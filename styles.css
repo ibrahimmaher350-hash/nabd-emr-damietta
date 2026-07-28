@@ -1486,3 +1486,168 @@ tr:hover {
     box-shadow: none;
   }
 }
+
+/* ========================================
+   WIZARD PROGRESS BAR (Report Studio)
+   ======================================== */
+.wizard-progress-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+}
+
+.wizard-progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--border-color);
+  transform: translateY(-50%);
+  z-index: 0;
+}
+
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  transition: all 0.2s ease;
+}
+
+.wizard-step .step-num {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  transition: all 0.25s ease;
+}
+
+.wizard-step .step-title {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.wizard-step.active .step-num {
+  background: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+  color: #0b192c;
+  box-shadow: 0 0 14px rgba(0, 212, 178, 0.5);
+  transform: scale(1.1);
+}
+
+.wizard-step.active .step-title {
+  color: var(--accent-cyan);
+  font-weight: 800;
+}
+
+.wizard-step.completed .step-num {
+  background: rgba(0, 212, 178, 0.2);
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+.wizard-step.completed .step-title {
+  color: var(--accent-cyan);
+}
+
+.wizard-step:hover .step-num {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan);
+}
+
+/* ========================================
+   TOAST NOTIFICATION ANIMATION
+   ======================================== */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ========================================
+   NOTIFICATION SEND FORM - MOBILE
+   ======================================== */
+.notif-send-form {
+  background: rgba(0, 212, 178, 0.04);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ========================================
+   REPORT STUDIO MOBILE LAYOUT
+   ======================================== */
+@media (max-width: 768px) {
+  .wizard-progress-bar {
+    gap: 0.2rem;
+    overflow-x: auto;
+    padding-bottom: 0.4rem;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .wizard-step .step-title {
+    font-size: 0.6rem;
+  }
+
+  .wizard-step .step-num {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  /* Report Studio 3-column -> 1 column on mobile */
+  #report-editor-stage .form-grid[style*="grid-template-columns: 1fr 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .notif-monitoring-bar {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Schedule tab table card layout on mobile */
+  #schedule-tab .table-responsive {
+    overflow-x: auto !important;
+  }
+
+  /* Report type cards single column on mobile */
+  #categorized-reports-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .wizard-step .step-title {
+    display: none;
+  }
+
+  .wizard-step .step-num {
+    width: 28px;
+    height: 28px;
+    font-size: 0.8rem;
+  }
+
+  .notif-monitoring-bar {
+    grid-template-columns: 1fr 1fr !important;
+  }
+}
+

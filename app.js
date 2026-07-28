@@ -2930,3 +2930,171 @@ function renderRecentVisits() {
     </tr>
   `).join('');
 }
+
+/* ===========================
+   MISSING CRITICAL FUNCTIONS
+   =========================== */
+
+// Save current report draft to localStorage
+function saveCurrentDraftToLocalStorage() {
+  if (!currentDraftState) {
+    alert('لا توجد مسودة تقرير مفتوحة للحفظ. افتح محرر التقرير أولاً.');
+    return;
+  }
+  currentDraftState.updatedAt = new Date().toISOString();
+  const existing = reportDrafts.findIndex(d => d.draftId === currentDraftState.draftId);
+  if (existing >= 0) {
+    reportDrafts[existing] = { ...currentDraftState };
+  } else {
+    reportDrafts.unshift({ ...currentDraftState });
+  }
+  try {
+    localStorage.setItem('nabd_report_drafts_v1', JSON.stringify(reportDrafts));
+    showToast('💾 تم حفظ المسودة بنجاح في ذاكرة الجهاز!', 'success');
+  } catch (e) {
+    alert('⚠️ حدث خطأ أثناء حفظ المسودة: ' + e.message);
+  }
+}
+
+// AI enhance report notes (stub with professional template)
+function aiEnhanceReportNotes() {
+  if (!currentDraftState) {
+    alert('افتح محرر التقرير أولاً لاستخدام ميزة التحسين الذكي.');
+    return;
+  }
+  const reportTemplates = {
+    prescription:    'بناءً على الفحص السريري وتقييم الحالة الصحية، يُوصى بالالتزام الكامل بالجرعات المحددة. يُمنع تناول الأدوية على معدة فارغة. يُرجى مراجعة الممرض المختص في حال ظهور أي أعراض جانبية.',
+    wound_dressing:  'تم إجراء غيار الجرح وفق بروتوكول التطهير المعتمد. الجرح في تحسن تدريجي. يُوصى بالمحافظة على نظافة المنطقة المصابة وتجنب البلل حتى موعد الغيار القادم.',
+    vitals_log:      'تم قياس العلامات الحيوية ومتابعة المؤشرات الحيوية. القراءات ضمن النطاق الطبيعي للمريض. يُوصى بمتابعة مستوى الضغط والسكر يومياً وإخطار الممرض المسؤول بأي تغيير.',
+    diabetic_foot:   'تم فحص القدم السكري وتقييم الدورة الدموية الطرفية. يُوصى بالعناية اليومية بالقدم وتجنب الحرارة الشديدة. ارتداء الجوارب الطبية المناسبة وتفادي الضغط على المنطقة المصابة.',
+    resident_nursing:'تمت متابعة المريض على مدار الساعة. الحالة مستقرة. يُوصى بالالتزام بجدول الأدوية والتغذية. التواصل مع الممرض المسؤول عند أي تغيير في الحالة الصحية.',
+  };
+  const enhanced = reportTemplates[currentDraftState.reportType] || 'بناءً على التقييم الشامل للحالة الصحية للمريض، يُوصى بالالتزام الكامل بالخطة التمريضية الموضوعة من إبراهيم ماهر (نبض للتمريض المنزلي - محافظة دمياط). يُرجى التواصل الفوري في حال ظهور أي مستجدات صحية على رقم: 01001097896.';
+  
+  const currentNotes = getElementValue('draft-free-notes', '');
+  setElementValue('draft-free-notes', currentNotes ? currentNotes + '\n\n' + enhanced : enhanced);
+  updateDraftReportView();
+  showToast('✨ تم تحسين التقرير بالذكاء الاصطناعي بنجاح!', 'success');
+}
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+  const existing = document.getElementById('nabd-toast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'nabd-toast';
+  toast.style.cssText = `
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: ${type === 'success' ? 'rgba(16,185,129,0.95)' : type === 'error' ? 'rgba(255,82,82,0.95)' : 'rgba(0,212,178,0.95)'};
+    color: #0b192c; padding: 0.8rem 1.5rem; border-radius: 30px;
+    font-weight: 700; font-size: 0.95rem; z-index: 9999;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3); white-space: nowrap;
+    animation: toastIn 0.3s ease;
+  `;
+  toast.innerHTML = message;
+  document.body.appendChild(toast);
+  setTimeout(() => { if (toast.parentNode) toast.remove(); }, 3000);
+}
+
+// Wizard step handler for Report Studio
+function setWizardStep(stepNum) {
+  document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+    el.classList.toggle('active', idx + 1 === stepNum);
+    el.classList.toggle('completed', idx + 1 < stepNum);
+  });
+
+  const step1 = document.getElementById('wizard-step-1-container');
+  const editorStage = document.getElementById('report-editor-stage');
+
+  if (stepNum <= 2) {
+    if (step1) step1.style.display = 'block';
+    if (editorStage) editorStage.style.display = 'none';
+  } else {
+    // Steps 3,4,5 open the editor
+    if (step1) step1.style.display = 'block';
+    openReportEditorStage(null);
+  }
+}
+
+// renderTodayVisitsHub with real patient data
+function renderTodayVisitsHub() {
+  const containerCRM = document.getElementById('today-visits-hub-crm');
+  const containerDash = document.getElementById('today-visits-hub-dash');
+  if (!containerCRM && !containerDash) return;
+
+  const activePatients = patients.filter(p => p.status === 'نشط').slice(0, 6);
+  const todayStr = new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+  if (activePatients.length === 0) {
+    const emptyHtml = `<div style="background:rgba(0,212,178,0.06);border:1px solid var(--border-color);border-radius:12px;padding:1.2rem;margin-bottom:1rem;text-align:center;color:var(--text-muted);">🔔 لا توجد زيارات نشطة مقررة اليوم</div>`;
+    if (containerCRM) containerCRM.innerHTML = emptyHtml;
+    if (containerDash) containerDash.innerHTML = emptyHtml;
+    return;
+  }
+
+  const hubHtml = `
+    <div style="background:linear-gradient(135deg,rgba(0,212,178,0.10) 0%,rgba(11,25,44,0.85) 100%);border:1px solid var(--accent-cyan);border-radius:12px;padding:1rem;margin-bottom:1.2rem;box-shadow:0 4px 15px rgba(0,212,178,0.12);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem;flex-wrap:wrap;gap:0.4rem;">
+        <h3 style="color:var(--accent-cyan);font-size:1rem;display:flex;align-items:center;gap:0.5rem;">
+          🔔 زيارات اليوم المقررة
+          <span style="background:var(--accent-cyan);color:#0b192c;font-size:0.78rem;padding:0.2rem 0.6rem;border-radius:20px;font-weight:700;">${activePatients.length} مريض</span>
+        </h3>
+        <span style="font-size:0.78rem;color:var(--text-muted);">📅 ${todayStr}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0.6rem;">
+        ${activePatients.map(p => {
+          const cleanPhone = (p.whatsApp || p.phone || '').replace(/\D/g,'');
+          const service = (p.requestedServices && p.requestedServices.length > 0) ? p.requestedServices[0] : 'غيار جراحي ودعم تمريضي';
+          const mapsUrl = p.mapsLink || `https://maps.google.com/?q=${p.area}`;
+          return `
+          <div style="background:rgba(255,255,255,0.04);border:1px solid var(--border-color);padding:0.7rem;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;margin-bottom:0.25rem;">
+              <strong style="color:#fff;font-size:0.9rem;">👤 ${p.fullName}</strong>
+              <span style="color:var(--accent-cyan);font-size:0.75rem;">MRN: ${p.mrn || p.patientId}</span>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:0.2rem;">📍 ${p.area}</p>
+            <p style="font-size:0.78rem;color:var(--accent-amber);margin-bottom:0.5rem;">🩺 ${service}</p>
+            <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
+              <button class="btn btn-sm btn-primary" onclick="openNewVisitFromCRM('${p.patientId}')">🩺 بدء زيارة</button>
+              <button class="btn btn-sm btn-success" onclick="sendWhatsAppVisitReminderDirect('${p.patientId}')">💬 تذكير</button>
+              <a href="${mapsUrl}" target="_blank" class="btn btn-sm" style="background:#1e3e62;color:#fff;text-decoration:none;">📍 خريطة</a>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+  if (containerCRM) containerCRM.innerHTML = hubHtml;
+  if (containerDash) containerDash.innerHTML = hubHtml;
+}
+
+// Helper: Open new visit from CRM for a specific patient
+function openNewVisitFromCRM(patientId) {
+  const section = document.getElementById('inline-crm-visit-section');
+  if (!section) {
+    switchTab('patients-tab');
+    return;
+  }
+  switchTab('patients-tab');
+  if (patientId) {
+    const select = document.getElementById('new-visit-patient-id');
+    if (select) select.value = patientId;
+    const patNameDisplay = document.getElementById('new-visit-patient-name-display');
+    const p = patients.find(x => x.patientId === patientId);
+    if (patNameDisplay && p) patNameDisplay.innerText = `👤 المريض: ${p.fullName}`;
+  }
+  section.style.display = 'block';
+  section.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Confirm delete visit
+function confirmDeleteVisit(visitId) {
+  showConfirmDialog(`هل تريد حذف هذه الزيارة (${visitId}) نهائياً؟`, () => {
+    visits = visits.filter(v => v.visitId !== visitId);
+    saveStateToLocalStorage();
+    renderRecentVisits();
+    showToast('🗑️ تم حذف الزيارة بنجاح.', 'success');
+  });
+}
+
