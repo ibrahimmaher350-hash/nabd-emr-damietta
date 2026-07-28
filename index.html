@@ -776,6 +776,118 @@
     </div>
   </div>
 
+  <!-- EDIT PATIENT MODAL -->
+  <div class="modal-overlay" id="edit-patient-modal">
+    <div class="modal-card" style="max-width: 650px;">
+      <button class="modal-close" onclick="closeEditPatientModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">✏️ تعديل بيانات ملف المريض</h2>
+      <form id="edit-patient-form" onsubmit="handleUpdatePatient(event)">
+        <input type="hidden" id="edit-pat-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>اسم المريض</label>
+            <input type="text" id="edit-pat-name" required>
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="edit-pat-phone" required>
+          </div>
+          <div class="form-group">
+            <label>رقم الواتساب</label>
+            <input type="tel" id="edit-pat-whatsapp">
+          </div>
+          <div class="form-group">
+            <label>المنطقة (دمياط)</label>
+            <select id="edit-pat-area">
+              <option value="بندر دمياط">بندر دمياط</option>
+              <option value="مركز دمياط">مركز دمياط</option>
+              <option value="رأس البر">رأس البر</option>
+              <option value="دمياط الجديدة">دمياط الجديدة</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>العنوان التفصيلي</label>
+            <input type="text" id="edit-pat-address">
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditPatientModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary">💾 حفظ التحديثات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT VISIT MODAL -->
+  <div class="modal-overlay" id="edit-visit-modal">
+    <div class="modal-card" style="max-width: 650px;">
+      <button class="modal-close" onclick="closeEditVisitModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">✏️ تعديل تفاصيل الزيارة التمريضية</h2>
+      <form id="edit-visit-form" onsubmit="handleUpdateVisit(event)">
+        <input type="hidden" id="edit-visit-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الشكوى الرئيسية</label>
+            <input type="text" id="edit-visit-complaint">
+          </div>
+          <div class="form-group">
+            <label>المبلغ الإجمالي (<span class="ui-currency-symbol">ج.م</span>)</label>
+            <input type="number" id="edit-visit-total">
+          </div>
+          <div class="form-group">
+            <label>المبلغ المدفوع (<span class="ui-currency-symbol">ج.م</span>)</label>
+            <input type="number" id="edit-visit-paid">
+          </div>
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary" onclick="closeEditVisitModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary">💾 حفظ تعديل الزيارة</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EXPORT PATIENT MODAL -->
+  <div class="modal-overlay" id="export-patient-modal">
+    <div class="modal-card" style="max-width: 500px; text-align: center;">
+      <button class="modal-close" onclick="closeExportPatientModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">📤 تصدير ملف المريض والزيارات</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">اختر الصيغة المطلوبة لتصدير تقارير وبيانات المريض:</p>
+      <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+        <button class="btn btn-primary btn-lg" onclick="executeExportTarget('pdf')">📄 تصدير تقرير شامل PDF</button>
+        <button class="btn btn-secondary btn-lg" onclick="executeExportTarget('excel')">📊 تصدير البيانات إلى Excel (CSV)</button>
+        <button class="btn btn-amber btn-lg" onclick="executeExportTarget('json')">💾 تصدير نسخة JSON للمريض</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRE-SEND REVIEW MODAL -->
+  <div class="modal-overlay" id="send-review-modal">
+    <div class="modal-card" style="max-width: 540px;">
+      <button class="modal-close" onclick="closeSendReviewModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">📱 مراجعة الرسالة قبل الإرسال</h2>
+      <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <p style="margin-bottom: 0.4rem;"><strong>المريض:</strong> <span id="rev-patient-name">-</span></p>
+        <p style="margin-bottom: 0.4rem;"><strong>رقم الواتساب:</strong> <span id="rev-patient-phone">-</span></p>
+        <p style="margin-bottom: 0.4rem;"><strong>موعد الزيارة:</strong> <span id="rev-appointment-time">-</span></p>
+        <hr style="border-color: var(--border-color); margin: 0.8rem 0;">
+        <p style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 0.3rem;">معاينة نص الرسالة:</p>
+        <div id="rev-message-preview-text" style="white-space: pre-line; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 6px; font-size: 0.9rem;"></div>
+      </div>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeSendReviewModal()">إلغاء</button>
+        <button class="btn btn-primary btn-lg" onclick="executeFinalSendMessage()">إرسال عبر الواتساب الآن 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELIVERY STATUS MODAL -->
+  <div class="modal-overlay" id="delivery-status-modal">
+    <div class="modal-card" style="max-width: 480px; text-align: center;" id="delivery-status-modal-body">
+      <!-- Injected dynamically via JS -->
+    </div>
+  </div>
+
   <!-- PATIENT ACTION DROPDOWN / MENU MODAL (⋮ المزيد) -->
   <div class="modal-overlay" id="patient-actions-modal">
     <div class="modal-card" style="max-width: 540px;">

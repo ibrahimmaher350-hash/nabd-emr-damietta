@@ -1340,10 +1340,15 @@ function removeMedication(idx) {
   renderMedicationsList();
 }
 
+function getElementValue(id, fallbackVal = "") {
+  const el = document.getElementById(id);
+  return el ? el.value : fallbackVal;
+}
+
 // Visit Form Submission
 function handleSaveVisit(e) {
   if (e) e.preventDefault();
-  let patId = document.getElementById('visit-patient-id').value;
+  let patId = getElementValue('visit-patient-id');
   let pat = patients.find(p => p.patientId === patId);
 
   if (!pat) {
@@ -1353,8 +1358,8 @@ function handleSaveVisit(e) {
 
   const selectedProcedures = Array.from(document.querySelectorAll('input[name="procedure"]:checked')).map(cb => cb.value);
 
-  const wWeight = parseFloat(document.getElementById('vital-weight').value) || 0;
-  const hHeight = parseFloat(document.getElementById('vital-height').value) || 0;
+  const wWeight = parseFloat(getElementValue('vital-weight', '0')) || 0;
+  const hHeight = parseFloat(getElementValue('vital-height', '0')) || 0;
   const bmiRes = calculateBMI(wWeight, hHeight);
 
   const nextVisId = systemSettings.nextVisitId || `vst_${Date.now()}`;
@@ -1363,20 +1368,20 @@ function handleSaveVisit(e) {
     visitId: nextVisId,
     patientId: patId,
     patientName: pat.fullName,
-    providerName: document.getElementById('visit-provider-name').value || "إبراهيم ماهر",
-    visitDate: document.getElementById('visit-date-time').value || new Date().toISOString().slice(0, 16),
-    chiefComplaint: document.getElementById('visit-chief-complaint').value || "زيارة ومتابعة تمريضية عامة",
-    hpi: document.getElementById('visit-hpi').value || "",
+    providerName: getElementValue('visit-provider-name', 'إبراهيم ماهر'),
+    visitDate: getElementValue('visit-date-time', new Date().toISOString().slice(0, 16)),
+    chiefComplaint: getElementValue('visit-chief-complaint', 'زيارة ومتابعة تمريضية عامة'),
+    hpi: getElementValue('visit-hpi', ''),
     vitals: {
-      temp: parseFloat(document.getElementById('vital-temp').value) || 37.0,
-      pulse: parseInt(document.getElementById('vital-pulse').value) || 75,
-      bpSys: parseInt(document.getElementById('vital-bp-sys').value) || 120,
-      bpDia: parseInt(document.getElementById('vital-bp-dia').value) || 80,
-      rr: parseInt(document.getElementById('vital-rr').value) || 18,
-      spO2: parseInt(document.getElementById('vital-spo2').value) || 98,
-      sugar: parseInt(document.getElementById('vital-sugar').value) || 140,
-      sugarType: document.getElementById('vital-sugar-type').value,
-      pain: parseInt(document.getElementById('vital-pain').value) || 0,
+      temp: parseFloat(getElementValue('vital-temp', '37.0')) || 37.0,
+      pulse: parseInt(getElementValue('vital-pulse', '75')) || 75,
+      bpSys: parseInt(getElementValue('vital-bp-sys', '120')) || 120,
+      bpDia: parseInt(getElementValue('vital-bp-dia', '80')) || 80,
+      rr: parseInt(getElementValue('vital-rr', '18')) || 18,
+      spO2: parseInt(getElementValue('vital-spo2', '98')) || 98,
+      sugar: parseInt(getElementValue('vital-sugar', '140')) || 140,
+      sugarType: getElementValue('vital-sugar-type', 'عشوائي (Random)'),
+      pain: parseInt(getElementValue('vital-pain', '0')) || 0,
       weight: wWeight,
       height: hHeight,
       bmi: bmiRes.bmi,
@@ -1384,21 +1389,21 @@ function handleSaveVisit(e) {
     },
     procedures: selectedProcedures,
     wound: {
-      type: document.getElementById('wound-type').value,
-      stage: document.getElementById('wound-stage').value,
-      dimensions: document.getElementById('wound-dimensions').value,
-      exudate: document.getElementById('wound-exudate').value,
-      dressing: document.getElementById('wound-dressing-type').value,
-      nextDate: document.getElementById('wound-next-date').value
+      type: getElementValue('wound-type', 'غير محدد'),
+      stage: getElementValue('wound-stage', 'غير محدد'),
+      dimensions: getElementValue('wound-dimensions', 'غير محدد'),
+      exudate: getElementValue('wound-exudate', 'غير محدد'),
+      dressing: getElementValue('wound-dressing-type', 'معقم'),
+      nextDate: getElementValue('wound-next-date', '')
     },
     medications: [...activeMedications],
     billing: {
-      visitFee: parseFloat(document.getElementById('bill-visit-fee').value) || 0,
-      dressingFee: parseFloat(document.getElementById('bill-dressing-fee').value) || 0,
-      discount: parseFloat(document.getElementById('bill-discount').value) || 0,
-      totalDue: parseFloat(document.getElementById('bill-total').value) || 0,
-      paidAmount: parseFloat(document.getElementById('bill-paid').value) || 0,
-      remaining: parseFloat(document.getElementById('bill-remaining').value) || 0
+      visitFee: parseFloat(getElementValue('bill-visit-fee', '0')) || 0,
+      dressingFee: parseFloat(getElementValue('bill-dressing-fee', '0')) || 0,
+      discount: parseFloat(getElementValue('bill-discount', '0')) || 0,
+      totalDue: parseFloat(getElementValue('bill-total', '0')) || 0,
+      paidAmount: parseFloat(getElementValue('bill-paid', '0')) || 0,
+      remaining: parseFloat(getElementValue('bill-remaining', '0')) || 0
     }
   };
 
