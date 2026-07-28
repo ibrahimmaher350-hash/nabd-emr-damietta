@@ -1062,25 +1062,27 @@ function openEditPatientModal(patientId) {
   const p = patients.find(item => item.patientId === patientId);
   if (!p) return;
 
-  document.getElementById('edit-pat-id').value = p.patientId;
-  document.getElementById('edit-pat-name').value = p.fullName;
-  document.getElementById('edit-pat-national-id').value = p.nationalId;
-  document.getElementById('edit-pat-status').value = p.status || 'نشط';
-  document.getElementById('edit-pat-gender').value = p.gender;
-  document.getElementById('edit-pat-dob').value = p.dob;
-  document.getElementById('edit-pat-age-display').value = `${calculateAge(p.dob)} سنة`;
-  document.getElementById('edit-pat-phone').value = p.phone || clinicSettings.phone;
-  document.getElementById('edit-pat-whatsapp').value = p.whatsApp || clinicSettings.whatsApp;
-  document.getElementById('edit-pat-emergency').value = p.emergency || '';
-  document.getElementById('edit-pat-area').value = p.area;
-  document.getElementById('edit-pat-address-detail').value = p.detailedAddress;
-  document.getElementById('edit-pat-maps-link').value = p.mapsLink || clinicSettings.googleMapsUrl;
+  setElementValue('edit-pat-id', p.patientId);
+  setElementValue('edit-pat-name', p.fullName);
+  setElementValue('edit-pat-national-id', p.nationalId);
+  setElementValue('edit-pat-status', p.status || 'نشط');
+  setElementValue('edit-pat-gender', p.gender);
+  setElementValue('edit-pat-dob', p.dob);
+  setElementValue('edit-pat-age-display', `${calculateAge(p.dob)} سنة`);
+  setElementValue('edit-pat-phone', p.phone || clinicSettings.phone);
+  setElementValue('edit-pat-whatsapp', p.whatsApp || clinicSettings.whatsApp);
+  setElementValue('edit-pat-emergency', p.emergency || '');
+  setElementValue('edit-pat-area', p.area);
+  setElementValue('edit-pat-address-detail', p.detailedAddress);
+  setElementValue('edit-pat-maps-link', p.mapsLink || clinicSettings.googleMapsUrl);
 
-  document.getElementById('edit-patient-modal').classList.add('active');
+  const modal = document.getElementById('edit-patient-modal');
+  if (modal) modal.classList.add('active');
 }
 
 function closeEditPatientModal() {
-  document.getElementById('edit-patient-modal').classList.remove('active');
+  const modal = document.getElementById('edit-patient-modal');
+  if (modal) modal.classList.remove('active');
 }
 
 // Edit Visit Handlers
@@ -1088,16 +1090,17 @@ function openEditVisitModal(visitId) {
   const v = visits.find(item => item.visitId === visitId);
   if (!v) return;
 
-  document.getElementById('edit-visit-id').value = v.visitId;
-  document.getElementById('edit-visit-provider').value = v.providerName;
-  document.getElementById('edit-visit-complaint').value = v.chiefComplaint || '';
-  document.getElementById('edit-visit-bpsys').value = v.vitals?.bpSys || 120;
-  document.getElementById('edit-visit-bpdia').value = v.vitals?.bpDia || 80;
-  document.getElementById('edit-visit-sugar').value = v.vitals?.sugar || 140;
-  document.getElementById('edit-visit-total').value = v.billing?.totalDue || 0;
-  document.getElementById('edit-visit-paid').value = v.billing?.paidAmount || 0;
+  setElementValue('edit-visit-id', v.visitId);
+  setElementValue('edit-visit-provider', v.providerName);
+  setElementValue('edit-visit-complaint', v.chiefComplaint || '');
+  setElementValue('edit-visit-bpsys', v.vitals?.bpSys || 120);
+  setElementValue('edit-visit-bpdia', v.vitals?.bpDia || 80);
+  setElementValue('edit-visit-sugar', v.vitals?.sugar || 140);
+  setElementValue('edit-visit-total', v.billing?.totalDue || 0);
+  setElementValue('edit-visit-paid', v.billing?.paidAmount || 0);
 
-  document.getElementById('edit-visit-modal').classList.add('active');
+  const modal = document.getElementById('edit-visit-modal');
+  if (modal) modal.classList.add('active');
 }
 
 function closeEditVisitModal() {

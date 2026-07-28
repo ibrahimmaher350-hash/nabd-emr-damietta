@@ -785,8 +785,36 @@
         <input type="hidden" id="edit-pat-id">
         <div class="form-grid">
           <div class="form-group">
-            <label>اسم المريض</label>
+            <label>اسم المريض الكامل</label>
             <input type="text" id="edit-pat-name" required>
+          </div>
+          <div class="form-group">
+            <label>الرقم القومي (14 رقم)</label>
+            <input type="text" id="edit-pat-national-id">
+          </div>
+          <div class="form-group">
+            <label>حالة المريض</label>
+            <select id="edit-pat-status">
+              <option value="نشط">🟢 نشط</option>
+              <option value="متوقف">⏸️ متوقف</option>
+              <option value="متوفى">⚰️ متوفى</option>
+              <option value="خرج من الخدمة">🚪 خرج من الخدمة</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>النوع / الجنس</label>
+            <select id="edit-pat-gender">
+              <option value="ذكر">ذكر</option>
+              <option value="أنثى">أنثى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تاريخ الميلاد</label>
+            <input type="date" id="edit-pat-dob" onchange="autoCalcAgeInEditModal(this.value)">
+          </div>
+          <div class="form-group">
+            <label>العمر المحسوب</label>
+            <input type="text" id="edit-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;">
           </div>
           <div class="form-group">
             <label>رقم الهاتف</label>
@@ -795,6 +823,10 @@
           <div class="form-group">
             <label>رقم الواتساب</label>
             <input type="tel" id="edit-pat-whatsapp">
+          </div>
+          <div class="form-group">
+            <label>اسم الطوارئ والصلة والهاتف</label>
+            <input type="text" id="edit-pat-emergency">
           </div>
           <div class="form-group">
             <label>المنطقة (دمياط)</label>
@@ -806,8 +838,12 @@
             </select>
           </div>
           <div class="form-group full-width">
-            <label>العنوان التفصيلي</label>
-            <input type="text" id="edit-pat-address">
+            <label>العنوان التفصيلي وملاحظات الوصول</label>
+            <input type="text" id="edit-pat-address-detail">
+          </div>
+          <div class="form-group full-width">
+            <label>رابط Google Maps</label>
+            <input type="url" id="edit-pat-maps-link">
           </div>
         </div>
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
@@ -827,8 +863,24 @@
         <input type="hidden" id="edit-visit-id">
         <div class="form-grid">
           <div class="form-group">
+            <label>اسم الممرض المسؤول</label>
+            <input type="text" id="edit-visit-provider">
+          </div>
+          <div class="form-group full-width">
             <label>الشكوى الرئيسية</label>
             <input type="text" id="edit-visit-complaint">
+          </div>
+          <div class="form-group">
+            <label>ضغط انقباضي</label>
+            <input type="number" id="edit-visit-bpsys">
+          </div>
+          <div class="form-group">
+            <label>ضغط انبساطي</label>
+            <input type="number" id="edit-visit-bpdia">
+          </div>
+          <div class="form-group">
+            <label>قياس السكر</label>
+            <input type="number" id="edit-visit-sugar">
           </div>
           <div class="form-group">
             <label>المبلغ الإجمالي (<span class="ui-currency-symbol">ج.م</span>)</label>
