@@ -1074,6 +1074,140 @@ function openDocumentCenterForPatient(patientId) {
   openReportEditorStage();
 }
 
+// EXPORT & PRINT PATIENT EMR DOCUMENT ENGINE
+function printPatientRecord(patientId) {
+  const p = patients.find(item => item.patientId === (patientId || currentActiveProfilePatientId)) || patients[0];
+  if (!p) return;
+
+  const patVisits = visits.filter(v => v.patientId === p.patientId);
+  const lastVisit = patVisits[0];
+  let totalDue = 0;
+  patVisits.forEach(v => { totalDue += (v.billing?.remaining || 0); });
+
+  const ageText = p.dob ? `${calculateAge(p.dob)} سنة` : (p.age || 'غير محدد');
+
+  let visitsRowsHtml = '';
+  if (patVisits.length > 0) {
+    patVisits.forEach((v, idx) => {
+      visitsRowsHtml += `
+        <tr>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px; text-align:center;">${idx + 1}</td>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px;">${v.date || 'غير محدد'}</td>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px;">${v.providerName || 'إبراهيم ماهر'}</td>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px;">${v.chiefComplaint || 'زيارة دورية'}</td>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px;">ضغط: ${v.vitals?.bpSys || 120}/${v.vitals?.bpDia || 80} | سكر: ${v.vitals?.sugar || 140}</td>
+          <td style="border:1px solid #cbd5e1; padding:6px 8px; text-align:center;">${v.billing?.totalDue || 0} ج.م (متبقي: ${v.billing?.remaining || 0} ج.م)</td>
+        </tr>
+      `;
+    });
+  } else {
+    visitsRowsHtml = `<tr><td colspan="6" style="border:1px solid #cbd5e1; padding:10px; text-align:center; color:#64748b;">لا توجد زيارات مسجلة لهذا المريض بعد.</td></tr>`;
+  }
+
+  const diseasesStr = (p.diseases && p.diseases.length > 0) ? p.diseases.join('، ') : 'غير محدد';
+  const servicesStr = (p.requestedServices && p.requestedServices.length > 0) ? p.requestedServices.join('، ') : 'غير محدد';
+  const allergiesStr = (p.allergies && p.allergies.length > 0) ? (Array.isArray(p.allergies) ? p.allergies.join('، ') : p.allergies) : 'غير محدد';
+
+  const printableStage = document.getElementById('global-printable-stage');
+  if (printableStage) {
+    printableStage.innerHTML = `
+      <div style="font-family:'Segoe UI', Tahoma, sans-serif; color:#0b192c; padding:15px; background:#fff; direction:rtl; text-align:right;">
+        
+        <!-- HEADER -->
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid #00d4b2; padding-bottom:12px; margin-bottom:15px;">
+          <div>
+            <h1 style="margin:0; font-size:20px; color:#0b192c; font-weight:800;">إبراهيم ماهر | نبض للتمريض المنزلي</h1>
+            <p style="margin:3px 0 0 0; font-size:12px; color:#475569;">محافظة دمياط | رأس البر | دمياط الجديدة | 📱 01001097896</p>
+          </div>
+          <div style="text-align:left;">
+            <h2 style="margin:0; font-size:16px; color:#00d4b2; font-weight:700;">تقرير وملف مريض شامل</h2>
+            <p style="margin:3px 0 0 0; font-size:11px; color:#64748b;">تاريخ الإصدار: ${new Date().toLocaleDateString('ar-EG')} - ${new Date().toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</p>
+          </div>
+        </div>
+
+        <!-- DEMOGRAPHICS BOX -->
+        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:15px;">
+          <h3 style="margin:0 0 10px 0; font-size:14px; color:#0f172a; border-bottom:1px solid #cbd5e1; padding-bottom:5px;">📋 البيانات الشخصية والسجل الطبي (MRN: ${p.mrn || p.patientId})</h3>
+          <table style="width:100%; border-collapse:collapse; font-size:12px;">
+            <tr>
+              <td style="padding:4px 0; width:50%;"><strong>اسم المريض:</strong> ${p.fullName}</td>
+              <td style="padding:4px 0; width:50%;"><strong>السن / الجنس:</strong> ${ageText} (${p.gender})</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;"><strong>رقم الهاتف الرئيسي:</strong> ${p.phone}</td>
+              <td style="padding:4px 0;"><strong>رقم الواتساب:</strong> ${p.whatsApp}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;"><strong>المنطقة والمدينة:</strong> ${p.area}</td>
+              <td style="padding:4px 0;"><strong>حالة المريض:</strong> ${p.status || '🟢 نشط'}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;" colspan="2"><strong>العنوان التفصيلي:</strong> ${p.detailedAddress || 'غير محدد'}</td>
+            </tr>
+            <tr>
+              <td style="padding:4px 0;"><strong>طوارئ والصلة:</strong> ${p.emergency || 'غير محدد'}</td>
+              <td style="padding:4px 0;"><strong>فصيلة الدم / الحساسية:</strong> ${p.bloodType || 'غير محدد'} / ${allergiesStr}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- MEDICAL DIAGNOSIS & SERVICES -->
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+          <div style="flex:1; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:10px; font-size:12px;">
+            <strong>🩺 الأمراض المزمنة:</strong> ${diseasesStr}
+          </div>
+          <div style="flex:1; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; padding:10px; font-size:12px;">
+            <strong>💉 الخدمات المطلوبة:</strong> ${servicesStr}
+          </div>
+        </div>
+
+        <!-- VISITS HISTORY TABLE -->
+        <div style="margin-bottom:15px;">
+          <h3 style="margin:0 0 8px 0; font-size:14px; color:#0f172a;">📅 سجل الزيارات التمريضية والقياسات الحيوية</h3>
+          <table style="width:100%; border-collapse:collapse; font-size:11px;">
+            <thead>
+              <tr style="background:#e2e8f0; color:#0f172a; text-align:right;">
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:center;">#</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">التاريخ</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">مقدم الخدمة</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">الشكوى / السبب</th>
+                <th style="border:1px solid #cbd5e1; padding:6px;">القياسات الحيوية</th>
+                <th style="border:1px solid #cbd5e1; padding:6px; text-align:center;">الحساب والتكلفة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${visitsRowsHtml}
+            </tbody>
+          </table>
+        </div>
+
+        <!-- FINANCIAL SUMMARY -->
+        <div style="display:flex; justify-content:space-between; align-items:center; background:#fef2f2; border:1px solid #fca5a5; padding:10px; border-radius:6px; margin-bottom:20px;">
+          <span style="font-size:12px; font-weight:700; color:#991b1b;">إجمالي المبالغ المتبقية والمستحقة:</span>
+          <span style="font-size:14px; font-weight:800; color:#dc2626;">${totalDue} جنيه مصري</span>
+        </div>
+
+        <!-- STAMP & SIGNATURE BLOCK -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:30px; border-top:1px dashed #cbd5e1; padding-top:15px;">
+          <div style="text-align:center;">
+            <p style="margin:0 0 35px 0; font-size:12px; font-weight:700; color:#1e293b;">توقيع واعتماد أخصائي التمريض الطبي</p>
+            <p style="margin:0; font-size:13px; font-weight:800; color:#00d4b2;">إبراهيم ماهر</p>
+          </div>
+          <div style="text-align:center; font-size:10px; color:#64748b;">
+            <p style="margin:0;">مستند طبي معتمد صادر إلكترونياً من نظام نبض للتمريض المنزلي</p>
+            <p style="margin:2px 0 0 0;">دمياط | رأس البر | دمياط الجديدة - هاتف: 01001097896</p>
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  setTimeout(() => {
+    window.print();
+  }, 150);
+}
+
 // EXPORT PATIENT MODAL HANDLER
 function openExportPatientModal(patientId) {
   currentActiveProfilePatientId = patientId;
@@ -1091,7 +1225,7 @@ function executeExportTarget(targetType) {
   addAuditLog(p.patientId, `تصدير بيانات وتفاصيل المريض بتنسيق [${targetType.toUpperCase()}]`);
 
   if (targetType === 'print' || targetType === 'pdf') {
-    window.print();
+    printPatientRecord(p.patientId);
   } else if (targetType === 'word') {
     alert(`📄 تم تصدير المستند الطبي الشامل للمريض (${p.fullName}) بتنسيق Word Document (.docx) بنجاح!`);
   } else if (targetType === 'whatsapp') {
@@ -1598,7 +1732,8 @@ function viewVisitPrescription(visitId) {
 }
 
 function downloadReportPDF() {
-  window.print();
+  const patId = document.getElementById('rpt-patient-id')?.value;
+  printPatientRecord(patId || currentActiveProfilePatientId);
 }
 
 function shareReportWhatsApp() {
@@ -2324,7 +2459,7 @@ function exportDataExcel() {
 }
 
 function exportDataPDF() {
-  window.print();
+  printPatientRecord(currentActiveProfilePatientId);
 }
 
 function exportDataJSON() {
