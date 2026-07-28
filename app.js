@@ -3,9 +3,9 @@
 // Default Settings
 const defaultClinicSettings = {
   brandName: "إبراهيم ماهر",
-  logoUrl: "assets/logo.jpg?v=23",
-  stampUrl: "assets/stamp.jpg?v=23",
-  signatureUrl: "assets/signature.png?v=23",
+  logoUrl: "assets/logo.jpg?v=24",
+  stampUrl: "assets/stamp.jpg?v=24",
+  signatureUrl: "assets/signature.png?v=24",
   phone: "01001097896",
   whatsApp: "01001097896",
   email: "info@homenursing.eg",
@@ -56,6 +56,16 @@ let historyPointer = -1;
 let touchCanvasCtx = null;
 let isDrawingTouch = false;
 
+// Attachments Draft Object for New Patient Registration
+let currentTabPatientAttachments = {
+  idCard: null,
+  insurance: null,
+  rx: null,
+  labs: null,
+  rad: null,
+  other: null
+};
+
 try {
   const savedSettings = localStorage.getItem('nabd_clinic_settings_v1');
   if (savedSettings) clinicSettings = { ...defaultClinicSettings, ...JSON.parse(savedSettings) };
@@ -76,10 +86,13 @@ try {
   console.log('Using default state:', err);
 }
 
-// Initial Seed Data (Damietta Areas)
+// Initial Seed Data (Damietta Areas with MRN & Status)
 const initialPatients = [
   {
     patientId: "pat_1001",
+    mrn: "MRN-1001",
+    status: "نشط",
+    registrationDate: "2026-02-01",
     fullName: "محمد عبد الله السيد",
     nationalId: "28510151234567",
     gender: "ذكر",
@@ -91,13 +104,19 @@ const initialPatients = [
     detailedAddress: "الحي المتميز, عمارة 15, شقة 4, الدور الثاني",
     latitude: 31.4382,
     longitude: 31.6705,
-    diseases: ["السكري من النوع الثاني", "ارتفاع ضغط الدم"],
+    mapsLink: "https://maps.google.com/?q=31.4382,31.6705",
+    diseases: ["سكر", "ضغط"],
+    requestedServices: ["غيار جراحي على الجروح", "متابعة ضغط وسكر يومية"],
     allergies: ["حساسية البنسلين"],
     bloodType: "A+",
+    attachments: { idCard: null, insurance: null, rx: null, labs: null, rad: null, other: null },
     createdAt: "2026-02-01"
   },
   {
     patientId: "pat_1002",
+    mrn: "MRN-1002",
+    status: "نشط",
+    registrationDate: "2026-03-10",
     fullName: "فاطمة حسن علي",
     nationalId: "27208201234568",
     gender: "أنثى",
@@ -109,9 +128,12 @@ const initialPatients = [
     detailedAddress: "شارع الجلاء, برج الأطباء, الدور الأول",
     latitude: 31.4165,
     longitude: 31.8133,
-    diseases: ["قرحة فراش بالظهر", "جلطة سابقة"],
+    mapsLink: "https://maps.google.com/?q=31.4165,31.8133",
+    diseases: ["Bedridden", "Stroke"],
+    requestedServices: ["رعاية تمريضية مقيمة (24 ساعة)", "تركيب / تغيير قسطرة بولية"],
     allergies: ["لا يوجد"],
     bloodType: "O+",
+    attachments: { idCard: null, insurance: null, rx: null, labs: null, rad: null, other: null },
     createdAt: "2026-03-10"
   }
 ];
@@ -193,7 +215,21 @@ document.addEventListener('DOMContentLoaded', () => {
   renderNotificationLogs();
   initQRCode();
   setCurrentDateTime();
+  initTabAddPatientForm();
 });
+
+function initTabAddPatientForm() {
+  const regDateInput = document.getElementById('tab-pat-reg-date');
+  if (regDateInput && !regDateInput.value) {
+    regDateInput.value = new Date().toISOString().split('T')[0];
+  }
+
+  const mrnInput = document.getElementById('tab-pat-mrn');
+  if (mrnInput) {
+    const nextNum = (patients.length + 1005);
+    mrnInput.value = `MRN-${nextNum}`;
+  }
+}
 
 function applyClinicSettingsToUI() {
   const topLogo = document.getElementById('ui-top-logo');
@@ -266,6 +302,58 @@ function applySystemSettingsToUI() {
   renderDashboardStats();
 }
 
+// GPS LOCATION DETECTOR
+function getCurrentGPSLocationForTab() {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const mapsUrl = `https://maps.google.com/?q=${lat},${lng}`;
+        document.getElementById('tab-pat-maps-link').value = mapsUrl;
+        alert(`📍 تم التقاط موقع GPS الحقيقي بنجاح!\nخط العرض: ${lat}\nخط الطول: ${lng}\nرابط الخريطة: ${mapsUrl}`);
+      },
+      (err) => {
+        const fallbackUrl = clinicSettings.googleMapsUrl;
+        document.getElementById('tab-pat-maps-link').value = fallbackUrl;
+        alert(`📍 يتعذر الوصول المباشر للـ GPS (${err.message}). تم إضافة رابط خريطة المركز الافتراضي.`);
+      }
+    );
+  } else {
+    document.getElementById('tab-pat-maps-link').value = clinicSettings.googleMapsUrl;
+    alert('📍 متصفحك لا يدعم تحديد الموقع التلقائي. يمكنك لصق رابط Google Maps مباشرة.');
+  }
+}
+
+// PREVIEW & ATTACHMENT HANDLER
+function previewAttachment(inputId, previewBoxId) {
+  const fileInput = document.getElementById(inputId);
+  const previewBox = document.getElementById(previewBoxId);
+  if (!fileInput || !previewBox || !fileInput.files[0]) return;
+
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+    const dataUrl = e.target.result;
+
+    if (inputId === 'attach-id-card') currentTabPatientAttachments.idCard = dataUrl;
+    else if (inputId === 'attach-insurance') currentTabPatientAttachments.insurance = dataUrl;
+    else if (inputId === 'attach-rx') currentTabPatientAttachments.rx = dataUrl;
+    else if (inputId === 'attach-labs') currentTabPatientAttachments.labs = dataUrl;
+    else if (inputId === 'attach-rad') currentTabPatientAttachments.rad = dataUrl;
+    else if (inputId === 'attach-other') currentTabPatientAttachments.other = dataUrl;
+
+    if (file.type.startsWith('image/')) {
+      previewBox.innerHTML = `<img src="${dataUrl}" style="max-height:80px; border-radius:6px; border:1px solid var(--accent-cyan); margin-top:0.4rem;" alt="مرفق" />`;
+    } else {
+      previewBox.innerHTML = `<p style="font-size:0.8rem; color:var(--accent-cyan); margin-top:0.4rem;">📄 تم تحميل: ${file.name}</p>`;
+    }
+  };
+
+  reader.readAsDataURL(file);
+}
+
 // OPEN INLINE EMR VISIT SECTION INSIDE PATIENTS CRM TAB
 function openNewVisitFromCRM(patientId = null) {
   switchTab('patients-tab', document.querySelectorAll('.tab-btn')[1]);
@@ -307,13 +395,32 @@ function autoFillDemoPatientTabForm() {
   document.getElementById('tab-pat-emergency').value = 'محمود (أخو المريض) - 01112233445';
   document.getElementById('tab-pat-area').value = 'دمياط الجديدة';
   document.getElementById('tab-pat-address-detail').value = 'دمياط الجديدة - الحي المتميز - عمارة 15 شقة 4';
-  document.getElementById('tab-pat-diseases').value = 'السكري, ضغط الدم';
-  document.getElementById('tab-pat-allergies').value = 'لا يوجد';
+  document.getElementById('tab-pat-maps-link').value = 'https://maps.google.com/?q=31.4382,31.6705';
+  document.getElementById('tab-pat-status').value = 'نشط';
+  document.getElementById('tab-pat-reg-date').value = new Date().toISOString().split('T')[0];
+
+  // Select demo diseases checkboxes
+  document.querySelectorAll('input[name="tab_disease"]').forEach(cb => {
+    if (['سكر', 'ضغط', 'Bedridden'].includes(cb.value)) cb.checked = true;
+  });
+
+  // Select demo services checkboxes
+  document.querySelectorAll('input[name="tab_service"]').forEach(cb => {
+    if (['غيار جراحي على الجروح', 'متابعة ضغط وسكر يومية'].includes(cb.value)) cb.checked = true;
+  });
+
+  document.getElementById('tab-pat-other-diseases').value = 'حساسية موسمية';
+  document.getElementById('tab-pat-allergies').value = 'حساسية بنسلين';
   document.getElementById('tab-pat-blood').value = 'A+';
 }
 
 function handleSavePatientFromTab(e) {
   if (e) e.preventDefault();
+  
+  const mrn = document.getElementById('tab-pat-mrn').value || `MRN-${Date.now()}`;
+  const status = document.getElementById('tab-pat-status').value || "نشط";
+  const regDate = document.getElementById('tab-pat-reg-date').value || new Date().toISOString().split('T')[0];
+
   const name = document.getElementById('tab-pat-name').value.trim() || "مريض بدون اسم";
   const natId = document.getElementById('tab-pat-national-id').value.trim() || "غير محدد";
   const gender = document.getElementById('tab-pat-gender').value || "غير محدد";
@@ -323,7 +430,16 @@ function handleSavePatientFromTab(e) {
   const emergency = document.getElementById('tab-pat-emergency').value.trim() || "غير محدد";
   const area = document.getElementById('tab-pat-area').value || "بندر دمياط";
   const addressDetail = document.getElementById('tab-pat-address-detail').value.trim() || "غير محدد";
-  const diseasesStr = document.getElementById('tab-pat-diseases').value.trim();
+  const mapsLink = document.getElementById('tab-pat-maps-link').value.trim() || clinicSettings.googleMapsUrl;
+
+  // Selected Chronic Diseases Checkboxes + Other Diseases Text
+  const selectedDiseases = Array.from(document.querySelectorAll('input[name="tab_disease"]:checked')).map(cb => cb.value);
+  const otherDiseases = document.getElementById('tab-pat-other-diseases').value.trim();
+  if (otherDiseases) selectedDiseases.push(otherDiseases);
+
+  // Selected Required Services Checkboxes
+  const selectedServices = Array.from(document.querySelectorAll('input[name="tab_service"]:checked')).map(cb => cb.value);
+
   const allergiesStr = document.getElementById('tab-pat-allergies').value.trim();
   const blood = document.getElementById('tab-pat-blood').value || "غير محدد";
 
@@ -331,6 +447,9 @@ function handleSavePatientFromTab(e) {
 
   const newPat = {
     patientId: nextId,
+    mrn: mrn,
+    status: status,
+    registrationDate: regDate,
     fullName: name,
     nationalId: natId,
     gender: gender,
@@ -342,10 +461,13 @@ function handleSavePatientFromTab(e) {
     detailedAddress: addressDetail,
     latitude: 31.4165,
     longitude: 31.8133,
-    diseases: diseasesStr ? diseasesStr.split(',').map(s => s.trim()) : [],
+    mapsLink: mapsLink,
+    diseases: selectedDiseases,
+    requestedServices: selectedServices,
     allergies: allergiesStr ? allergiesStr.split(',').map(s => s.trim()) : [],
     bloodType: blood,
-    createdAt: new Date().toISOString().split('T')[0]
+    attachments: { ...currentTabPatientAttachments },
+    createdAt: regDate
   };
 
   const numericPart = parseInt(nextId.replace(/\D/g, '')) || 1005;
@@ -360,13 +482,18 @@ function handleSavePatientFromTab(e) {
   populatePatientSelectOptions();
   populateNotificationPatientSelect();
   populateReportPatientSelect();
-  document.getElementById('tab-add-patient-form').reset();
 
-  alert(`✅ تم حفظ ملف المريض (${name} - ${nextId}) بنجاح! الانتقال إلى سجل المرضى...`);
+  document.getElementById('tab-add-patient-form').reset();
+  currentTabPatientAttachments = { idCard: null, insurance: null, rx: null, labs: null, rad: null, other: null };
+  document.querySelectorAll('.file-preview-box').forEach(box => box.innerHTML = '');
+
+  initTabAddPatientForm();
+
+  alert(`✅ تم حفظ ملف المريض (${name} - ${mrn}) وحفظ الأمراض والخدمات والمرفقات بنجاح! الانتقال إلى سجل المرضى...`);
   switchTab('patients-tab', document.querySelectorAll('.tab-btn')[1]);
 }
 
-// PROFESSIONAL OFFICIAL REPORT FOOTER (CLEAN BLACK SIGNATURE & NO "ختم الاعتماد الرسمي" SENTENCE)
+// PROFESSIONAL OFFICIAL REPORT FOOTER
 function renderOfficialReportFooter(providerName = "إبراهيم ماهر") {
   return `
     <div class="prescription-footer" style="margin-top:2.5rem; padding-top:1rem; border-top:2px dashed #cbd5e1; display:flex; justify-content:space-between; align-items:flex-end;">
@@ -374,13 +501,13 @@ function renderOfficialReportFooter(providerName = "إبراهيم ماهر") {
       <!-- PROFESSIONAL BLACK CALLIGRAPHIC SIGNATURE OF IBRAHIM MAHER -->
       <div style="text-align: right; min-width: 200px;">
         <p style="font-size:0.85rem; color:#475569; font-weight:600; margin-bottom:0.3rem;">توقيع المسؤول المعتمد:</p>
-        <img src="assets/signature.png?v=23" alt="توقيع إبراهيم ماهر" style="height: 75px; max-width: 200px; filter: invert(1); mix-blend-mode: multiply; object-fit: contain; display: block; margin-bottom: 0.3rem;" />
+        <img src="assets/signature.png?v=24" alt="توقيع إبراهيم ماهر" style="height: 75px; max-width: 200px; filter: invert(1); mix-blend-mode: multiply; object-fit: contain; display: block; margin-bottom: 0.3rem;" />
         <strong style="color: #0b192c; font-size: 0.95rem;">إبراهيم ماهر (نبض للتمريض المنزلي)</strong>
       </div>
 
-      <!-- OFFICIAL NABD STAMP ONLY (WITHOUT SENTENCE "ختم الاعتماد الرسمي") -->
+      <!-- OFFICIAL NABD STAMP ONLY -->
       <div style="text-align: center;">
-        <img src="assets/stamp.jpg?v=23" alt="ختم نبض للتمريض المنزلي" style="width: 90px; height: 90px; border-radius: 50%; border: 2px solid #0b192c; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.12);" />
+        <img src="assets/stamp.jpg?v=24" alt="ختم نبض للتمريض المنزلي" style="width: 90px; height: 90px; border-radius: 50%; border: 2px solid #0b192c; object-fit: cover; box-shadow: 0 4px 8px rgba(0,0,0,0.12);" />
       </div>
 
       <!-- DIGITAL QR & VERIFICATION NOTE -->
@@ -397,7 +524,7 @@ function renderOfficialReportFooter(providerName = "إبراهيم ماهر") {
 function populateReportPatientSelect() {
   const select = document.getElementById('rpt-patient-id');
   if (!select) return;
-  select.innerHTML = patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.area} - ${p.phone})</option>`).join('');
+  select.innerHTML = patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
 }
 
 function openReportEditorStage(e) {
@@ -427,12 +554,12 @@ function openReportEditorStage(e) {
     },
     medications: [...(v.medications || [])],
     woundPhotos: [
-      { id: "img1", label: "صورة الجرح قبل Clean Dressing", url: "assets/logo.jpg?v=23" },
-      { id: "img2", label: "صورة الجرح بعد التطهير والغيار المعقم", url: "assets/logo.jpg?v=23" }
+      { id: "img1", label: "صورة الجرح قبل Clean Dressing", url: "assets/logo.jpg?v=24" },
+      { id: "img2", label: "صورة الجرح بعد التطهير والغيار المعقم", url: "assets/logo.jpg?v=24" }
     ],
     freeNotes: "ملاحظات وتوصيات خاصة بإبراهيم ماهر ونبض للتمريض المنزلي...",
     stampType: "nabd",
-    signatureUrl: "assets/signature.png?v=23",
+    signatureUrl: "assets/signature.png?v=24",
     extraElements: [],
     pageCount: 1
   };
@@ -780,7 +907,7 @@ function updateDraftReportView() {
       </div>
     ` : ''}
 
-    <!-- ALWAYS RENDER PROFESSIONAL FOOTER WITH BLACK CALLIGRAPHY & NO SENTENCE -->
+    <!-- ALWAYS RENDER PROFESSIONAL FOOTER WITH BLACK CALLIGRAPHY -->
     ${renderOfficialReportFooter("إبراهيم ماهر")}
   `;
 
@@ -853,10 +980,10 @@ function testCloudConnection() {
 
 function exportDataExcel() {
   let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-  csvContent += "ID المريض,اسم المريض,الرقم القومي,الجنس,المنطقة,الهاتف,الأمراض المزمنة,فصيلة الدم\n";
+  csvContent += "MRN,الحالة,تاريخ التسجيل,اسم المريض,الرقم القومي,الجنس,المنطقة,الهاتف,الأمراض المزمنة,الخدمات المطلوبة,فصيلة الدم,رابط الخريطة\n";
 
   patients.forEach(p => {
-    const row = `"${p.patientId}","${p.fullName}","${p.nationalId}","${p.gender}","${p.area}","${p.phone}","${p.diseases.join(' - ')}","${p.bloodType}"`;
+    const row = `"${p.mrn || p.patientId}","${p.status || 'نشط'}","${p.registrationDate || p.createdAt}","${p.fullName}","${p.nationalId}","${p.gender}","${p.area}","${p.phone}","${(p.diseases || []).join(' - ')}","${(p.requestedServices || []).join(' - ')}","${p.bloodType}","${p.mapsLink || ''}"`;
     csvContent += row + "\n";
   });
 
@@ -931,7 +1058,7 @@ function restoreSystemBackupDialog() {
 }
 
 function cleanTemporaryDataLogs() {
-  showConfirmDialog('هل أنت تأكد من تنظيف الملفات المؤقتة وسجلات الكاش الكاذبة وتحديث الذاكرة؟', () => {
+  showConfirmDialog('هل أنت تأكد من تنظيف الملفات المؤقتة وسجلات الكاش وتحديث الذاكرة؟', () => {
     alert('🧹 تم تنظيف البيانات المؤقتة وسجلات الكاش بنجاح!');
   });
 }
@@ -948,7 +1075,7 @@ function populateNotificationPatientSelect() {
   const select = document.getElementById('notif-patient-id');
   if (!select) return;
   select.innerHTML = '<option value="">-- اختر مريضاً من القائمة --</option>' +
-    patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.area} - ${p.phone})</option>`).join('');
+    patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
 }
 
 function updateReminderMessagePreview() {
@@ -1057,9 +1184,9 @@ function handleSaveClinicSettings(e) {
 
   clinicSettings = {
     brandName: "إبراهيم ماهر",
-    logoUrl: document.getElementById('cfg-logo-url').value || "assets/logo.jpg?v=23",
-    stampUrl: "assets/stamp.jpg?v=23",
-    signatureUrl: "assets/signature.png?v=23",
+    logoUrl: document.getElementById('cfg-logo-url').value || "assets/logo.jpg?v=24",
+    stampUrl: "assets/stamp.jpg?v=24",
+    signatureUrl: "assets/signature.png?v=24",
     phone: document.getElementById('cfg-phone').value || "01001097896",
     whatsApp: document.getElementById('cfg-whatsapp').value || "01001097896",
     email: document.getElementById('cfg-email').value || "info@homenursing.eg",
@@ -1151,7 +1278,6 @@ function saveStateToLocalStorage() {
   localStorage.setItem('nabd_visits_v5', JSON.stringify(visits));
 }
 
-// Custom Modal Confirmation Handler
 function showConfirmDialog(message, onConfirm) {
   const modal = document.getElementById('confirm-modal');
   const msgEl = document.getElementById('confirm-modal-msg');
@@ -1186,7 +1312,6 @@ function switchTab(tabId, btnElement) {
   if (btnElement) {
     btnElement.classList.add('active');
   } else {
-    // Fallback tab highlight search
     const btns = document.querySelectorAll('.tab-btn');
     if (tabId === 'add-patient-tab' && btns[0]) btns[0].classList.add('active');
     else if (tabId === 'patients-tab' && btns[1]) btns[1].classList.add('active');
@@ -1196,7 +1321,9 @@ function switchTab(tabId, btnElement) {
     else if (tabId === 'dashboard-tab' && btns[5]) btns[5].classList.add('active');
   }
 
-  if (tabId === 'dashboard-tab') {
+  if (tabId === 'add-patient-tab') {
+    initTabAddPatientForm();
+  } else if (tabId === 'dashboard-tab') {
     renderDashboardStats();
     renderRecentVisits();
   } else if (tabId === 'patients-tab') {
@@ -1313,7 +1440,7 @@ function renderRecentVisits() {
   `).join('');
 }
 
-// Patients CRM Render, Edit & Delete (Damietta Areas)
+// Patients CRM Render, Edit & Delete
 function renderPatientsGrid() {
   const container = document.getElementById('patients-grid-container');
   if (patients.length === 0) {
@@ -1323,27 +1450,38 @@ function renderPatientsGrid() {
 
   container.innerHTML = patients.map(p => {
     const age = calculateAge(p.dob);
-    const gMapsUrl = p.latitude && p.longitude ? `https://maps.google.com/?q=${p.latitude},${p.longitude}` : clinicSettings.googleMapsUrl;
+    const gMapsUrl = p.mapsLink || (p.latitude && p.longitude ? `https://maps.google.com/?q=${p.latitude},${p.longitude}` : clinicSettings.googleMapsUrl);
     const waUrl = `https://wa.me/${clinicSettings.whatsApp}?text=${encodeURIComponent('السلام عليكم أستاذ ' + p.fullName + '، تذكير بموعد الزيارة التمريضية المنزلية من إبراهيم ماهر (نبض للتمريض المنزلي - ' + clinicSettings.governorate + ' - هاتف: ' + clinicSettings.phone + ').')}`;
+
+    const statusBadge = p.status === 'متوقف' ? '⏸️ متوقف' : p.status === 'متوفى' ? '⚰️ متوفى' : p.status === 'خرج من الخدمة' ? '🚪 خرج من الخدمة' : '🟢 نشط';
 
     return `
       <div class="patient-card">
         <div class="patient-card-header">
           <div class="patient-avatar">${p.fullName ? p.fullName.charAt(0) : 'م'}</div>
           <div class="patient-details">
-            <h3>${p.fullName}</h3>
-            <p>السن: ${age > 0 ? age + ' سنة' : 'غير محدد'} | ${p.gender}</p>
+            <h3>${p.fullName} <span style="font-size:0.8rem; color:var(--accent-cyan);">(${p.mrn || p.patientId})</span></h3>
+            <p>السن: ${age > 0 ? age + ' سنة' : 'غير محدد'} | ${p.gender} | ${statusBadge}</p>
             <p>📱 ${p.phone || clinicSettings.phone}</p>
           </div>
         </div>
+        
         <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">
           📍 <strong style="color: var(--accent-cyan);">${p.area}</strong> - ${p.detailedAddress}
         </p>
+
         <div class="tag-list">
           ${p.diseases && p.diseases.length > 0 ? p.diseases.map(d => `<span class="tag">${d}</span>`).join('') : '<span class="tag">بدون أمراض مزمنة</span>'}
           <span class="tag tag-danger">فصيلة: ${p.bloodType}</span>
         </div>
-        <div class="patient-actions" style="flex-wrap: wrap;">
+
+        ${p.requestedServices && p.requestedServices.length > 0 ? `
+          <div style="font-size:0.8rem; color:var(--accent-cyan); margin-top:0.4rem;">
+            💉 <strong>الخدمات المطلوبة:</strong> ${p.requestedServices.join(' - ')}
+          </div>
+        ` : ''}
+
+        <div class="patient-actions" style="flex-wrap: wrap; margin-top:0.8rem;">
           <button class="btn btn-sm btn-primary" onclick="openNewVisitFromCRM('${p.patientId}')">🩺 زيارة جديدة</button>
           <button class="btn btn-sm btn-amber" onclick="openEditPatientModal('${p.patientId}')">✏️ تعديل</button>
           <button class="btn btn-sm btn-danger" onclick="confirmDeletePatient('${p.patientId}')">🗑️ حذف</button>
@@ -1361,7 +1499,11 @@ function filterPatients() {
   const disease = document.getElementById('filter-disease').value;
 
   const filtered = patients.filter(p => {
-    const matchQuery = (p.fullName && p.fullName.toLowerCase().includes(query)) || (p.phone && p.phone.includes(query)) || (p.nationalId && p.nationalId.includes(query));
+    const matchQuery = (p.fullName && p.fullName.toLowerCase().includes(query)) ||
+                       (p.phone && p.phone.includes(query)) ||
+                       (p.nationalId && p.nationalId.includes(query)) ||
+                       (p.mrn && p.mrn.toLowerCase().includes(query));
+
     const matchArea = !area || (p.area && p.area.includes(area));
     const matchDisease = !disease || (p.diseases && p.diseases.some(d => d.includes(disease)));
     return matchQuery && matchArea && matchDisease;
@@ -1396,6 +1538,7 @@ function openEditPatientModal(patientId) {
   document.getElementById('edit-pat-id').value = p.patientId;
   document.getElementById('edit-pat-name').value = p.fullName;
   document.getElementById('edit-pat-national-id').value = p.nationalId;
+  document.getElementById('edit-pat-status').value = p.status || 'نشط';
   document.getElementById('edit-pat-gender').value = p.gender;
   document.getElementById('edit-pat-dob').value = p.dob;
   document.getElementById('edit-pat-age-display').value = `${calculateAge(p.dob)} سنة`;
@@ -1404,9 +1547,7 @@ function openEditPatientModal(patientId) {
   document.getElementById('edit-pat-emergency').value = p.emergency || '';
   document.getElementById('edit-pat-area').value = p.area;
   document.getElementById('edit-pat-address-detail').value = p.detailedAddress;
-  document.getElementById('edit-pat-diseases').value = p.diseases ? p.diseases.join(', ') : '';
-  document.getElementById('edit-pat-allergies').value = p.allergies ? p.allergies.join(', ') : '';
-  document.getElementById('edit-pat-blood').value = p.bloodType || 'A+';
+  document.getElementById('edit-pat-maps-link').value = p.mapsLink || clinicSettings.googleMapsUrl;
 
   document.getElementById('edit-patient-modal').classList.add('active');
 }
@@ -1499,14 +1640,15 @@ function handleSavePatient(e) {
   const emergency = document.getElementById('pat-emergency').value.trim() || "غير محدد";
   const area = document.getElementById('pat-area').value || "بندر دمياط";
   const addressDetail = document.getElementById('pat-address-detail').value.trim() || "غير محدد";
-  const diseasesStr = document.getElementById('pat-diseases').value.trim();
-  const allergiesStr = document.getElementById('pat-allergies').value.trim();
-  const blood = document.getElementById('pat-blood').value || "غير محدد";
 
   const nextId = systemSettings.nextPatientId || `pat_${Date.now()}`;
+  const mrn = `MRN-${patients.length + 1005}`;
 
   const newPat = {
     patientId: nextId,
+    mrn: mrn,
+    status: "نشط",
+    registrationDate: new Date().toISOString().split('T')[0],
     fullName: name,
     nationalId: natId,
     gender: gender,
@@ -1518,9 +1660,11 @@ function handleSavePatient(e) {
     detailedAddress: addressDetail,
     latitude: 31.4165,
     longitude: 31.8133,
-    diseases: diseasesStr ? diseasesStr.split(',').map(s => s.trim()) : [],
-    allergies: allergiesStr ? allergiesStr.split(',').map(s => s.trim()) : [],
-    bloodType: blood,
+    mapsLink: clinicSettings.googleMapsUrl,
+    diseases: [],
+    requestedServices: [],
+    allergies: [],
+    bloodType: "A+",
     createdAt: new Date().toISOString().split('T')[0]
   };
 
@@ -1538,7 +1682,7 @@ function handleSavePatient(e) {
   populateReportPatientSelect();
   closeAddPatientModal();
   document.getElementById('add-patient-form').reset();
-  alert(`✅ تم حفظ بيانات المريض (${nextId}) في قاعدة بيانات إبراهيم ماهر (${clinicSettings.governorate}) بنجاح!`);
+  alert(`✅ تم حفظ بيانات المريض (${nextId} - ${mrn}) بنجاح!`);
 }
 
 function handleUpdatePatient(e) {
@@ -1549,6 +1693,7 @@ function handleUpdatePatient(e) {
 
   const name = document.getElementById('edit-pat-name').value.trim() || patients[index].fullName;
   const natId = document.getElementById('edit-pat-national-id').value.trim() || patients[index].nationalId;
+  const status = document.getElementById('edit-pat-status').value || patients[index].status;
   const gender = document.getElementById('edit-pat-gender').value || patients[index].gender;
   const dob = document.getElementById('edit-pat-dob').value || patients[index].dob;
   const phone = document.getElementById('edit-pat-phone').value.trim() || patients[index].phone;
@@ -1556,14 +1701,13 @@ function handleUpdatePatient(e) {
   const emergency = document.getElementById('edit-pat-emergency').value.trim() || patients[index].emergency;
   const area = document.getElementById('edit-pat-area').value || patients[index].area;
   const addressDetail = document.getElementById('edit-pat-address-detail').value.trim() || patients[index].detailedAddress;
-  const diseasesStr = document.getElementById('edit-pat-diseases').value.trim();
-  const allergiesStr = document.getElementById('edit-pat-allergies').value.trim();
-  const blood = document.getElementById('edit-pat-blood').value || patients[index].bloodType;
+  const mapsLink = document.getElementById('edit-pat-maps-link').value.trim() || patients[index].mapsLink;
 
   patients[index] = {
     ...patients[index],
     fullName: name,
     nationalId: natId,
+    status: status,
     gender: gender,
     dob: dob,
     phone: phone,
@@ -1571,9 +1715,7 @@ function handleUpdatePatient(e) {
     emergency: emergency,
     area: area,
     detailedAddress: addressDetail,
-    diseases: diseasesStr ? diseasesStr.split(',').map(s => s.trim()) : patients[index].diseases,
-    allergies: allergiesStr ? allergiesStr.split(',').map(s => s.trim()) : patients[index].allergies,
-    bloodType: blood,
+    mapsLink: mapsLink
   };
 
   saveStateToLocalStorage();
@@ -1621,7 +1763,7 @@ function populatePatientSelectOptions() {
   const select = document.getElementById('visit-patient-id');
   if (!select) return;
   select.innerHTML = '<option value="">-- اختر مريضاً من القائمة --</option>' +
-    patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.area} - ${p.phone})</option>`).join('');
+    patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
 }
 
 function startVisitForPatient(patientId) {
@@ -1803,7 +1945,7 @@ function shareReportWhatsApp() {
   window.open(url, '_blank');
 }
 
-// Scheduling Render with Delete/Edit Option
+// Scheduling Render
 function renderScheduleTable() {
   const tbody = document.getElementById('schedule-table-body');
   if (!tbody) return;
@@ -1815,7 +1957,7 @@ function renderScheduleTable() {
       <td><span class="tag">${p.area}</span></td>
       <td>غيار جراحي ودعم تمريضي</td>
       <td>إبراهيم ماهر</td>
-      <td><a href="https://maps.google.com/?q=${p.latitude},${p.longitude}" target="_blank">📍 موقع GPS (${p.area})</a></td>
+      <td><a href="${p.mapsLink || 'https://maps.google.com/?q=' + p.latitude + ',' + p.longitude}" target="_blank">📍 موقع GPS (${p.area})</a></td>
       <td>
         <div style="display:flex; gap:0.3rem;">
           <button class="btn btn-sm btn-amber" onclick="openEditPatientModal('${p.patientId}')">✏️ تعديل</button>
