@@ -1736,21 +1736,20 @@ function populateReportPatientSelect() {
   select.innerHTML = patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
 }
 
-function openReportEditorStage(e) {
+function openReportEditorStage(e, templateId = 'prescription') {
   if (e) e.preventDefault();
 
-  const selectedTypeEl = document.querySelector('input[name="rpt_type"]:checked');
-  const rptType = selectedTypeEl ? selectedTypeEl.value : 'prescription';
-  const patId = document.getElementById('rpt-patient-id').value || (patients[0] ? patients[0].patientId : '');
+  const patSelect = document.getElementById('rpt-patient-id');
+  const patId = patSelect ? patSelect.value : (patients[0] ? patients[0].patientId : '');
 
-  const p = patients.find(item => item.patientId === patId) || patients[0];
-  const v = visits.find(vis => vis.patientId === patId) || (visits[0] ? visits[0] : initialVisits[0]);
+  const p = patients.find(item => item.patientId === patId) || patients[0] || { fullName: "مريض افتراضي", dob: "1990-01-01", phone: clinicSettings.phone, area: "بندر دمياط", detailedAddress: "شارع الجلاء" };
+  const v = visits.find(vis => vis.patientId === patId) || (visits[0] ? visits[0] : { visitId: "vst_demo", medications: [] });
 
   currentDraftState = {
     draftId: `draft_${Date.now()}`,
     visitId: v.visitId,
     patientId: p.patientId,
-    reportType: rptType,
+    reportType: templateId,
     version: 1,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -1776,22 +1775,25 @@ function openReportEditorStage(e) {
   editorHistoryStack = [JSON.parse(JSON.stringify(currentDraftState))];
   historyPointer = 0;
 
-  document.getElementById('draft-pat-name').value = currentDraftState.patientScope.fullName;
-  document.getElementById('draft-pat-age').value = currentDraftState.patientScope.age;
-  document.getElementById('draft-pat-phone').value = currentDraftState.patientScope.phone;
-  document.getElementById('draft-pat-area').value = currentDraftState.patientScope.area;
-  document.getElementById('draft-free-notes').value = currentDraftState.freeNotes;
+  setElementValue('draft-pat-name', currentDraftState.patientScope.fullName);
+  setElementValue('draft-pat-age', currentDraftState.patientScope.age);
+  setElementValue('draft-pat-phone', currentDraftState.patientScope.phone);
+  setElementValue('draft-pat-area', currentDraftState.patientScope.area);
+  setElementValue('draft-free-notes', currentDraftState.freeNotes);
 
-  renderDraftMedicationsList();
-  renderDraftWoundPhotosList();
-  updateDraftReportView();
+  try { renderDraftMedicationsList(); } catch (err) { console.log(err); }
+  try { updateDraftReportView(); } catch (err) { console.log(err); }
 
-  document.getElementById('report-editor-stage').style.display = 'block';
-  document.getElementById('report-editor-stage').scrollIntoView({ behavior: 'smooth' });
+  const stage = document.getElementById('report-editor-stage');
+  if (stage) {
+    stage.style.display = 'block';
+    stage.scrollIntoView({ behavior: 'smooth' });
+  }
 }
 
 function closeReportEditorStage() {
-  document.getElementById('report-editor-stage').style.display = 'none';
+  const stage = document.getElementById('report-editor-stage');
+  if (stage) stage.style.display = 'none';
 }
 
 function togglePatientInlineEditor() {
@@ -2025,13 +2027,13 @@ function addNewPageToDraftReport() {
 function updateDraftReportView() {
   if (!currentDraftState) return;
 
-  currentDraftState.patientScope.fullName = document.getElementById('draft-pat-name').value || "غير محدد";
-  currentDraftState.patientScope.age = document.getElementById('draft-pat-age').value || "غير محدد";
-  currentDraftState.patientScope.phone = document.getElementById('draft-pat-phone').value || "غير محدد";
-  currentDraftState.patientScope.area = document.getElementById('draft-pat-area').value || "غير محدد";
-  currentDraftState.freeNotes = document.getElementById('draft-free-notes').value || "";
+  currentDraftState.patientScope.fullName = getElementValue('draft-pat-name', 'غير محدد');
+  currentDraftState.patientScope.age = getElementValue('draft-pat-age', 'غير محدد');
+  currentDraftState.patientScope.phone = getElementValue('draft-pat-phone', 'غير محدد');
+  currentDraftState.patientScope.area = getElementValue('draft-pat-area', 'غير محدد');
+  currentDraftState.freeNotes = getElementValue('draft-free-notes', '');
 
-  const canvas = document.getElementById('printable-editor-report-canvas');
+  const canvas = document.getElementById('printable-editor-report-canvas') || document.getElementById('draft-live-preview-box');
   if (!canvas) return;
 
   let html = `
