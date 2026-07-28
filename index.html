@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b192c">
+  <title>إبراهيم ماهر | نبض للتمريض المنزلي - محافظة دمياط</title>
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=23">
+  <link rel="apple-touch-icon" href="assets/logo.jpg?v=23">
+  <link rel="stylesheet" href="styles.css?v=23">
+  <!-- QRCode JS Library for PDF/Prescription verification -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="top-navbar">
+    <div class="brand-section">
+      <img src="assets/logo.jpg?v=23" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
+      <div class="brand-title">
+        <h1 id="ui-top-brand-name" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h1>
+        <p id="ui-top-subtitle" style="font-size: 0.88rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | 📱 <span id="ui-top-phone">01001097896</span></p>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button class="btn btn-primary" onclick="switchTab('add-patient-tab', document.querySelectorAll('.tab-btn')[0])">
+        <span>➕ إضافة مريض جديد</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs (Visit tab integrated inside Patients CRM) -->
+  <nav class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('add-patient-tab', this)">
+      ➕ إضافة مريض جديد
+    </button>
+    <button class="tab-btn" onclick="switchTab('patients-tab', this)">
+      👥 سجل المرضى (CRM)
+    </button>
+    <button class="tab-btn" onclick="switchTab('schedule-tab', this)">
+      📅 الجدولة والإشعارات
+    </button>
+    <button class="tab-btn" onclick="switchTab('prescription-tab', this)">
+      📑 مركز إنشاء التقارير والروشتات (Report Builder)
+    </button>
+    <button class="tab-btn" onclick="switchTab('settings-tab', this)">
+      ⚙️ إعدادات العيادة والمزامنة وقواعد البيانات
+    </button>
+    <button class="tab-btn" onclick="switchTab('dashboard-tab', this)">
+      📊 لوحة التحكم والتحليلات
+    </button>
+  </nav>
+
+  <!-- Main Content Container -->
+  <main class="main-container">
+
+    <!-- 1. ADD NEW PATIENT DEDICATED TAB -->
+    <section id="add-patient-tab" class="tab-content active">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>➕ إضافة مريض جديد - إبراهيم ماهر (نبض للتمريض المنزلي - دمياط)</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-amber btn-sm" onclick="autoFillDemoPatientTabForm()">⚡ تعبئة مريض تجريبي (دمياط)</button>
+          </div>
+        </div>
+
+        <form id="tab-add-patient-form" onsubmit="handleSavePatientFromTab(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>1. الاسم الثلاثي / الرباعي للمريض</label>
+              <input type="text" id="tab-pat-name" placeholder="مثال: أحمد محمود إبراهيم">
+            </div>
+            <div class="form-group">
+              <label>2. الرقم القومي</label>
+              <input type="text" id="tab-pat-national-id" placeholder="29010151234567">
+            </div>
+            <div class="form-group">
+              <label>3. النوع / الجنس</label>
+              <select id="tab-pat-gender">
+                <option value="غير محدد">غير محدد</option>
+                <option value="ذكر" selected>ذكر</option>
+                <option value="أنثى">أنثى</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>4. تاريخ الميلاد</label>
+              <input type="date" id="tab-pat-dob" onchange="autoCalcAgeInTabForm(this.value)">
+            </div>
+            <div class="form-group">
+              <label>5. العمر المحسوب تلقائياً</label>
+              <input type="text" id="tab-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="غير محدد">
+            </div>
+            <div class="form-group">
+              <label>6. رقم الهاتف الرئيسي</label>
+              <input type="tel" id="tab-pat-phone" placeholder="01001097896">
+            </div>
+            <div class="form-group">
+              <label>7. رقم الواتساب</label>
+              <input type="tel" id="tab-pat-whatsapp" placeholder="01001097896">
+            </div>
+            <div class="form-group">
+              <label>8. اسم الطوارئ والصلة ورقم الهاتف</label>
+              <input type="text" id="tab-pat-emergency" placeholder="محمود (ابن المريض) - 01114455667">
+            </div>
+            <div class="form-group">
+              <label>9. المنطقة / المدينة (نطاق دمياط)</label>
+              <select id="tab-pat-area">
+                <option value="بندر دمياط" selected>بندر دمياط</option>
+                <option value="مركز دمياط">مركز دمياط</option>
+                <option value="رأس البر">رأس البر</option>
+                <option value="دمياط الجديدة">دمياط الجديدة</option>
+              </select>
+            </div>
+            <div class="form-group full-width">
+              <label>10. العنوان التفصيلي وملاحظات الوصول للمنزل</label>
+              <input type="text" id="tab-pat-address-detail" placeholder="مثال: دمياط الجديدة - الحي المتميز - عمارة 15 شقة 4">
+            </div>
+            <div class="form-group">
+              <label>11. الأمراض المزمنة (مفصولة بفواصل)</label>
+              <input type="text" id="tab-pat-diseases" placeholder="السكري, ضغط الدم">
+            </div>
+            <div class="form-group">
+              <label>12. الحساسية الدوائية (Allergies)</label>
+              <input type="text" id="tab-pat-allergies" placeholder="حساسية بنسلين">
+            </div>
+            <div class="form-group">
+              <label>13. فصيلة الدم</label>
+              <select id="tab-pat-blood">
+                <option value="غير محدد">غير محدد</option>
+                <option value="A+" selected>A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              💾 حفظ ملف المريض وافتتاح السجل الطبي
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. PATIENTS CRM TAB (With EMR Visit Action Button replacing Add Patient Button) -->
+    <section id="patients-tab" class="tab-content">
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🔎 البحث وتصفية سجلات المرضى (محافظة دمياط)</h2>
+          <button class="btn btn-primary btn-lg" onclick="openNewVisitFromCRM()">🩺 تسجيل زيارة تمريضية جديدة (EMR)</button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>بحث بالاسم أو رقم الهاتف أو الرقم القومي</label>
+            <input type="text" id="search-query" placeholder="اكتب اسم المريض أو رقم الهاتف..." oninput="filterPatients()">
+          </div>
+          <div class="form-group">
+            <label>تصفية حسب نطاق تقديم الخدمة (دمياط)</label>
+            <select id="filter-area" onchange="filterPatients()">
+              <option value="">جميع مناطق دمياط</option>
+              <option value="بندر دمياط">بندر دمياط</option>
+              <option value="مركز دمياط">مركز دمياط</option>
+              <option value="رأس البر">رأس البر</option>
+              <option value="دمياط الجديدة">دمياط الجديدة</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تصفية حسب المرض المزمن</label>
+            <select id="filter-disease" onchange="filterPatients()">
+              <option value="">جميع الأمراض</option>
+              <option value="Diabetes">السكري</option>
+              <option value="Hypertension">ضغط الدم</option>
+              <option value="Heart Disease">أمراض القلب</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- INLINE VISIT EMR RECORDING FORM CONTAINER -->
+      <div id="inline-crm-visit-section" class="panel-card" style="display: none; background: rgba(0, 212, 178, 0.03); border: 2px solid var(--accent-cyan); margin-bottom: 2rem;">
+        <div class="panel-header">
+          <h2 style="color: var(--accent-cyan);">🩺 تسجيل زيارة تمريضية جديدة وتحديث EMR إبراهيم ماهر</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-amber btn-sm" onclick="autoFillDemoVisit()">⚡ تعبئة نموذج تجريبي</button>
+            <button class="btn btn-danger btn-sm" onclick="closeInlineCRMVisitSection()">❌ إغلاق تسجيل الزيارة</button>
+          </div>
+        </div>
+
+        <form id="visit-form" onsubmit="handleSaveVisit(event)">
+          
+          <!-- Step 1: Patient Selection & General Info -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">1️⃣ المريض والشكوى الرئيسية</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>اختر المريض</label>
+                <select id="visit-patient-id" onchange="onPatientSelectInVisit(this.value)">
+                  <option value="">-- اختر مريضاً من القائمة --</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>تاريخ ووقت الزيارة</label>
+                <input type="datetime-local" id="visit-date-time">
+              </div>
+              <div class="form-group">
+                <label>اسم الممرض / الطبيب المسؤول</label>
+                <input type="text" id="visit-provider-name" value="إبراهيم ماهر (نبض للتمريض المنزلي)">
+              </div>
+              <div class="form-group full-width">
+                <label>الشكوى الرئيسية (Chief Complaint)</label>
+                <input type="text" id="visit-chief-complaint" placeholder="مثال: غيار على جرح سكري في القدم اليمنى ومتابعة الضغط والسكر">
+              </div>
+              <div class="form-group full-width">
+                <label>تاريخ المرض الحالي (HPI - History of Present Illness)</label>
+                <textarea id="visit-hpi" rows="2" placeholder="تفاصيل تطور حالة المريض والشكوى الحالية..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Vital Signs & Auto-BMI Calculator -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">2️⃣ قياس العلامات الحيوية (Vitals) وحساب BMI التلقائي</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>حرارة الجسم (Temp °C)</label>
+                <input type="number" step="0.1" id="vital-temp" placeholder="37.0">
+              </div>
+              <div class="form-group">
+                <label>النبض (Pulse / min)</label>
+                <input type="number" id="vital-pulse" placeholder="75">
+              </div>
+              <div class="form-group">
+                <label>ضغط الدم الانقباضي (BP Systolic)</label>
+                <input type="number" id="vital-bp-sys" placeholder="120">
+              </div>
+              <div class="form-group">
+                <label>ضغط الدم الانبساطي (BP Diastolic)</label>
+                <input type="number" id="vital-bp-dia" placeholder="80">
+              </div>
+              <div class="form-group">
+                <label>معدل التنفس (RR / min)</label>
+                <input type="number" id="vital-rr" placeholder="18">
+              </div>
+              <div class="form-group">
+                <label>نسبة الأكسجين (SpO2 %)</label>
+                <input type="number" id="vital-spo2" placeholder="98">
+              </div>
+              <div class="form-group">
+                <label>قياس السكر (Blood Sugar mg/dL)</label>
+                <input type="number" id="vital-sugar" placeholder="140">
+              </div>
+              <div class="form-group">
+                <label>نوع قياس السكر</label>
+                <select id="vital-sugar-type">
+                  <option value="عشوائي (Random)">عشوائي (Random)</option>
+                  <option value="صائم (Fasting)">صائم (Fasting)</option>
+                  <option value="بعد الأكل (Postprandial)">بعد الأكل (Postprandial)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>مقياس الألم (Pain Scale 0-10)</label>
+                <input type="number" min="0" max="10" id="vital-pain" placeholder="3">
+              </div>
+              <div class="form-group">
+                <label>الوزن (كجم)</label>
+                <input type="number" step="0.5" id="vital-weight" placeholder="80" oninput="calculateBMIInForm()">
+              </div>
+              <div class="form-group">
+                <label>الطول (سم)</label>
+                <input type="number" step="0.5" id="vital-height" placeholder="175" oninput="calculateBMIInForm()">
+              </div>
+              <div class="form-group">
+                <label>مؤشر كتلة الجسم (BMI - محصوبة تلقائياً)</label>
+                <input type="text" id="vital-bmi-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="لم يتم الحساب">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Clinical Exam & Nursing Process -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">3️⃣ الفحص السريري والعملية التمريضية (Nursing Process)</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>مستوى الوعي مقياس جلاسكو (GCS Score 3-15)</label>
+                <input type="number" min="3" max="15" id="exam-gcs" value="15">
+              </div>
+              <div class="form-group">
+                <label>الفحص العام (General Appearance)</label>
+                <input type="text" id="exam-general" placeholder="وعي كامل, حالة عامة مستقرة...">
+              </div>
+              <div class="form-group">
+                <label>فحص الصدر والتنفس (Chest)</label>
+                <input type="text" id="exam-chest" placeholder="أصوات تنفس طبيعية بالجانبين...">
+              </div>
+              <div class="form-group">
+                <label>فحص الأطراف والوذمة (Extremities & Edema)</label>
+                <input type="text" id="exam-extremities" placeholder="تورم خفيف بالقدمين (+1)...">
+              </div>
+              <div class="form-group full-width">
+                <label>التشخيص التمريضي والخطة العلاجية (Nursing Diagnosis & Plan)</label>
+                <textarea id="nursing-plan" rows="2" placeholder="التشخيص التمريضي, الأهداف, التدخلات التمريضية, والتقييم النهائي..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Multi-select Procedures -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 0.5rem;">4️⃣ الإجراءات التمريضية المنفذة (Procedures)</h3>
+            <div class="checkbox-grid">
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="غيار جراحي معقم (Dressing)"> غيار جراحي معقم</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="تركيب / تغيير كانيولا (IV Cannula)"> تركيب / تغيير كانيولا</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="حقن عضل / وريد (IM/IV Injection)"> حقن عضل / وريد</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="تركيب / تغيير قسطرة بولية (Catheter)"> تركيب / تغيير قسطرة بولية</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="تركيب رايل / أنبوب تغذية (Ryle Tube)"> تركيب رايل / أنبوب تغذية</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="سحب عينات تحاليل (Sample Collection)"> سحب عينات تحاليل</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="جلسة نيبولايزر (Nebulizer)"> جلسة نيبولايزر</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="تركيب / متابعة أكسجين (Oxygen)"> تركيب أكسجين</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="رسم قلب منزلي (ECG)"> رسم قلب منزلي</label>
+              <label class="checkbox-item"><input type="checkbox" name="procedure" value="فك غرز جراحية (Suture Removal)"> فك غرز جراحية</label>
+            </div>
+          </div>
+
+          <!-- Step 5: Specialized Wound Care Module -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">5️⃣ وحدة العناية بالجروح (Wound Care Tracker)</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>نوع الجرح (Wound Type)</label>
+                <select id="wound-type">
+                  <option value="بدون جرح">بدون جرح / لا يوجد</option>
+                  <option value="قدم سكري (Diabetic Foot)">قدم سكري (Diabetic Foot)</option>
+                  <option value="قرحة فراش (Pressure Ulcer)">قرحة فراش (Pressure Ulcer)</option>
+                  <option value="جرح جراحي (Surgical Wound)">جرح جراحي (Surgical Wound)</option>
+                  <option value="حرق (Burn Wound)">حرق (Burn Wound)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>مرحلة الجرح (Stage)</label>
+                <select id="wound-stage">
+                  <option value="N/A">غير محدد</option>
+                  <option value="Stage 1">المرحلة الأولى (احمرار)</option>
+                  <option value="Stage 2">المرحلة الثانية (سطحي)</option>
+                  <option value="Stage 3">المرحلة الثالثة (عميق)</option>
+                  <option value="Stage 4">المرحلة الرابعة (واصل للعظم)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>الأبعاد (الطول × العرض × العمق سم)</label>
+                <input type="text" id="wound-dimensions" placeholder="مثال: 4 × 3 × 0.5 سم">
+              </div>
+              <div class="form-group">
+                <label>الإفرازات (Exudate)</label>
+                <select id="wound-exudate">
+                  <option value="لا يوجد">لا يوجد</option>
+                  <option value="مصلية خفيفة (Serous)">مصلية خفيفة (Serous)</option>
+                  <option value="مصلية متوسطة">مصلية متوسطة</option>
+                  <option value="صديدية (Purulent)">صديدية (Purulent)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>نوع الغيار المستخدم (Dressing Type)</label>
+                <input type="text" id="wound-dressing-type" placeholder="مثال: Silver Foam + Hydrogel">
+              </div>
+              <div class="form-group">
+                <label>تاريخ الغيار القادم (Next Change)</label>
+                <input type="date" id="wound-next-date">
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 6: Prescriptions & Billing -->
+          <div class="panel-card" style="background: rgba(255,255,255,0.02);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">6️⃣ الأدوية والروشتة والحسابات المالية</h3>
+            
+            <div style="margin-bottom: 1.5rem;">
+              <h4 style="color: var(--text-muted); margin-bottom: 0.5rem;">إضافة دواء للروشتة:</h4>
+              <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                <input type="text" id="med-name" placeholder="اسم الدواء (Augmentin 1g)">
+                <input type="text" id="med-dose" placeholder="الجرعة (قرص)">
+                <input type="text" id="med-freq" placeholder="التكرار (كل 12 ساعة)">
+                <input type="text" id="med-duration" placeholder="المدة (7 أيام)">
+                <input type="text" id="med-instructions" placeholder="تعليمات (بعد الأكل)">
+                <button type="button" class="btn btn-primary" onclick="addMedicationRow()">إضافة</button>
+              </div>
+              <ul id="medications-list" style="margin-top: 1rem; color: var(--accent-cyan); font-size: 0.9rem; list-style: circle; padding-right: 1.5rem;"></ul>
+            </div>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>كشفية / رسوم الزيارة (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-visit-fee" value="300" oninput="calculateBillingInForm()">
+              </div>
+              <div class="form-group">
+                <label>رسوم الغيار والمستلزمات (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-dressing-fee" value="150" oninput="calculateBillingInForm()">
+              </div>
+              <div class="form-group">
+                <label>خصم (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-discount" value="0" oninput="calculateBillingInForm()">
+              </div>
+              <div class="form-group">
+                <label>المبلغ الإجمالي المستحق (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-total" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;">
+              </div>
+              <div class="form-group">
+                <label>المبلغ المدفوع كاش (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-paid" value="450" oninput="calculateBillingInForm()">
+              </div>
+              <div class="form-group">
+                <label>المبلغ المتبقي (<span class="ui-currency-symbol">ج.م</span>)</label>
+                <input type="number" id="bill-remaining" readonly style="color: var(--accent-red); font-weight: bold;">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              💾 حفظ الزيارة وتحديث السجل ومزامنة Google Sheets
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="patients-grid" id="patients-grid-container">
+        <!-- Dynamic Patient Cards injected via app.js -->
+      </div>
+    </section>
+
+    <!-- 3. SCHEDULING & NOTIFICATIONS TAB -->
+    <section id="schedule-tab" class="tab-content">
+      
+      <!-- SCHEDULE VISITS PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>📅 1. جدولة الزيارات القادمة وتخطيط الرحلات (محافظة دمياط)</h2>
+          <button class="btn btn-primary btn-sm" onclick="alert('تم تفعيل التذكيرات التلقائية عبر الواتساب وتقويم Google')">🔔 إرسال تذكيرات الواتساب</button>
+        </div>
+        
+        <div class="form-grid" style="margin-bottom: 2rem;">
+          <div class="form-group">
+            <label>حساب المسافة والزمن المتوقع (Google Maps API)</label>
+            <select id="route-origin">
+              <option value="بندر دمياط - مقر نبض للتمريض المنزلي">بندر دمياط - مقر نبض للتمريض المنزلي</option>
+              <option value="دمياط الجديدة - النقطة التمريضية 1">دمياط الجديدة - النقطة التمريضية 1</option>
+              <option value="رأس البر - وحدة التمريض السريع">رأس البر - وحدة التمريض السريع</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>وجهة المريض</label>
+            <input type="text" id="route-destination" value="دمياط الجديدة - الحي المتميز - عمارة 12">
+          </div>
+          <div class="form-group" style="align-self: flex-end;">
+            <button class="btn btn-amber" onclick="calculateRouteDemo()">🗺️ حساب المسافة والمسار</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>تاريخ الزيارة المقررة</th>
+                <th>المريض</th>
+                <th>رقم الهاتف / الواتساب</th>
+                <th>المنطقة والنطاق</th>
+                <th>الخدمة المطلوبة</th>
+                <th>الممرض المكلف</th>
+                <th>الموقع على الخريطة</th>
+                <th>إجراءات (تعديل / حذف)</th>
+              </tr>
+            </thead>
+            <tbody id="schedule-table-body">
+              <!-- Dynamic Schedule rows injected via app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMART NOTIFICATIONS & REMINDERS PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🔔 2. مركز الإشعارات والتذكيرات الذكية (Smart Reminders Hub)</h2>
+          <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
+            💬 إشعارات الواتساب والنظام
+          </span>
+        </div>
+
+        <form id="notification-form" onsubmit="handleSendReminderForm(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>1. نوع الإشعار والتذكير</label>
+              <select id="notif-type" onchange="updateReminderMessagePreview()">
+                <option value="visit">🩺 تذكير بموعد الزيارة التمريضية</option>
+                <option value="followup">🔄 تذكير بالمتابعة وقياس العلامات الحيوية</option>
+                <option value="dressing">🩹 تذكير بموعد الغيار على الجرح</option>
+                <option value="lab">🧪 تذكير بسحب عينة التحليل</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>2. اختر المريض</label>
+              <select id="notif-patient-id" onchange="updateReminderMessagePreview()">
+                <option value="">-- اختر مريضاً من القائمة --</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>3. موعد الإشعار المخصص</label>
+              <input type="datetime-local" id="notif-date-time" onchange="updateReminderMessagePreview()">
+            </div>
+            <div class="form-group full-width">
+              <label>4. معاينة نص رسالة الواتساب التلقائية</label>
+              <textarea id="notif-msg-preview" rows="3" readonly style="background: rgba(0,212,178,0.06); color: var(--accent-cyan); font-weight: 600;"></textarea>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-success btn-lg" onclick="sendActiveReminderWhatsApp()">
+              📲 إرسال التذكير فوراً عبر الواتساب
+            </button>
+            <button type="submit" class="btn btn-primary btn-lg">
+              🔔 جدولة إشعار تلقائي في النظام
+            </button>
+          </div>
+        </form>
+
+        <div style="margin-top: 2rem;">
+          <h3 style="color: var(--accent-cyan); font-size: 1.1rem; margin-bottom: 1rem;">📋 سجل الإشعارات الصادرة والمتوقعة:</h3>
+          <div class="table-responsive">
+            <table>
+              <thead>
+                <tr>
+                  <th>تاريخ الإشعار</th>
+                  <th>المريض</th>
+                  <th>نوع التذكير</th>
+                  <th>رقم الواتساب</th>
+                  <th>الحالة</th>
+                  <th>إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="notif-log-table">
+                <!-- Dynamic notification log rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 4. REPORT BUILDER CENTER & INTERACTIVE EDITOR TAB -->
+    <section id="prescription-tab" class="tab-content">
+      
+      <!-- REPORT BUILDER SELECTION PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>📑 مركز إنشاء التقارير والروشتات (Report Builder & Editor Center)</h2>
+          <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
+            ✏️ تحرير كامل ومسودات Report Drafts
+          </span>
+        </div>
+
+        <form id="report-builder-form" onsubmit="openReportEditorStage(event)">
+          
+          <!-- Step 1: Report Type Selection (15 Options) -->
+          <h3 style="color: var(--accent-cyan); font-size: 1.1rem; margin-bottom: 1rem;">1️⃣ اختر نوع التقرير المطلوب (15 نوع تقرير):</h3>
+          
+          <div class="report-type-grid">
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="prescription" checked>
+              <div class="report-type-info">
+                <h4>📋 1. روشتة طبية (Rx)</h4>
+                <p>أدوية، جرعات، تعليمات، وQR Code</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="visit">
+              <div class="report-type-info">
+                <h4>🩺 2. تقرير زيارة تمريضية</h4>
+                <p>سبب الزيارة، فحص، علامات، وإجراءات</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="wound">
+              <div class="report-type-info">
+                <h4>🩹 3. تقرير متابعة الجروح</h4>
+                <p>المقاسات، صور قبل وبعد، ومقارنة الزيارات</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="vitals">
+              <div class="report-type-info">
+                <h4>📊 4. تقرير العلامات الحيوية</h4>
+                <p>رسم بياني شريطي ورصد التغيرات</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="labs">
+              <div class="report-type-info">
+                <h4>🧪 5. تقرير التحاليل الطبية</h4>
+                <p>نتائج CBC, CRP مع مرفقات الصور والـ PDF</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="radiology">
+              <div class="report-type-info">
+                <h4>🩻 6. تقرير الأشعة</h4>
+                <p>صور الأشعة، تقرير الطبيب والملفات</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="meds_only">
+              <div class="report-type-info">
+                <h4>💊 7. تقرير العلاج الحالي</h4>
+                <p>عرض الأدوية الحالية فقط بدون تفاصيل أخرى</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="full_emr">
+              <div class="report-type-info">
+                <h4>📂 8. التقرير الطبي الكامل (EMR)</h4>
+                <p>سجل شامل مقسم إلى فصول مع فهرس</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="financial">
+              <div class="report-type-info">
+                <h4>💵 9. تقرير مالي / فاتورة</h4>
+                <p>تفنيد الخدمات، الخصومات، والمدفوعات</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="referral">
+              <div class="report-type-info">
+                <h4>✉️ 10. خطاب تحويل لطبيب</h4>
+                <p>خطاب تحويل واستشارة طبيب متخصص</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="insurance">
+              <div class="report-type-info">
+                <h4>🛡️ 11. تقرير التأمين</h4>
+                <p>بيانات، تشخيص، خدمات، وتكاليف فقط</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="custom">
+              <div class="report-type-info">
+                <h4>🛠️ 12. تقرير مخصّص</h4>
+                <p>تحديد الأقسام المطلوبة بالـ Checkbox</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="receipt">
+              <div class="report-type-info">
+                <h4>🧾 13. إيصال استلام</h4>
+                <p>إيصال استلام مالي رسمي موثق</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="attendance">
+              <div class="report-type-info">
+                <h4>📜 14. شهادة حضور زيارة</h4>
+                <p>إثبات تقديم الخدمة التمريضية المنزلية</p>
+              </div>
+            </label>
+
+            <label class="report-type-card">
+              <input type="radio" name="rpt_type" value="discharge">
+              <div class="report-type-info">
+                <h4>🚪 15. تقرير خروج من الخدمة</h4>
+                <p>إنهاء الخدمة وتوصيات التعافي</p>
+              </div>
+            </label>
+          </div>
+
+          <!-- Step 2: Patient Selection -->
+          <h3 style="color: var(--accent-cyan); font-size: 1.1rem; margin-bottom: 1rem;">2️⃣ اختر المريض لإنشاء التقرير:</h3>
+          <div class="form-grid" style="margin-bottom: 1.5rem;">
+            <div class="form-group">
+              <label>اختر المريض</label>
+              <select id="rpt-patient-id">
+                <option value="">-- اختر مريضاً من القائمة --</option>
+              </select>
+            </div>
+            <div class="form-group" style="align-self: flex-end;">
+              <button type="submit" class="btn btn-primary btn-lg">⚡ فتح محرر ومعاين التقرير (Report Editor)</button>
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- INTERACTIVE REPORT EDITOR STAGE (Report Editor Phase) -->
+      <div id="report-editor-stage" class="panel-card" style="display: none;">
+        
+        <!-- Editor Top Toolbar -->
+        <div class="editor-toolbar-top">
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <span style="font-weight: 800; color: var(--accent-cyan);">✏️ وضع التحرير المباشر:</span>
+            <button class="btn btn-sm btn-primary" onclick="saveReportDraft()">💾 حفظ مسودة</button>
+            <button class="btn btn-sm btn-secondary" onclick="editorUndo()">↶ تراجع</button>
+            <button class="btn btn-sm btn-secondary" onclick="editorRedo()">↷ إعادة</button>
+            <button class="btn btn-sm btn-amber" onclick="openAddElementModal()">➕ إضافة عنصر جديد</button>
+            <button class="btn btn-sm btn-success" onclick="openSaveTemplateModal()">💾 حفظ كقالب</button>
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <select id="editor-version-select" onchange="restoreReportVersion(this.value)" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">
+              <option value="v1">الإصدار 1 (الافتراضي)</option>
+            </select>
+            <button class="btn btn-sm btn-primary" onclick="toggleReportViewMode()">👁️ المعاينة النهائية</button>
+            <button class="btn btn-sm btn-success" onclick="downloadReportPDF()">📄 PDF</button>
+            <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ طباعة</button>
+            <button class="btn btn-sm btn-success" onclick="shareReportWhatsApp()">📲 واتساب</button>
+            <button class="btn btn-sm btn-danger" onclick="closeReportEditorStage()">❌ إغلاق</button>
+          </div>
+        </div>
+
+        <!-- Inline Patient Details Editor (Draft Scope Only) -->
+        <div class="editor-section-card">
+          <div class="editor-section-header">
+            <h4>👤 1. بيانات المريض داخل التقرير فقط (بدون التعديل على قاعدة البيانات):</h4>
+            <button class="btn btn-sm btn-amber" onclick="togglePatientInlineEditor()">✏️ تعديل بيانات المريض بالتقرير</button>
+          </div>
+          <div id="patient-inline-editor" style="display: none;" class="form-grid">
+            <div class="form-group">
+              <label>اسم المريض بالتقرير</label>
+              <input type="text" id="draft-pat-name" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group">
+              <label>السن</label>
+              <input type="text" id="draft-pat-age" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group">
+              <label>رقم الهاتف</label>
+              <input type="text" id="draft-pat-phone" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group">
+              <label>المنطقة والعنوان</label>
+              <input type="text" id="draft-pat-area" oninput="updateDraftReportView()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Medications & Items Direct Controls -->
+        <div class="editor-section-card">
+          <div class="editor-section-header">
+            <h4>💊 2. أدوية الروشتة المباشرة (Rx Items):</h4>
+            <button class="btn btn-sm btn-primary" onclick="openAddMedicationDraftModal()">➕ إضافة دواء للروشتة</button>
+          </div>
+          <div id="draft-medications-editor-list" style="margin-top: 0.5rem;">
+            <!-- Dynamic Medication Rows with Edit/Delete -->
+          </div>
+        </div>
+
+        <!-- Wound Care Images Editor -->
+        <div class="editor-section-card">
+          <div class="editor-section-header">
+            <h4>🩹 3. صور الجروح والمرفقات (Wound Images & Photos):</h4>
+            <button class="btn btn-sm btn-amber" onclick="triggerAddNewWoundPhoto()">➕ إضافة صورة جرح جديدة</button>
+          </div>
+          <input type="file" id="wound-photo-file-input" accept="image/*" style="display: none;" onchange="executeAddWoundPhoto(event)">
+          <div id="draft-wound-photos-list" class="wound-comparison-grid">
+            <!-- Dynamic wound photos with Replace / Delete -->
+          </div>
+        </div>
+
+        <!-- Free Text Notes Area -->
+        <div class="editor-section-card">
+          <div class="editor-section-header">
+            <h4>📝 4. ملاحظات إضافية حرة (Free Text Notes):</h4>
+          </div>
+          <textarea id="draft-free-notes" rows="3" placeholder="اكتب أي ملاحظات أو تعليمات إضافية هنا ليتم إدراجها بالتقرير قبل الطباعة..." oninput="updateDraftReportView()"></textarea>
+        </div>
+
+        <!-- Signature & Stamp Selector -->
+        <div class="editor-section-card">
+          <div class="editor-section-header">
+            <h4>✍️ 5. التوقيع والختم المعتمد (Signature & Stamp):</h4>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-sm btn-primary" onclick="openSignatureCanvasModal()">✍️ رسم التوقيع باليد</button>
+              <select id="draft-stamp-select" onchange="updateDraftReportView()" style="font-size: 0.8rem; padding: 0.3rem;">
+                <option value="nabd">🏛️ ختم نبض للتمريض المنزلي</option>
+                <option value="doctor">🩺 ختم الطبيب المعالج</option>
+                <option value="nurse">🩺 ختم التمريض المسؤول</option>
+                <option value="none">بدون ختم</option>
+              </select>
+            </div>
+          </div>
+          <div id="draft-signature-preview" style="margin-top: 0.5rem; text-align: center;">
+            <p style="color: var(--text-muted); font-size: 0.8rem;">توقيع رقمي معتمد جاهز بالتقرير</p>
+          </div>
+        </div>
+
+        <!-- Add Page Control -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <button class="btn btn-amber btn-lg" onclick="addNewPageToDraftReport()">+ صفحة جديدة بالتقرير</button>
+          <span style="font-size: 0.85rem; color: var(--text-muted);" id="draft-page-count-display">إجمالي الصفحات: 1 صفحة</span>
+        </div>
+
+        <!-- LIVE REPORT CANVAS PREVIEW -->
+        <div class="report-paper-view printable" id="printable-editor-report-canvas">
+          <!-- Dynamic report content rendered live -->
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 5. SETTINGS & DATABASE TAB -->
+    <section id="settings-tab" class="tab-content">
+      
+      <!-- CLINIC & BRAND SETTINGS FORM PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🏢 1. إعدادات مركز نبض والبراند (Clinic & Brand Settings)</h2>
+          <span class="status-badge" style="background: rgba(255, 159, 67, 0.15); color: var(--accent-amber); border-color: rgba(255, 159, 67, 0.3);">
+            ⚙️ الهوية والبيانات
+          </span>
+        </div>
+
+        <form id="clinic-settings-form" onsubmit="handleSaveClinicSettings(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>1. اسم البراند / المركز</label>
+              <input type="text" id="cfg-brand-name" value="إبراهيم ماهر">
+            </div>
+            <div class="form-group">
+              <label>2. الشعار الرسمي (مسار / URL)</label>
+              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=23">
+            </div>
+            <div class="form-group">
+              <label>3. رقم الهاتف الرئيسي</label>
+              <input type="tel" id="cfg-phone" value="01001097896">
+            </div>
+            <div class="form-group">
+              <label>4. رقم الواتساب (للمشاركة والتذكير)</label>
+              <input type="tel" id="cfg-whatsapp" value="01001097896">
+            </div>
+            <div class="form-group">
+              <label>5. البريد الإلكتروني (Email)</label>
+              <input type="email" id="cfg-email" value="info@homenursing.eg">
+            </div>
+            <div class="form-group">
+              <label>6. الموقع الإلكتروني (Website URL)</label>
+              <input type="text" id="cfg-website" value="https://homenursing.eg">
+            </div>
+            <div class="form-group">
+              <label>7. المحافظة</label>
+              <input type="text" id="cfg-governorate" value="محافظة دمياط">
+            </div>
+            <div class="form-group">
+              <label>8. العنوان التفصيلي للمركز</label>
+              <input type="text" id="cfg-address" value="شارع الجلاء - بندر دمياط">
+            </div>
+            <div class="form-group full-width">
+              <label>9. مناطق تقديم الخدمة (مفصولة بفواصل)</label>
+              <input type="text" id="cfg-service-areas" value="بندر دمياط, مركز دمياط, رأس البر, دمياط الجديدة">
+            </div>
+            <div class="form-group full-width">
+              <label>10. رابط الموقع على Google Maps</label>
+              <input type="url" id="cfg-google-maps" value="https://maps.google.com/?q=31.4165,31.8133">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              💾 حفظ تحديث إعدادات المركز والبراند
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SYNC & CLOUD INTEGRATION SETTINGS PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🔄 2. إعدادات المزامنة والربط السحابي (Sync & Cloud Integration)</h2>
+        </div>
+
+        <form id="sync-settings-form" onsubmit="handleSaveSyncSettings(event)">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label>1. Google Sheets (رابط Apps Script Webhook)</label>
+              <input type="url" id="sync-sheets-url" value="https://script.google.com/macros/s/AKfycbx_DEMO_WEBHOOK_URL/exec">
+            </div>
+            <div class="form-group">
+              <label>2. Google Drive (معرف مجلد النسخ الاحتياطية Folder ID)</label>
+              <input type="text" id="sync-drive-folder-id" value="1A2B3C4D5E6F7G8H9I0J">
+            </div>
+            <div class="form-group">
+              <label>3. Firebase Project ID (مشروع السحابة)</label>
+              <input type="text" id="sync-firebase-project-id" value="nabd-home-nursing-damietta">
+            </div>
+            <div class="form-group">
+              <label>4. Firebase API Key (مفتاح الـ Web App)</label>
+              <input type="text" id="sync-firebase-api-key" value="AIzaSyDemoKey123456789NabdEMR">
+            </div>
+            <div class="form-group">
+              <label>5. Cloud Firestore Database Name</label>
+              <input type="text" id="sync-firestore-db" value="(default)">
+            </div>
+            <div class="form-group full-width">
+              <label>6. Webhook الإشعارات الخارجية (Custom Webhook Endpoint)</label>
+              <input type="url" id="sync-custom-webhook" value="https://api.homenursing.eg/webhooks/visit-created">
+            </div>
+            
+            <div class="form-group">
+              <label>7. المزامنة التلقائية (Auto-Sync عند الاتصال)</label>
+              <select id="sync-auto-sync-enabled">
+                <option value="true">مفعل (مزامنة فورية تلقائية)</option>
+                <option value="false">معطل (مزامنة يدوية فقط)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>8. النسخ الاحتياطي التلقائي (Auto-Backup)</label>
+              <select id="sync-auto-backup-enabled">
+                <option value="true">مفعل (توليد احتياطي دوري)</option>
+                <option value="false">معطل</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>9. تكرار النسخ الاحتياطي التلقائي</label>
+              <select id="sync-backup-interval">
+                <option value="12">كل 12 ساعة</option>
+                <option value="24" selected>كل 24 ساعة (يومياً)</option>
+                <option value="168">أسبوعياً</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>10. آخر مزامنة سحابية ناجحة</label>
+              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 17:11">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-amber" onclick="triggerManualSync()">🔄 مزامنة فورية الآن (Sync Now)</button>
+            <button type="button" class="btn btn-success" onclick="triggerGoogleDriveBackup()">☁️ نسخ احتياطي إلى Google Drive</button>
+            <button type="submit" class="btn btn-primary">💾 حفظ وتفعيل إعدادات المزامنة</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- SYSTEM & UI PREFERENCES PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>🛠️ 3. إعدادات النظام وتفضيلات العرض (System Settings)</h2>
+          <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
+            🎨 المظهر والترقيم والعملة
+          </span>
+        </div>
+
+        <form id="system-settings-form" onsubmit="handleSaveSystemSettings(event)">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>1. مظهر النظام (Theme Mode)</label>
+              <select id="sys-theme">
+                <option value="dark" selected>الوضع الداكن (Dark Mode)</option>
+                <option value="light">الوضع الفاتح (Light Mode)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>2. واجهة اللغة (System Language)</label>
+              <select id="sys-language">
+                <option value="ar" selected>العربية (RTL)</option>
+                <option value="en">English (LTR)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>3. العملة المستعملة (Currency)</label>
+              <select id="sys-currency">
+                <option value="ج.م" selected>جنيه مصري (ج.م)</option>
+                <option value="$">دولار أمريكي ($)</option>
+                <option value="ر.س">ريال سعودي (ر.س)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>4. تنسيق التاريخ (Date Format)</label>
+              <select id="sys-date-format">
+                <option value="YYYY-MM-DD" selected>YYYY-MM-DD (2026-07-28)</option>
+                <option value="DD/MM/YYYY">DD/MM/YYYY (28/07/2026)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>5. تنسيق الوقت (Time Format)</label>
+              <select id="sys-time-format">
+                <option value="12h" selected>12 ساعة (ص/م)</option>
+                <option value="24h">24 ساعة (10:00 - 22:00)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>6. المنطقة الزمنية (Timezone)</label>
+              <select id="sys-timezone">
+                <option value="Africa/Cairo (UTC+3)" selected>القاهرة / مصر (UTC+03:00)</option>
+                <option value="Asia/Riyadh (UTC+3)">الرياض / السعودية (UTC+03:00)</option>
+                <option value="UTC">التوقيت العالمي (UTC)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>7. رقم المريض التالي (Next Patient ID)</label>
+              <input type="text" id="sys-next-patient-id" value="pat_1005">
+            </div>
+            <div class="form-group">
+              <label>8. رقم الزيارة التالي (Next Visit ID)</label>
+              <input type="text" id="sys-next-visit-id" value="vst_5002">
+            </div>
+            <div class="form-group">
+              <label>9. رقم الفاتورة التالي (Next Invoice ID)</label>
+              <input type="text" id="sys-next-invoice-id" value="inv_9001">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary btn-lg">
+              💾 حفظ وتطبيق إعدادات النظام
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- DATABASE MANAGEMENT & EXPORT/IMPORT PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2>💾 4. إدارة قواعد البيانات والتصدير والنسخ الاحتياطي (Database Management)</h2>
+          <span class="status-badge" style="background: rgba(255, 82, 82, 0.15); color: var(--accent-red); border-color: rgba(255, 82, 82, 0.3);">
+            ⚠️ تحكم وأدوات قاعدة البيانات
+          </span>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          أدوات التصدير والاستيراد المتقدمة لقواعد البيانات وسجلات EMR مع خيارات الاختبار والنسخ الاحتياطي وإعادة الضبط:
+        </p>
+
+        <!-- Hidden File Input for Importing JSON -->
+        <input type="file" id="json-import-file-input" accept=".json" style="display: none;" onchange="executeJSONImport(event)">
+
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-start;">
+          <button type="button" class="btn btn-primary btn-lg" onclick="saveAllSystemSettingsMaster()">💾 حفظ الإعدادات</button>
+          <button type="button" class="btn btn-secondary btn-lg" onclick="testCloudConnection()">☁️ اختبار الاتصال</button>
+          <button type="button" class="btn btn-amber btn-lg" onclick="triggerManualSync()">🔄 مزامنة الآن</button>
+          <button type="button" class="btn btn-success btn-lg" onclick="exportDataExcel()">📤 تصدير Excel</button>
+          <button type="button" class="btn btn-primary btn-lg" onclick="exportDataPDF()">📤 تصدير PDF</button>
+          <button type="button" class="btn btn-amber btn-lg" onclick="exportDataJSON()">📤 تصدير JSON</button>
+          <button type="button" class="btn btn-secondary btn-lg" onclick="triggerJSONImportDialog()">📥 استيراد</button>
+          <button type="button" class="btn btn-success btn-lg" onclick="restoreSystemBackupDialog()">🗂️ استعادة نسخة</button>
+          <button type="button" class="btn btn-amber btn-lg" onclick="cleanTemporaryDataLogs()">🧹 تنظيف البيانات</button>
+          <button type="button" class="btn btn-danger btn-lg" onclick="resetSystemFactoryMaster()">⚠️ إعادة ضبط النظام</button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- 6. DASHBOARD TAB -->
+    <section id="dashboard-tab" class="tab-content">
+      <div class="panel-card hero-banner">
+        <img src="assets/logo.jpg?v=23" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
+        <div>
+          <h2 id="ui-hero-title" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h2>
+          <p id="ui-hero-areas" style="font-size: 0.95rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | مناطق الخدمة: بندر دمياط, مركز دمياط, رأس البر, دمياط الجديدة | 📞 01001097896</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">👥</div>
+          <div class="stat-info">
+            <h3>إجمالي المرضى المسجلين</h3>
+            <div class="stat-value" id="stat-total-patients">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🩺</div>
+          <div class="stat-info">
+            <h3>زيارات اليوم</h3>
+            <div class="stat-value" id="stat-today-visits">0</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">💵</div>
+          <div class="stat-info">
+            <h3>إجمالي الإيرادات</h3>
+            <div class="stat-value" id="stat-total-revenue">0 <span class="ui-currency-symbol">ج.م</span></div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">⏳</div>
+          <div class="stat-info">
+            <h3>المبالغ المتبقية / المديونيات</h3>
+            <div class="stat-value" id="stat-pending-balance" style="color: var(--accent-red);">0 <span class="ui-currency-symbol">ج.م</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <div class="panel-header">
+          <h2 id="ui-recent-visits-header">📋 أحدث الزيارات التمريضية - إبراهيم ماهر (نبض للتمريض المنزلي)</h2>
+          <button class="btn btn-primary btn-sm" onclick="openNewVisitFromCRM()">
+            + تسجيل زيارة جديدة
+          </button>
+        </div>
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>تاريخ الزيارة</th>
+                <th>اسم المريض</th>
+                <th>الممرض / الطبيب المسؤول</th>
+                <th>الخدمات والتعليمات</th>
+                <th>العلامات الحيوية</th>
+                <th>المبلغ الإجمالي</th>
+                <th>الحالة</th>
+                <th>إجراءات (تعديل / حذف)</th>
+              </tr>
+            </thead>
+            <tbody id="recent-visits-table">
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  لا توجد زيارات مسجلة حتى الآن. ابدأ بتسجيل أول زيارة!
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ADD ELEMENT DYNAMIC MODAL -->
+  <div class="modal-overlay" id="add-element-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeAddElementModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">➕ إضافة عنصر جديد إلى التقرير</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1.5rem;">اختر نوع العنصر المراد إضافته مباشرة داخل مسودة التقرير:</p>
+
+      <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+        <button class="btn btn-secondary" onclick="insertElementToDraft('text')">📝 ○ نص حر</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('heading')">📌 ○ عنوان رئيسي</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('image')">📷 ○ صورة مرفقة</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('table')">📊 ○ جدول بيانات</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('medication')">💊 ○ دواء جديد</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('lab')">🧪 ○ نتيجة تحليل</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('radiology')">🩻 ○ نتيجة أشعة</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('note')">💡 ○ ملاحظة هامة</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('signature')">✍️ ○ توقيع طبيب</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('qrcode')">📱 ○ QR Code</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('stamp')">🏛️ ○ ختم المركز</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('divider')">➖ ○ خط أفقي فاصل</button>
+        <button class="btn btn-secondary" onclick="insertElementToDraft('callout')">📦 ○ مربع مميز</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE TOUCH CANVAS MODAL -->
+  <div class="modal-overlay" id="signature-canvas-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeSignatureCanvasModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">✍️ رسم التوقيع باليد / التاتش (Touch Signature)</h2>
+      <canvas id="signature-touch-canvas" class="signature-canvas-box"></canvas>
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+        <button class="btn btn-secondary" onclick="clearSignatureTouchCanvas()">🧹 مسح</button>
+        <button class="btn btn-primary" onclick="saveSignatureTouchCanvas()">💾 تطبيق التوقيع بالتقرير</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PATIENT MODAL (POPUP FALLBACK) -->
+  <div class="modal-overlay" id="add-patient-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeAddPatientModal()">✕</button>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <img src="assets/logo.jpg?v=23" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <div>
+          <h2 style="color: var(--accent-cyan); font-size: 1.25rem;" class="ui-modal-brand-title">إضافة مريض جديد - إبراهيم ماهر (دمياط)</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">تسجيل بيانات المريض وتأكيد الرقم القومي وهاتف التواصل</p>
+        </div>
+      </div>
+      
+      <form id="add-patient-form" onsubmit="handleSavePatient(event)">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الاسم الثلاثي / الرباعي</label>
+            <input type="text" id="pat-name" placeholder="مثال: محمد عبد الله السيد">
+          </div>
+          <div class="form-group">
+            <label>الرقم القومي</label>
+            <input type="text" id="pat-national-id" placeholder="28510151234567">
+          </div>
+          <div class="form-group">
+            <label>النوع / الجنس</label>
+            <select id="pat-gender">
+              <option value="غير محدد">غير محدد</option>
+              <option value="ذكر" selected>ذكر</option>
+              <option value="أنثى">أنثى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تاريخ الميلاد</label>
+            <input type="date" id="pat-dob" onchange="autoCalcAgeInModal(this.value)">
+          </div>
+          <div class="form-group">
+            <label>العمر المحسوب تلقائياً</label>
+            <input type="text" id="pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan);" value="غير محدد">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="pat-phone" placeholder="01001097896">
+          </div>
+          <div class="form-group">
+            <label>رقم الواتساب</label>
+            <input type="tel" id="pat-whatsapp" placeholder="01001097896">
+          </div>
+          <div class="form-group">
+            <label>اسم الطوارئ والصلة ورقم الهاتف</label>
+            <input type="text" id="pat-emergency" placeholder="محمود (ابن المريض) - 01114455667">
+          </div>
+          <div class="form-group">
+            <label>المنطقة / المدينة (نطاق دمياط)</label>
+            <select id="pat-area">
+              <option value="بندر دمياط" selected>بندر دمياط</option>
+              <option value="مركز دمياط">مركز دمياط</option>
+              <option value="رأس البر">رأس البر</option>
+              <option value="دمياط الجديدة">دمياط الجديدة</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>العنوان التفصيلي وملاحظات الوصول</label>
+            <input type="text" id="pat-address-detail" placeholder="مثال: دمياط الجديدة - الحي المتميز - عمارة 15 شقة 4">
+          </div>
+          <div class="form-group">
+            <label>الأمراض المزمنة</label>
+            <input type="text" id="pat-diseases" placeholder="السكري, ضغط الدم, القلب">
+          </div>
+          <div class="form-group">
+            <label>الحساسية الدوائية (Allergies)</label>
+            <input type="text" id="pat-allergies" placeholder="حساسية بنسلين">
+          </div>
+          <div class="form-group">
+            <label>فصيلة الدم</label>
+            <select id="pat-blood">
+              <option value="غير محدد">غير محدد</option>
+              <option value="A+" selected>A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn" onclick="closeAddPatientModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary">💾 حفظ ملف المريض</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT PATIENT MODAL -->
+  <div class="modal-overlay" id="edit-patient-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeEditPatientModal()">✕</button>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <img src="assets/logo.jpg?v=23" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <div>
+          <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل بيانات المريض</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل التفاصيل والسجل الطبي لمريض مسجل بنبض</p>
+        </div>
+      </div>
+      
+      <form id="edit-patient-form" onsubmit="handleUpdatePatient(event)">
+        <input type="hidden" id="edit-pat-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الاسم الثلاثي / الرباعي</label>
+            <input type="text" id="edit-pat-name">
+          </div>
+          <div class="form-group">
+            <label>الرقم القومي</label>
+            <input type="text" id="edit-pat-national-id">
+          </div>
+          <div class="form-group">
+            <label>النوع / الجنس</label>
+            <select id="edit-pat-gender">
+              <option value="غير محدد">غير محدد</option>
+              <option value="ذكر">ذكر</option>
+              <option value="أنثى">أنثى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>تاريخ الميلاد</label>
+            <input type="date" id="edit-pat-dob" onchange="autoCalcAgeInEditModal(this.value)">
+          </div>
+          <div class="form-group">
+            <label>العمر المحسوب</label>
+            <input type="text" id="edit-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan);">
+          </div>
+          <div class="form-group">
+            <label>رقم الهاتف</label>
+            <input type="tel" id="edit-pat-phone">
+          </div>
+          <div class="form-group">
+            <label>رقم الواتساب</label>
+            <input type="tel" id="edit-pat-whatsapp">
+          </div>
+          <div class="form-group">
+            <label>اسم الطوارئ والصلة ورقم الهاتف</label>
+            <input type="text" id="edit-pat-emergency">
+          </div>
+          <div class="form-group">
+            <label>المنطقة / المدينة (دمياط)</label>
+            <select id="edit-pat-area">
+              <option value="بندر دمياط">بندر دمياط</option>
+              <option value="مركز دمياط">مركز دمياط</option>
+              <option value="رأس البر">رأس البر</option>
+              <option value="دمياط الجديدة">دمياط الجديدة</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>العنوان التفصيلي وملاحظات الوصول</label>
+            <input type="text" id="edit-pat-address-detail">
+          </div>
+          <div class="form-group">
+            <label>الأمراض المزمنة (مفصولة بفواصل)</label>
+            <input type="text" id="edit-pat-diseases">
+          </div>
+          <div class="form-group">
+            <label>الحساسية الدوائية (Allergies)</label>
+            <input type="text" id="edit-pat-allergies">
+          </div>
+          <div class="form-group">
+            <label>فصيلة الدم</label>
+            <select id="edit-pat-blood">
+              <option value="غير محدد">غير محدد</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn" onclick="closeEditPatientModal()">إلغاء</button>
+          <button type="submit" class="btn btn-amber">✏️ حفظ التعديلات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT VISIT MODAL -->
+  <div class="modal-overlay" id="edit-visit-modal">
+    <div class="modal-card">
+      <button class="modal-close" onclick="closeEditVisitModal()">✕</button>
+      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <img src="assets/logo.jpg?v=23" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <div>
+          <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل الزيارة التمريضية</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل تفاصيل الزيارة والعلامات الحيوية والرسوم</p>
+        </div>
+      </div>
+      
+      <form id="edit-visit-form" onsubmit="handleUpdateVisit(event)">
+        <input type="hidden" id="edit-visit-id">
+        <div class="form-grid">
+          <div class="form-group">
+            <label>الممرض / الطبيب المسؤول</label>
+            <input type="text" id="edit-visit-provider">
+          </div>
+          <div class="form-group">
+            <label>الشكوى الرئيسية</label>
+            <input type="text" id="edit-visit-complaint">
+          </div>
+          <div class="form-group">
+            <label>ضغط الدم (الانقباضي / الانبساطي)</label>
+            <div style="display:flex; gap:0.5rem;">
+              <input type="number" id="edit-visit-bpsys" placeholder="120">
+              <input type="number" id="edit-visit-bpdia" placeholder="80">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>قياس السكر mg/dL</label>
+            <input type="number" id="edit-visit-sugar" placeholder="140">
+          </div>
+          <div class="form-group">
+            <label>المبلغ المستحق (<span class="ui-currency-symbol">ج.م</span>)</label>
+            <input type="number" id="edit-visit-total">
+          </div>
+          <div class="form-group">
+            <label>المبلغ المدفوع (<span class="ui-currency-symbol">ج.م</span>)</label>
+            <input type="number" id="edit-visit-paid">
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button type="button" class="btn" onclick="closeEditVisitModal()">إلغاء</button>
+          <button type="submit" class="btn btn-amber">✏️ حفظ التعديلات</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- CONFIRM DELETE MODAL -->
+  <div class="modal-overlay" id="confirm-modal">
+    <div class="modal-card" style="max-width: 480px; text-align: center;">
+      <h2 style="color: var(--accent-red); margin-bottom: 1rem;">⚠️ تأكيد عملية الحذف</h2>
+      <p id="confirm-modal-msg" style="color: var(--text-main); margin-bottom: 1.5rem; font-size: 1rem;">هل أنت تأكد من إتمام العملية؟</p>
+      <div style="display: flex; gap: 1rem; justify-content: center;">
+        <button class="btn btn-secondary" id="confirm-modal-cancel">إلغاء</button>
+        <button class="btn btn-danger" id="confirm-modal-action">🗑️ تأكيد الحذف النهائي</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=23"></script>
+</body>
+</html>

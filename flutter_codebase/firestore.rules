@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && getUserData().role == role;
+    }
+
+    function isStaff() {
+      return isAuthenticated() && 
+        (getUserData().role in ['Admin', 'Doctor', 'Nurse', 'Secretary']);
+    }
+
+    // Users Collection Rules
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if hasRole('Admin');
+      allow delete: if false; // Audit compliance
+    }
+
+    // Patients Collection Rules
+    match /patients/{patientId} {
+      allow read: if isStaff();
+      allow create, update: if isStaff();
+      allow delete: if hasRole('Admin');
+
+      // Nested Visits Collection
+      match /visits/{visitId} {
+        allow read: if isStaff();
+        allow create: if isStaff();
+        allow update: if hasRole('Admin') || hasRole('Doctor') || 
+                         (hasRole('Nurse') && resource.data.nurseId == request.auth.uid);
+        allow delete: if hasRole('Admin');
+      }
+    }
+
+    // Services Master Catalog Rules
+    match /services/{serviceId} {
+      allow read: if isAuthenticated();
+      allow write: if hasRole('Admin');
+    }
+
+    // Audit Logs Rules (Write-only for system, read for Admin)
+    match /audit_logs/{logId} {
+      allow read: if hasRole('Admin');
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // Immutable audit log
+    }
+  }
+}
