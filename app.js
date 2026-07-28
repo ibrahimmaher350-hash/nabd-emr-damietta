@@ -1131,20 +1131,35 @@ function openEditPatientModal(patientId) {
 
   setElementValue('edit-pat-id', p.patientId);
   setElementValue('edit-pat-name', p.fullName);
-  setElementValue('edit-pat-national-id', p.nationalId);
   setElementValue('edit-pat-status', p.status || 'نشط');
-  setElementValue('edit-pat-gender', p.gender);
-  setElementValue('edit-pat-dob', p.dob);
-  setElementValue('edit-pat-age-display', `${calculateAge(p.dob)} سنة`);
+  populateSelectFromFieldList('edit-pat-status', 'patient_status', p.status || 'نشط');
+  populateSelectFromFieldList('edit-pat-gender', 'gender', p.gender || 'غير محدد');
+  setElementValue('edit-pat-dob', p.dob || '');
+  setElementValue('edit-pat-age-display', p.dob ? `${calculateAge(p.dob)} سنة` : (p.age || 'غير محدد'));
   setElementValue('edit-pat-phone', p.phone || clinicSettings.phone);
   setElementValue('edit-pat-whatsapp', p.whatsApp || clinicSettings.whatsApp);
   setElementValue('edit-pat-emergency', p.emergency || '');
-  setElementValue('edit-pat-area', p.area);
-  setElementValue('edit-pat-address-detail', p.detailedAddress);
+  populateSelectFromFieldList('edit-pat-area', 'service_areas', p.area || 'بندر دمياط');
+  setElementValue('edit-pat-address-detail', p.detailedAddress || '');
   setElementValue('edit-pat-maps-link', p.mapsLink || clinicSettings.googleMapsUrl);
+  populateSelectFromFieldList('edit-pat-blood', 'blood_group', p.bloodType || 'غير محدد');
+  setElementValue('edit-pat-allergies', Array.isArray(p.allergies) ? p.allergies.join(', ') : (p.allergies || ''));
+
+  populateSelectFromFieldList('edit-pat-disease-select', 'diagnosis', (p.diseases && p.diseases[0]) ? p.diseases[0] : '');
+  setElementValue('edit-pat-other-diseases', (p.diseases && p.diseases.length > 1) ? p.diseases.slice(1).join(', ') : '');
+
+  populateSelectFromFieldList('edit-pat-service-select', 'services', (p.requestedServices && p.requestedServices[0]) ? p.requestedServices[0] : '');
+  setElementValue('edit-pat-other-services', (p.requestedServices && p.requestedServices.length > 1) ? p.requestedServices.slice(1).join(', ') : '');
 
   const modal = document.getElementById('edit-patient-modal');
   if (modal) modal.classList.add('active');
+}
+
+function autoCalcAgeInEditModal(dobStr) {
+  if (!dobStr) return;
+  const age = calculateAge(dobStr);
+  const display = document.getElementById('edit-pat-age-display');
+  if (display) display.value = `${age} سنة`;
 }
 
 function closeEditPatientModal() {
@@ -1290,33 +1305,55 @@ function handleUpdatePatient(e) {
   if (index === -1) return;
 
   const name = document.getElementById('edit-pat-name').value.trim() || patients[index].fullName;
-  const natId = document.getElementById('edit-pat-national-id').value.trim() || patients[index].nationalId;
   const status = document.getElementById('edit-pat-status').value || patients[index].status;
   const gender = document.getElementById('edit-pat-gender').value || patients[index].gender;
   const dob = document.getElementById('edit-pat-dob').value || patients[index].dob;
+  const ageDisplay = getElementValue('edit-pat-age-display', '');
   const phone = document.getElementById('edit-pat-phone').value.trim() || patients[index].phone;
   const whatsApp = document.getElementById('edit-pat-whatsapp').value.trim() || phone;
   const emergency = document.getElementById('edit-pat-emergency').value.trim() || patients[index].emergency;
   const area = document.getElementById('edit-pat-area').value || patients[index].area;
   const addressDetail = document.getElementById('edit-pat-address-detail').value.trim() || patients[index].detailedAddress;
   const mapsLink = document.getElementById('edit-pat-maps-link').value.trim() || patients[index].mapsLink;
+  const blood = document.getElementById('edit-pat-blood').value || patients[index].bloodType;
+  const allergiesStr = document.getElementById('edit-pat-allergies').value.trim();
+
+  const primaryDisease = getElementValue('edit-pat-disease-select', '');
+  const otherDiseases = getElementValue('edit-pat-other-diseases', '');
+  const diseasesList = [];
+  if (primaryDisease && primaryDisease !== 'غير محدد') diseasesList.push(primaryDisease);
+  if (otherDiseases && otherDiseases !== 'غير محدد') {
+    otherDiseases.split(',').forEach(d => { if (d.trim()) diseasesList.push(d.trim()); });
+  }
+
+  const primaryService = getElementValue('edit-pat-service-select', '');
+  const otherServices = getElementValue('edit-pat-other-services', '');
+  const servicesList = [];
+  if (primaryService && primaryService !== 'غير محدد') servicesList.push(primaryService);
+  if (otherServices && otherServices !== 'غير محدد') {
+    otherServices.split(',').forEach(s => { if (s.trim()) servicesList.push(s.trim()); });
+  }
 
   patients[index] = {
     ...patients[index],
     fullName: name,
-    nationalId: natId,
     status: status,
     gender: gender,
     dob: dob,
+    age: ageDisplay,
     phone: phone,
     whatsApp: whatsApp,
     emergency: emergency,
     area: area,
     detailedAddress: addressDetail,
-    mapsLink: mapsLink
+    mapsLink: mapsLink,
+    bloodType: blood,
+    allergies: allergiesStr ? allergiesStr.split(',').map(s => s.trim()) : [],
+    diseases: diseasesList.length > 0 ? diseasesList : patients[index].diseases,
+    requestedServices: servicesList.length > 0 ? servicesList : patients[index].requestedServices
   };
 
-  addAuditLog(patId, "تحديث وتعديل البيانات الأساسية والموقع الجغرافي");
+  addAuditLog(patId, "تحديث وتعديل كافة البيانات الأساسية والطبية للمريض");
 
   saveStateToLocalStorage();
   renderPatientsGrid();
@@ -1324,8 +1361,9 @@ function handleUpdatePatient(e) {
   populatePatientSelectOptions();
   populateNotificationPatientSelect();
   populateReportPatientSelect();
+
   closeEditPatientModal();
-  alert('✏️ تم تحديث بيانات المريض بنجاح!');
+  showToast(`✅ تم تحديث كافة بيانات المريض "${name}" بنجاح!`, 'success');
 }
 
 function confirmDeletePatient(patientId) {
@@ -3932,6 +3970,9 @@ function refreshAllConfigurableSelects() {
   populateSelectFromFieldList('edit-pat-gender', 'gender', getElementValue('edit-pat-gender', ''));
   populateSelectFromFieldList('edit-pat-area', 'service_areas', getElementValue('edit-pat-area', ''));
   populateSelectFromFieldList('edit-pat-status', 'patient_status', getElementValue('edit-pat-status', ''));
+  populateSelectFromFieldList('edit-pat-blood', 'blood_group', getElementValue('edit-pat-blood', ''));
+  populateSelectFromFieldList('edit-pat-disease-select', 'diagnosis', getElementValue('edit-pat-disease-select', ''));
+  populateSelectFromFieldList('edit-pat-service-select', 'services', getElementValue('edit-pat-service-select', ''));
 
   populateSelectFromFieldList('filter-area', 'service_areas', getElementValue('filter-area', ''), false);
   populateSelectFromFieldList('filter-disease', 'diagnosis', getElementValue('filter-disease', ''), false);
