@@ -210,7 +210,7 @@ try {
 }
 
 // NAVIGATION HISTORY STACK (FOR BACK ARROWS)
-let navigationHistoryStack = ['add-patient-tab'];
+let navigationHistoryStack = ['patients-tab'];
 
 function navigateBackHistory() {
   // 1. Check if any popup modal is open
@@ -240,7 +240,7 @@ function navigateBackHistory() {
     const previousTab = navigationHistoryStack[navigationHistoryStack.length - 1];
     switchTab(previousTab, null, true);
   } else {
-    switchTab('add-patient-tab', null, true);
+    switchTab('patients-tab', null, true);
   }
 }
 
@@ -263,25 +263,22 @@ function switchTab(tabId, btnElement, skipPush = false) {
     btnElement.classList.add('active');
   } else {
     const btns = document.querySelectorAll('.nav-tabs > .tab-btn');
-    if (tabId === 'add-patient-tab' && btns[0]) btns[0].classList.add('active');
-    else if (tabId === 'patients-tab' && btns[1]) btns[1].classList.add('active');
-    else if (tabId === 'schedule-tab' && btns[2]) btns[2].classList.add('active');
-    else if (tabId === 'prescription-tab' && btns[3]) btns[3].classList.add('active');
-    else if (tabId === 'settings-tab' && btns[4]) btns[4].classList.add('active');
-    else if (tabId === 'dashboard-tab' && btns[5]) btns[5].classList.add('active');
+    if (tabId === 'patients-tab' && btns[0]) btns[0].classList.add('active');
+    else if (tabId === 'schedule-tab' && btns[1]) btns[1].classList.add('active');
+    else if (tabId === 'prescription-tab' && btns[2]) btns[2].classList.add('active');
+    else if (tabId === 'settings-tab' && btns[3]) btns[3].classList.add('active');
+    else if (tabId === 'dashboard-tab' && btns[4]) btns[4].classList.add('active');
   }
 
   // Sync Mobile Bottom Nav Items
   const mobItems = document.querySelectorAll('.mobile-bottom-nav > .mobile-nav-item');
-  if (tabId === 'add-patient-tab' && mobItems[0]) mobItems[0].classList.add('active');
-  else if (tabId === 'patients-tab' && mobItems[1]) mobItems[1].classList.add('active');
-  else if (tabId === 'schedule-tab' && mobItems[2]) mobItems[2].classList.add('active');
-  else if (tabId === 'prescription-tab' && mobItems[3]) mobItems[3].classList.add('active');
-  else if (tabId === 'settings-tab' && mobItems[4]) mobItems[4].classList.add('active');
+  if (tabId === 'patients-tab' && mobItems[0]) mobItems[0].classList.add('active');
+  else if (tabId === 'schedule-tab' && mobItems[1]) mobItems[1].classList.add('active');
+  else if (tabId === 'prescription-tab' && mobItems[2]) mobItems[2].classList.add('active');
+  else if (tabId === 'settings-tab' && mobItems[3]) mobItems[3].classList.add('active');
+  else if (tabId === 'dashboard-tab' && mobItems[4]) mobItems[4].classList.add('active');
 
-  if (tabId === 'add-patient-tab') {
-    initTabAddPatientForm();
-  } else if (tabId === 'dashboard-tab') {
+  if (tabId === 'dashboard-tab') {
     renderDashboardStats();
     renderRecentVisits();
   } else if (tabId === 'patients-tab') {
@@ -1127,14 +1124,6 @@ function filterPatients() {
 }
 
 // Add & Edit Patient Handlers
-function openAddPatientModal() {
-  switchTab('add-patient-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[0]);
-}
-
-function closeAddPatientModal() {
-  const modal = document.getElementById('add-patient-modal');
-  if (modal) modal.classList.remove('active');
-}
 
 function openEditPatientModal(patientId) {
   const p = patients.find(item => item.patientId === patientId);

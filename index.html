@@ -716,25 +716,25 @@
 
   <!-- ERGONOMIC MOBILE BOTTOM NAVIGATION BAR (Android Native App Experience) -->
   <nav class="mobile-bottom-nav">
-    <button class="mobile-nav-item active" onclick="switchTab('add-patient-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[0])">
-      <span class="mobile-nav-icon">➕</span>
-      <span class="mobile-nav-label">مريض جديد</span>
-    </button>
-    <button class="mobile-nav-item" onclick="switchTab('patients-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[1])">
+    <button class="mobile-nav-item active" onclick="switchTab('patients-tab', this)">
       <span class="mobile-nav-icon">👥</span>
       <span class="mobile-nav-label">المرضى</span>
     </button>
-    <button class="mobile-nav-item" onclick="switchTab('schedule-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[2])">
+    <button class="mobile-nav-item" onclick="switchTab('schedule-tab', this)">
       <span class="mobile-nav-icon">📅</span>
       <span class="mobile-nav-label">الجدولة</span>
     </button>
-    <button class="mobile-nav-item" onclick="switchTab('prescription-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[3])">
+    <button class="mobile-nav-item" onclick="switchTab('prescription-tab', this)">
       <span class="mobile-nav-icon">📑</span>
       <span class="mobile-nav-label">التقارير</span>
     </button>
-    <button class="mobile-nav-item" onclick="switchTab('settings-tab', document.querySelectorAll('.nav-tabs > .tab-btn')[4])">
+    <button class="mobile-nav-item" onclick="switchTab('settings-tab', this)">
       <span class="mobile-nav-icon">⚙️</span>
       <span class="mobile-nav-label">الإعدادات</span>
+    </button>
+    <button class="mobile-nav-item" onclick="switchTab('dashboard-tab', this)">
+      <span class="mobile-nav-icon">📊</span>
+      <span class="mobile-nav-label">التحليلات</span>
     </button>
   </nav>
 
