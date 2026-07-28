@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b192c">
   <title>إبراهيم ماهر | نبض للتمريض المنزلي - محافظة دمياط</title>
-  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=27">
-  <link rel="apple-touch-icon" href="assets/logo.jpg?v=27">
-  <link rel="stylesheet" href="styles.css?v=27">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=28">
+  <link rel="apple-touch-icon" href="assets/logo.jpg?v=28">
+  <link rel="stylesheet" href="styles.css?v=28">
   <!-- QRCode JS Library for PDF/Prescription verification -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -21,7 +21,7 @@
         <span style="font-size: 1.2rem;">➡️</span>
         <span>رجوع</span>
       </button>
-      <img src="assets/logo.jpg?v=27" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
+      <img src="assets/logo.jpg?v=28" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
       <div class="brand-title">
         <h1 id="ui-top-brand-name" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h1>
         <p id="ui-top-subtitle" style="font-size: 0.88rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | 📱 <span id="ui-top-phone">01001097896</span></p>
@@ -567,6 +567,45 @@
     <!-- 3. SCHEDULING & NOTIFICATIONS TAB -->
     <section id="schedule-tab" class="tab-content">
       
+      <!-- 10. MONITORING METRICS HEADER BAR -->
+      <div class="notif-monitoring-bar">
+        <div class="metric-card">
+          <span class="metric-icon">📨</span>
+          <div>
+            <div class="metric-title">رسائل اليوم</div>
+            <div class="metric-val" id="metric-today-count">0</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">✅</span>
+          <div>
+            <div class="metric-title">تم الإرسال</div>
+            <div class="metric-val" style="color:var(--accent-green);" id="metric-delivered-count">0</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">⏳</span>
+          <div>
+            <div class="metric-title">بانتظار الإرسال</div>
+            <div class="metric-val" style="color:var(--accent-amber);" id="metric-pending-count">0</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">❌</span>
+          <div>
+            <div class="metric-title">فشل الإرسال</div>
+            <div class="metric-val" style="color:var(--accent-red);" id="metric-failed-count">0</div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon">📊</span>
+          <div>
+            <div class="metric-title">نسبة النجاح</div>
+            <div class="metric-val" style="color:var(--accent-cyan);" id="metric-success-rate">100%</div>
+          </div>
+        </div>
+      </div>
+
       <!-- SCHEDULE VISITS PANEL -->
       <div class="panel-card">
         <div class="panel-header">
@@ -574,7 +613,7 @@
             <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
             <h2>📅 1. جدولة الزيارات القادمة وتخطيط الرحلات (محافظة دمياط)</h2>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="alert('تم تفعيل التذكيرات التلقائية عبر الواتساب وتقويم Google')">🔔 إرسال تذكيرات الواتساب</button>
+          <button class="btn btn-primary btn-sm" onclick="triggerSmartAutomationCheck()">⚡ تشغيل الإشعارات الذكية السياقية</button>
         </div>
         
         <div class="form-grid" style="margin-bottom: 2rem;">
@@ -616,77 +655,136 @@
         </div>
       </div>
 
-      <!-- SMART NOTIFICATIONS & REMINDERS PANEL -->
+      <!-- 4 & 5. TEMPLATE SELECTOR & VARIABLE EDITOR HUB -->
       <div class="panel-card">
         <div class="panel-header">
           <div style="display: flex; align-items: center; gap: 0.8rem;">
             <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
-            <h2>🔔 2. مركز الإشعارات والتذكيرات الذكية (Smart Reminders Hub)</h2>
+            <h2>💬 2. مركز محرر الرسائل والقوالب الذكية (Smart WhatsApp Templates & Variables)</h2>
           </div>
           <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
-            💬 إشعارات الواتساب والنظام
+            ⚙️ 8 قوالب جاهزة بالمتغيرات
           </span>
         </div>
 
-        <form id="notification-form" onsubmit="handleSendReminderForm(event)">
+        <form id="notification-form" onsubmit="prepareSendReviewModal(event)">
           <div class="form-grid">
             <div class="form-group">
-              <label>1. نوع الإشعار والتذكير</label>
-              <select id="notif-type" onchange="updateReminderMessagePreview()">
-                <option value="visit">🩺 تذكير بموعد الزيارة التمريضية</option>
-                <option value="followup">🔄 تذكير بالمتابعة وقياس العلامات الحيوية</option>
-                <option value="dressing">🩹 تذكير بموعد الغيار على الجرح</option>
-                <option value="lab">🧪 تذكير بسحب عينة التحليل</option>
+              <label>1. اختر قالب الرسالة الجاهز (8 قوالب)</label>
+              <select id="notif-template-select" onchange="onMessageTemplateSelectChange()">
+                <option value="visit">📅 1. تذكير بزيارة منزلية (Home Visit)</option>
+                <option value="injection">💉 2. تذكير بحقنة (Injection)</option>
+                <option value="dressing">🩹 3. تذكير بموعد غيار (Dressing Change)</option>
+                <option value="medication">💊 4. تذكير بتناول الدواء (Medication)</option>
+                <option value="lab">🧪 5. تذكير بتحليل (Lab Test)</option>
+                <option value="followup">📞 6. متابعة بعد الزيارة (Post-Visit Follow-up)</option>
+                <option value="due">💰 7. تذكير بمبلغ مستحق (Payment Due)</option>
+                <option value="thanks">❤️ 8. رسالة شكر بعد انتهاء الخدمة (Thank You)</option>
+                <option value="custom">🛠️ 9. قالب مخصص حر (Custom Template)</option>
               </select>
             </div>
+
             <div class="form-group">
               <label>2. اختر المريض</label>
-              <select id="notif-patient-id" onchange="updateReminderMessagePreview()">
+              <select id="notif-patient-id" onchange="updateTemplateVariablesPreview()">
                 <option value="">-- اختر مريضاً من القائمة --</option>
               </select>
             </div>
+
             <div class="form-group">
-              <label>3. موعد الإشعار المخصص</label>
-              <input type="datetime-local" id="notif-date-time" onchange="updateReminderMessagePreview()">
+              <label>3. موعد الزيارة / الخدمة</label>
+              <input type="datetime-local" id="notif-date-time" onchange="updateTemplateVariablesPreview()">
             </div>
+
             <div class="form-group full-width">
-              <label>4. معاينة نص رسالة الواتساب التلقائية</label>
-              <textarea id="notif-msg-preview" rows="3" readonly style="background: rgba(0,212,178,0.06); color: var(--accent-cyan); font-weight: 600;"></textarea>
+              <label>4. محرر قوالب الرسالة مع دعم المتغيرات تلقائياً (Variables: {PatientName}, {VisitDate}, {Service}, {Address}, {Nurse}, {ClinicPhone}, {DueAmount})</label>
+              <div style="display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:0.5rem;">
+                <span class="template-tag" onclick="insertVariableToTemplate('{PatientName}')">{PatientName}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{VisitDate}')">{VisitDate}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{Service}')">{Service}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{Address}')">{Address}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{Nurse}')">{Nurse}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{ClinicPhone}')">{ClinicPhone}</span>
+                <span class="template-tag" onclick="insertVariableToTemplate('{DueAmount}')">{DueAmount}</span>
+              </div>
+              <textarea id="notif-template-raw" rows="3" oninput="updateTemplateVariablesPreview()" placeholder="اكتب نص القالب هنا مستخدماً المتغيرات أعلاه..."></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label>5. معاينة الرسالة الحقيقية المستبدلة بعد استبدال المتغيرات تلقائياً:</label>
+              <textarea id="notif-msg-preview" rows="4" readonly style="background: rgba(0,212,178,0.06); color: var(--accent-cyan); font-weight: 600;"></textarea>
             </div>
           </div>
 
           <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.5rem;">
             <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
-            <button type="button" class="btn btn-success btn-lg" onclick="sendActiveReminderWhatsApp()">
-              📲 إرسال التذكير فوراً عبر الواتساب
-            </button>
             <button type="submit" class="btn btn-primary btn-lg">
-              🔔 جدولة إشعار تلقائي في النظام
+              📲 إرسال التذكير (مراجعة قبل الإرسال)
             </button>
           </div>
         </form>
+      </div>
 
-        <div style="margin-top: 2rem;">
-          <h3 style="color: var(--accent-cyan); font-size: 1.1rem; margin-bottom: 1rem;">📋 سجل الإشعارات الصادرة والمتوقعة:</h3>
-          <div class="table-responsive">
-            <table>
-              <thead>
-                <tr>
-                  <th>تاريخ الإشعار</th>
-                  <th>المريض</th>
-                  <th>نوع التذكير</th>
-                  <th>رقم الواتساب</th>
-                  <th>الحالة</th>
-                  <th>إجراء</th>
-                </tr>
-              </thead>
-              <tbody id="notif-log-table">
-                <!-- Dynamic notification log rows -->
-              </tbody>
-            </table>
+      <!-- 6. BULK MESSAGING ENGINE PANEL -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>📢 3. وحدة الإرسال الجماعي الذكي (Bulk WhatsApp Messaging Engine)</h2>
           </div>
+          <span class="status-badge" style="background: rgba(255, 159, 67, 0.15); color: var(--accent-amber);">
+            🚀 إرسال متعدد دفعة واحدة
+          </span>
         </div>
 
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.2rem;">
+          حدد الشرائح أو المجموعات المستهدفة لإرسال تذكيرات الواتساب الجماعية دفعة واحدة بنقرة زر:
+        </p>
+
+        <div class="checkbox-grid" style="margin-bottom: 1.5rem;">
+          <label class="checkbox-item"><input type="checkbox" id="bulk-filter-today" checked> ☑️ جميع زيارات اليوم</label>
+          <label class="checkbox-item"><input type="checkbox" id="bulk-filter-dressing"> ☑️ جميع مرضى الغيارات والجروح</label>
+          <label class="checkbox-item"><input type="checkbox" id="bulk-filter-diabetes"> ☑️ جميع مرضى السكر والضغط</label>
+          <label class="checkbox-item"><input type="checkbox" id="bulk-filter-damietta-new"> ☑️ جميع مرضى منطقة دمياط الجديدة</label>
+          <label class="checkbox-item"><input type="checkbox" id="bulk-filter-due"> ☑️ جميع مرضى المبالغ المستحقة</label>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+          <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
+          <button type="button" class="btn btn-amber btn-lg" onclick="executeBulkMessaging()">
+            📢 إرسال جماعي للجميع الآن
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. ENHANCED NOTIFICATION LOG TABLE & AUTO RETRY QUEUE -->
+      <div class="panel-card">
+        <div class="panel-header">
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>📋 4. سجل الإشعارات والرسائل الشامل (Notification & Message Delivery Logs)</h2>
+          </div>
+          <button class="btn btn-amber btn-sm" onclick="triggerAutoRetryQueueProcess()">🔄 تشغيل إعادة المحاولة التلقائي (Retry Failed Queue)</button>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>رقم الرسالة</th>
+                <th>المريض</th>
+                <th>نوع الرسالة</th>
+                <th>الموعد المقرر</th>
+                <th>الحالة</th>
+                <th>آخر محاولة ووقت الإرسال</th>
+                <th>إجراءات الإرسال</th>
+              </tr>
+            </thead>
+            <tbody id="notif-log-table">
+              <!-- Dynamic notification log rows injected via app.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </section>
@@ -991,7 +1089,7 @@
             </div>
             <div class="form-group">
               <label>2. الشعار الرسمي (مسار / URL)</label>
-              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=27">
+              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=28">
             </div>
             <div class="form-group">
               <label>3. رقم الهاتف الرئيسي</label>
@@ -1096,7 +1194,7 @@
             </div>
             <div class="form-group">
               <label>10. آخر مزامنة سحابية ناجحة</label>
-              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 18:11">
+              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 18:19">
             </div>
           </div>
 
@@ -1229,7 +1327,7 @@
     <!-- 6. DASHBOARD TAB -->
     <section id="dashboard-tab" class="tab-content">
       <div class="panel-card hero-banner">
-        <img src="assets/logo.jpg?v=27" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
+        <img src="assets/logo.jpg?v=28" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
         <div>
           <h2 id="ui-hero-title" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h2>
           <p id="ui-hero-areas" style="font-size: 0.95rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | مناطق الخدمة: بندر دمياط, مركز دمياط, رأس البر, دمياط الجديدة | 📞 01001097896</p>
@@ -1305,6 +1403,61 @@
 
   </main>
 
+  <!-- 1. PRE-SEND REVIEW MODAL -->
+  <div class="modal-overlay" id="send-review-modal">
+    <div class="modal-card review-modal-card" style="max-width: 520px;">
+      <button class="modal-close" onclick="closeSendReviewModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.6rem;">
+        💬 مراجعة تفاصيل التذكير قبل الإرسال
+      </h2>
+
+      <div class="review-info-box">
+        <div class="review-row">
+          <span>👤 <strong>المريض:</strong></span>
+          <strong id="rev-patient-name" style="color:var(--accent-cyan); font-size:1.05rem;">محمد عبد الله السيد</strong>
+        </div>
+        <div class="review-row">
+          <span>📱 <strong>رقم الواتساب:</strong></span>
+          <strong id="rev-patient-phone">01001097896</strong>
+        </div>
+        <div class="review-row">
+          <span>📅 <strong>موعد الزيارة / الخدمة:</strong></span>
+          <strong id="rev-appointment-time">27/07/2026 - 10:00 صباحًا</strong>
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 0.8rem 0;">
+
+        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;"><strong>معاينة نص الرسالة الصادرة:</strong></div>
+        <div id="rev-message-preview-text" class="review-msg-box">
+          السلام عليكم أ/ محمد عبد الله...
+        </div>
+
+        <hr style="border: 0; border-top: 1px dashed var(--border-color); margin: 0.8rem 0;">
+
+        <div class="checkbox-grid" style="margin-top: 0.5rem;">
+          <label class="checkbox-item"><input type="checkbox" id="rev-chk-whatsapp" checked> ☑️ إرسال عبر واتساب</label>
+          <label class="checkbox-item"><input type="checkbox" id="rev-chk-log" checked> ☑️ تسجيل في سجل الإشعارات</label>
+          <label class="checkbox-item"><input type="checkbox" id="rev-chk-time" checked> ☑️ حفظ وقت الإرسال</label>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.2rem;">
+        <button class="btn btn-secondary" onclick="closeSendReviewModal()">إلغاء</button>
+        <button class="btn btn-primary btn-lg" onclick="executeFinalSendMessage()">🚀 [ إرسال الآن ]</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. POST-SEND DELIVERY STATUS MODAL -->
+  <div class="modal-overlay" id="delivery-status-modal">
+    <div class="modal-card" style="max-width: 460px; text-align: center;">
+      <button class="modal-close" onclick="closeDeliveryStatusModal()">✕</button>
+      <div id="delivery-status-content">
+        <!-- Dynamically populated via app.js -->
+      </div>
+    </div>
+  </div>
+
   <!-- COMPREHENSIVE FULL PATIENT PROFILE MODAL (EMR CENTER) -->
   <div class="modal-overlay" id="full-patient-profile-modal">
     <div class="full-profile-modal-card">
@@ -1315,13 +1468,14 @@
         <!-- Injected via JavaScript -->
       </div>
 
-      <!-- Profile Sticky Tab Navigation (11 Tabs) -->
+      <!-- Profile Sticky Tab Navigation (12 Tabs) -->
       <nav class="profile-nav-tabs">
         <button class="tab-btn active" onclick="switchProfileTab('prof-basic', this)">📋 البيانات الأساسية</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-history', this)">🏥 التاريخ المرضي</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-visits', this)">📅 الزيارات</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-wounds', this)">🩹 الجروح</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-meds', this)">💊 الأدوية</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-messages', this)">📨 رسائل الواتساب</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-labs', this)">🧪 التحاليل</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-rad', this)">🩻 الأشعة</button>
         <button class="tab-btn" onclick="switchProfileTab('prof-attachments', this)">📷 المرفقات</button>
@@ -1421,7 +1575,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeAddPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=28" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;" class="ui-modal-brand-title">إضافة مريض جديد - إبراهيم ماهر (دمياط)</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تسجيل بيانات المريض وتأكيد الرقم القومي وهاتف التواصل</p>
@@ -1494,7 +1648,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=28" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل بيانات المريض</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل التفاصيل والسجل الطبي لمريض مسجل بنبض</p>
@@ -1581,7 +1735,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditVisitModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=28" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل الزيارة التمريضية</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل تفاصيل الزيارة والعلامات الحيوية والرسوم</p>
@@ -1640,6 +1794,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=27"></script>
+  <script src="app.js?v=28"></script>
 </body>
 </html>
