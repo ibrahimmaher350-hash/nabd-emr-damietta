@@ -298,21 +298,21 @@ function switchTab(tabId, btnElement, skipPush = false) {
 
 // Initialize Application & Service Worker PWA Registration
 document.addEventListener('DOMContentLoaded', () => {
-  applyClinicSettingsToUI();
-  applySyncSettingsToUI();
-  applySystemSettingsToUI();
-  saveStateToLocalStorage();
-  renderDashboardStats();
-  renderRecentVisits();
-  renderPatientsGrid();
-  populatePatientSelectOptions();
-  populateNotificationPatientSelect();
-  populateReportPatientSelect();
-  renderScheduleTable();
-  renderNotificationLogs();
-  initQRCode();
-  setCurrentDateTime();
-  initTabAddPatientForm();
+  try { applyClinicSettingsToUI(); } catch (e) { console.error('Error in applyClinicSettingsToUI:', e); }
+  try { applySyncSettingsToUI(); } catch (e) { console.error('Error in applySyncSettingsToUI:', e); }
+  try { applySystemSettingsToUI(); } catch (e) { console.error('Error in applySystemSettingsToUI:', e); }
+  try { saveStateToLocalStorage(); } catch (e) { console.error('Error in saveStateToLocalStorage:', e); }
+  try { renderDashboardStats(); } catch (e) { console.error('Error in renderDashboardStats:', e); }
+  try { renderRecentVisits(); } catch (e) { console.error('Error in renderRecentVisits:', e); }
+  try { renderPatientsGrid(); } catch (e) { console.error('Error in renderPatientsGrid:', e); }
+  try { populatePatientSelectOptions(); } catch (e) { console.error('Error in populatePatientSelectOptions:', e); }
+  try { populateNotificationPatientSelect(); } catch (e) { console.error('Error in populateNotificationPatientSelect:', e); }
+  try { populateReportPatientSelect(); } catch (e) { console.error('Error in populateReportPatientSelect:', e); }
+  try { renderScheduleTable(); } catch (e) { console.error('Error in renderScheduleTable:', e); }
+  try { renderNotificationLogs(); } catch (e) { console.error('Error in renderNotificationLogs:', e); }
+  try { initQRCode(); } catch (e) { console.error('Error in initQRCode:', e); }
+  try { setCurrentDateTime(); } catch (e) { console.error('Error in setCurrentDateTime:', e); }
+  try { initTabAddPatientForm(); } catch (e) { console.error('Error in initTabAddPatientForm:', e); }
 
   // Register PWA Service Worker for Offline & Native Mobile Support
   if ('serviceWorker' in navigator) {
@@ -1448,14 +1448,23 @@ function initQRCode() {
   const container = document.getElementById('qrcode-container');
   if (!container) return;
   container.innerHTML = '';
-  new QRCode(container, {
-    text: `${clinicSettings.website}/damietta/verify?id=${Date.now()}&phone=${clinicSettings.phone}`,
-    width: 65,
-    height: 65,
-    colorDark: "#0b192c",
-    colorLight: "#ffffff",
-    correctLevel: QRCode.CorrectLevel.H
-  });
+  try {
+    if (typeof QRCode !== 'undefined') {
+      new QRCode(container, {
+        text: `${clinicSettings.website}/damietta/verify?id=${Date.now()}&phone=${clinicSettings.phone}`,
+        width: 65,
+        height: 65,
+        colorDark: "#0b192c",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.H
+      });
+    } else {
+      container.innerHTML = '<div style="font-size:0.75rem; color:var(--accent-cyan); text-align:center; padding:0.5rem; border:1px solid var(--border-color); border-radius:4px;">QR Code</div>';
+    }
+  } catch (err) {
+    console.log('QR Code generation skipped:', err);
+    container.innerHTML = '<div style="font-size:0.75rem; color:var(--accent-cyan); text-align:center; padding:0.5rem; border:1px solid var(--border-color); border-radius:4px;">QR Code</div>';
+  }
 }
 
 function viewVisitPrescription(visitId) {
