@@ -1044,15 +1044,260 @@ tr:hover {
   justify-content: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+  margin-bottom: 1.5rem;
+}
+
+.metric-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-cyan);
+}
+
+.metric-icon {
+  font-size: 1.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-title {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.metric-val {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-top: 0.2rem;
+}
+
+/* TEMPLATE VARIABLE TAGS */
+.template-tag {
+  display: inline-block;
+  background: rgba(0, 212, 178, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 212, 178, 0.3);
+  padding: 0.25rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.template-tag:hover {
+  background: var(--accent-cyan);
+  color: #0b192c;
+  transform: scale(1.05);
+}
+
+/* REVIEW & DELIVERY MODALS */
+.review-modal-card {
+  border-top: 4px solid var(--accent-cyan);
+}
+
+.review-info-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.review-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.review-msg-box {
+  background: rgba(0, 212, 178, 0.06);
+  border-right: 3px solid var(--accent-cyan);
+  padding: 0.8rem;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  white-space: pre-line;
+  max-height: 140px;
+  overflow-y: auto;
+  font-weight: 600;
+}
+
+.status-badge-delivered {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+.status-badge-pending {
+  background: rgba(255, 159, 67, 0.15);
+  color: var(--accent-amber);
+  border: 1px solid rgba(255, 159, 67, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+.status-badge-failed {
+  background: rgba(255, 82, 82, 0.15);
+  color: var(--accent-red);
+  border: 1px solid rgba(255, 82, 82, 0.3);
+  padding: 0.3rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: bold;
+}
+
+/* MOBILE BOTTOM NAVIGATION BAR (Android Native App Experience) */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: #0b192c;
+  border-top: 1px solid var(--border-color);
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  transition: all 0.15s ease;
+  flex: 1;
+}
+
+.mobile-nav-item .mobile-nav-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.1rem;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent-cyan);
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  transform: translateY(-2px);
+}
+
+/* MOBILE FLOATING ACTION BUTTON (FAB) */
+.mobile-fab-btn {
+  display: none;
+  position: fixed;
+  bottom: 74px;
+  left: 16px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, #00a88f 100%);
+  color: #0b192c;
+  font-size: 1.5rem;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 212, 178, 0.4);
+  z-index: 999;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
 
 .mobile-fab-btn:active {
   transform: scale(0.92);
+}
+
+/* FULL PATIENT PROFILE MODAL STYLING */
+.full-profile-modal-card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  border: 1px solid var(--border-color);
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 1050px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-lg);
+  position: relative;
+}
+
+.profile-top-banner {
+  background: linear-gradient(135deg, rgba(0, 212, 178, 0.1) 0%, rgba(11, 25, 44, 0.9) 100%);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.profile-nav-tabs {
+  display: flex;
+  overflow-x: auto;
+  white-space: nowrap;
+  gap: 0.4rem;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.profile-nav-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.profile-nav-tabs .tab-btn {
+  flex: 0 0 auto;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.85rem;
+  border-radius: 20px;
 }
 
 /* RESPONSIVE SMARTPHONE MEDIA QUERIES (320px to 768px) */
 @media (max-width: 768px) {
   body {
     padding-bottom: 70px;
+    overflow-x: hidden !important;
+  }
+
+  .main-container {
+    padding: 0.6rem 0.4rem !important;
   }
 
   .nav-tabs {
@@ -1068,27 +1313,25 @@ tr:hover {
   }
 
   .top-navbar {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 0.8rem;
     flex-wrap: wrap;
     gap: 0.5rem;
   }
 
   .brand-title h1 {
-    font-size: 1.25rem !important;
+    font-size: 1.15rem !important;
   }
 
   .brand-title p {
-    font-size: 0.78rem !important;
-  }
-
-  .main-container {
-    padding: 0.8rem 0.6rem;
+    font-size: 0.75rem !important;
   }
 
   .panel-card {
-    padding: 1rem;
+    padding: 0.8rem !important;
     border-radius: 12px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.8rem;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
 
   .panel-header {
@@ -1097,35 +1340,111 @@ tr:hover {
     gap: 0.6rem;
   }
 
+  /* Target all modal overlays and modal cards on phone */
+  .modal-overlay {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-overlay .modal-card,
+  .modal-overlay .full-profile-modal-card {
+    border-radius: 20px 20px 0 0 !important;
+    max-height: 92vh !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 1rem 0.8rem !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Profile Top Banner Stack for Mobile */
+  .profile-top-banner {
+    padding: 0.8rem !important;
+  }
+
+  .profile-top-banner > div {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+  }
+
+  .profile-top-banner div[style*="display:flex"] {
+    flex-wrap: wrap !important;
+    gap: 0.3rem !important;
+    width: 100% !important;
+  }
+
+  .profile-top-banner .btn {
+    font-size: 0.78rem !important;
+    padding: 0.3rem 0.6rem !important;
+    min-height: 36px !important;
+    flex: 1 1 auto !important;
+  }
+
+  /* Profile Nav Tabs Scrollable Row */
+  .profile-nav-tabs {
+    display: flex !important;
+    overflow-x: auto !important;
+    white-space: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 0.3rem !important;
+    padding-bottom: 0.6rem !important;
+    width: 100% !important;
+  }
+
+  .profile-nav-tabs .tab-btn {
+    flex: 0 0 auto !important;
+    font-size: 0.8rem !important;
+    padding: 0.4rem 0.7rem !important;
+  }
+
+  /* Grid Layouts collapse to 1 column on phone */
   .form-grid {
     grid-template-columns: 1fr !important;
-    gap: 0.8rem;
+    gap: 0.6rem !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.6rem !important;
+  }
+
+  .patients-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem !important;
+  }
+
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  table {
+    min-width: 550px !important;
+  }
+
+  input, select, textarea {
+    font-size: 16px !important;
   }
 
   .btn {
-    min-height: 46px;
-    font-size: 0.92rem;
+    min-height: 44px !important;
+    font-size: 0.88rem !important;
+    padding: 0.5rem 0.8rem !important;
     justify-content: center;
-    width: 100%;
   }
 
   .btn-sm {
-    min-height: 38px;
-    width: auto;
-  }
-
-  /* Bottom sheet modal styling for phones */
-  .modal-overlay .modal-card {
-    border-radius: 20px 20px 0 0;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: 0;
-    width: 100%;
-    max-width: 100% !important;
+    min-height: 36px !important;
+    font-size: 0.8rem !important;
   }
 }
 
@@ -1136,8 +1455,8 @@ tr:hover {
   }
 
   .hero-logo {
-    width: 60px;
-    height: 60px;
+    width: 54px;
+    height: 54px;
   }
 
   .patient-card {
