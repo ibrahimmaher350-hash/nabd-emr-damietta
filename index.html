@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b192c">
   <title>إبراهيم ماهر | نبض للتمريض المنزلي - محافظة دمياط</title>
-  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=24">
-  <link rel="apple-touch-icon" href="assets/logo.jpg?v=24">
-  <link rel="stylesheet" href="styles.css?v=24">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=25">
+  <link rel="apple-touch-icon" href="assets/logo.jpg?v=25">
+  <link rel="stylesheet" href="styles.css?v=25">
   <!-- QRCode JS Library for PDF/Prescription verification -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
@@ -17,7 +17,7 @@
   <!-- Top Header Navigation -->
   <header class="top-navbar">
     <div class="brand-section">
-      <img src="assets/logo.jpg?v=24" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
+      <img src="assets/logo.jpg?v=25" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
       <div class="brand-title">
         <h1 id="ui-top-brand-name" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h1>
         <p id="ui-top-subtitle" style="font-size: 0.88rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | 📱 <span id="ui-top-phone">01001097896</span></p>
@@ -545,7 +545,7 @@
       </div>
 
       <div class="patients-grid" id="patients-grid-container">
-        <!-- Dynamic Patient Cards injected via app.js -->
+        <!-- Dynamic Clean Patient Cards injected via app.js -->
       </div>
     </section>
 
@@ -844,7 +844,7 @@
               <option value="v1">الإصدار 1 (الافتراضي)</option>
             </select>
             <button class="btn btn-sm btn-primary" onclick="toggleReportViewMode()">👁️ المعاينة النهائية</button>
-            <button class="btn btn-sm btn-success" onclick="downloadReportPDF()">📄 PDF</button>
+            <button class="btn btn-sm btn-success" onclick="openExportPatientModal(currentDraftState ? currentDraftState.patientId : null)">📄 PDF والتصدير</button>
             <button class="btn btn-sm btn-secondary" onclick="window.print()">🖨️ طباعة</button>
             <button class="btn btn-sm btn-success" onclick="shareReportWhatsApp()">📲 واتساب</button>
             <button class="btn btn-sm btn-danger" onclick="closeReportEditorStage()">❌ إغلاق</button>
@@ -962,14 +962,14 @@
             </div>
             <div class="form-group">
               <label>2. الشعار الرسمي (مسار / URL)</label>
-              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=24">
+              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=25">
             </div>
             <div class="form-group">
               <label>3. رقم الهاتف الرئيسي</label>
               <input type="tel" id="cfg-phone" value="01001097896">
             </div>
             <div class="form-group">
-              <label>4. رقم الواتساب (للمشاركة والتذكير)</label>
+              <label>4. رقم الواتساب (ل للمشاركة والتذكير)</label>
               <input type="tel" id="cfg-whatsapp" value="01001097896">
             </div>
             <div class="form-group">
@@ -1063,7 +1063,7 @@
             </div>
             <div class="form-group">
               <label>10. آخر مزامنة سحابية ناجحة</label>
-              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 17:41">
+              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 17:56">
             </div>
           </div>
 
@@ -1187,7 +1187,7 @@
     <!-- 6. DASHBOARD TAB -->
     <section id="dashboard-tab" class="tab-content">
       <div class="panel-card hero-banner">
-        <img src="assets/logo.jpg?v=24" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
+        <img src="assets/logo.jpg?v=25" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
         <div>
           <h2 id="ui-hero-title" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h2>
           <p id="ui-hero-areas" style="font-size: 0.95rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | مناطق الخدمة: بندر دمياط, مركز دمياط, رأس البر, دمياط الجديدة | 📞 01001097896</p>
@@ -1260,6 +1260,79 @@
 
   </main>
 
+  <!-- COMPREHENSIVE FULL PATIENT PROFILE MODAL (EMR CENTER) -->
+  <div class="modal-overlay" id="full-patient-profile-modal">
+    <div class="full-profile-modal-card">
+      <button class="modal-close" onclick="closeFullPatientProfileModal()">✕</button>
+
+      <!-- Profile Top Summary Banner -->
+      <div class="profile-top-banner" id="profile-top-banner-content">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Profile Sticky Tab Navigation (11 Tabs) -->
+      <nav class="profile-nav-tabs">
+        <button class="tab-btn active" onclick="switchProfileTab('prof-basic', this)">📋 البيانات الأساسية</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-history', this)">🏥 التاريخ المرضي</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-visits', this)">📅 الزيارات</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-wounds', this)">🩹 الجروح</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-meds', this)">💊 الأدوية</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-labs', this)">🧪 التحاليل</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-rad', this)">🩻 الأشعة</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-attachments', this)">📷 المرفقات</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-invoices', this)">🧾 الفواتير</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-reports', this)">📄 التقارير</button>
+        <button class="tab-btn" onclick="switchProfileTab('prof-audit', this)">⚙️ سجل التعديلات (Audit Log)</button>
+      </nav>
+
+      <!-- Profile Body Content Container -->
+      <div class="profile-body-container" id="profile-body-content">
+        <!-- Injected via JavaScript based on selected tab -->
+      </div>
+    </div>
+  </div>
+
+  <!-- PATIENT ACTION DROPDOWN / MENU MODAL (⋮ المزيد) -->
+  <div class="modal-overlay" id="patient-actions-modal">
+    <div class="modal-card" style="max-width: 540px;">
+      <button class="modal-close" onclick="closePatientActionsModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;" id="actions-modal-title">⚙️ لوحة الإجراءات السريعة للمريض</h2>
+      <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));" id="actions-modal-buttons-grid">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPORT & PRINT OPTIONS MODAL -->
+  <div class="modal-overlay" id="export-patient-modal">
+    <div class="modal-card" style="max-width: 580px;">
+      <button class="modal-close" onclick="closeExportPatientModal()">✕</button>
+      <h2 style="color: var(--accent-cyan); margin-bottom: 1rem;">📄 تصدير وطباعة بيانات المريض</h2>
+      
+      <h4 style="color: var(--text-muted); margin-bottom: 0.8rem;">اختر الأقسام المراد تصديرها بالتقرير:</h4>
+      <div class="checkbox-grid" style="margin-bottom: 1.5rem;">
+        <label class="checkbox-item"><input type="checkbox" id="exp-basic" checked> ☑️ البيانات الأساسية</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-history" checked> ☑️ التاريخ المرضي</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-visits" checked> ☑️ سجل الزيارات</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-vitals" checked> ☑️ العلامات الحيوية</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-meds" checked> ☑️ الأدوية والعلاج</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-wounds" checked> ☑️ تقرير الجروح</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-labs" checked> ☑️ التحاليل والأشعة</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-photos" checked> ☑️ الصور والمرفقات</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-billing" checked> ☑️ الفواتير والحسابات</label>
+        <label class="checkbox-item"><input type="checkbox" id="exp-recs" checked> ☑️ التوصيات والتعليمات</label>
+      </div>
+
+      <h4 style="color: var(--text-muted); margin-bottom: 0.8rem;">اختر طريقة التصدير أو الإرسال:</h4>
+      <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; justify-content: flex-end;">
+        <button class="btn btn-primary" onclick="executeExportTarget('pdf')">☑️ PDF</button>
+        <button class="btn btn-amber" onclick="executeExportTarget('word')">☑️ Word</button>
+        <button class="btn btn-secondary" onclick="executeExportTarget('print')">☑️ طباعة مباشرة</button>
+        <button class="btn btn-success" onclick="executeExportTarget('whatsapp')">☑️ واتساب</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ADD ELEMENT DYNAMIC MODAL -->
   <div class="modal-overlay" id="add-element-modal">
     <div class="modal-card">
@@ -1303,7 +1376,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeAddPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=24" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;" class="ui-modal-brand-title">إضافة مريض جديد - إبراهيم ماهر (دمياط)</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تسجيل بيانات المريض وتأكيد الرقم القومي وهاتف التواصل</p>
@@ -1376,7 +1449,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=24" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل بيانات المريض</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل التفاصيل والسجل الطبي لمريض مسجل بنبض</p>
@@ -1463,7 +1536,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditVisitModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=24" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل الزيارة التمريضية</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل تفاصيل الزيارة والعلامات الحيوية والرسوم</p>
@@ -1522,6 +1595,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=24"></script>
+  <script src="app.js?v=25"></script>
 </body>
 </html>
