@@ -308,6 +308,8 @@ document.addEventListener('DOMContentLoaded', () => {
   try { populatePatientSelectOptions(); } catch (e) { console.error('Error in populatePatientSelectOptions:', e); }
   try { populateNotificationPatientSelect(); } catch (e) { console.error('Error in populateNotificationPatientSelect:', e); }
   try { populateReportPatientSelect(); } catch (e) { console.error('Error in populateReportPatientSelect:', e); }
+  try { renderCategorizedReportCards(); } catch (e) { console.error('Error in renderCategorizedReportCards:', e); }
+  try { renderTodayVisitsHub(); } catch (e) { console.error('Error in renderTodayVisitsHub:', e); }
   try { renderScheduleTable(); } catch (e) { console.error('Error in renderScheduleTable:', e); }
   try { renderNotificationLogs(); } catch (e) { console.error('Error in renderNotificationLogs:', e); }
   try { initQRCode(); } catch (e) { console.error('Error in initQRCode:', e); }
@@ -1577,6 +1579,157 @@ function renderOfficialReportFooter(providerName = "إبراهيم ماهر") {
 }
 
 // REPORT BUILDER CENTER ENGINE (15 REPORT TYPES)
+const reportTemplatesCatalog = [
+  { id: "prescription", title: "📄 روشتة طبية معتمدة", category: "official", desc: "روشتة علاج أدوية معتمدة بختم نبض وتوقيع إبراهيم ماهر المعتمد", icon: "📄", time: "⏱️ 2 دقيقة", fav: true },
+  { id: "wound_dressing", title: "🩹 تقرير غيار جروح وقرح", category: "wounds", desc: "تقرير طبي بتفاصيل أبعاد الجرح، الإفرازات، الصور وصلاحية الغيار", icon: "🩹", time: "⏱️ 3 دقائق", fav: true },
+  { id: "vitals_log", title: "🩺 تقرير متابعة العلامات الحيوية", category: "nursing", desc: "سجل قراءات الضغط، السكر، النبض، الحرارة، ونسبة الأكسجين", icon: "🩺", time: "⏱️ 1 دقيقة", fav: true },
+  { id: "lab_collection", title: "🧪 تقرير سحب عينات تحاليل", category: "labs", desc: "نموذج استلام عينات التحاليل الطبية وتوثيق شروط الصيام والجمع", icon: "🧪", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "catheter_care", title: "🫁 تقرير تركيب / تغيير قسطرة بولية", category: "nursing", desc: "توثيق نوع القسطرة، المقاس بالفرينش (Fr)، والتطهير وتاريخ التغيير القادم", icon: "🫁", time: "⏱️ 3 دقائق", fav: false },
+  { id: "iv_infusion", title: "💉 تقرير تركيب كانيولا ومحاليل", category: "nursing", desc: "توثيق نوع المحاليل الوريدية، السرعة، وملاحظات الأوردة", icon: "💉", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "resident_nursing", title: "🏠 تقرير رعاية تمريضية مقيمة (24س)", category: "nursing", desc: "تقرير شامل لمتابعة الحالات الحرجة والمقيمة بالمنزل على مدار اليوم", icon: "🏠", time: "⏱️ 5 دقائق", fav: true },
+  { id: "clearance_cert", title: "📜 شهادة خلو من الأمراض وملاءمة تمريضية", category: "official", desc: "شهادة طبية رسمية معتمدة بالحالة الصحية العامة ونطاق الخدمة", icon: "📜", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "diabetic_foot", title: "🦶 تقرير عناية بالقدم السكري", category: "wounds", desc: "فحص وتوثيق الدورة الدموية، النبض الطرفي، وغيارات القدم السكري", icon: "🦶", time: "⏱️ 4 دقائق", fav: true },
+  { id: "post_op_care", title: "🔪 تقرير عناية بعد العمليات الجراحية", category: "wounds", desc: "متابعة الخياطة الجراحية والغرز وإزالة الدرنقة وتطهير الجرح", icon: "🔪", time: "⏱️ 3 دقائق", fav: false },
+  { id: "physiotherapy", title: "🤸 تقرير جلسة علاج طبيعي وتأهيل", category: "nursing", desc: "توثيق التمارين الحركية، التأهيل بعد الجلطات، ومدى الحركة", icon: "🤸", time: "⏱️ 3 دقائق", fav: false },
+  { id: "xray_rad", title: "🩻 تقرير فحوصات وأشعة منزلية", category: "labs", desc: "أرشفة وتوثيق نتائج تقارير الأشعة والسنار المنزلي", icon: "🩻", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "ryle_feeding", title: "🥛 تقرير أنبوب تغذية (رايل Ryle)", category: "nursing", desc: "توثيق إدخال واختبار مكان الرايل وجدول التغذية الأنبوبية", icon: "🥛", time: "⏱️ 3 دقائق", fav: false },
+  { id: "medical_invoice", title: "🧾 فاتورة مستحقات تمريضية معتمدة", category: "official", desc: "كشف حسـاب وفاتورة رسمية بالخدمات والمستلزمات والمبالغ المدفوعة", icon: "🧾", time: "⏱️ 1 دقيقة", fav: true },
+  { id: "discharge_summary", title: "🚪 ملخص تقرير خروج وانتهاء رعاية", category: "official", desc: "تقرير ختامي بتحسن الحالة وانتهاء فترة تقديم الخدمة التمريضية المنزلية", icon: "🚪", time: "⏱️ 3 دقائق", fav: false }
+];
+
+let activeReportFilterCategory = 'all';
+
+function renderCategorizedReportCards() {
+  const container = document.getElementById('categorized-reports-container');
+  if (!container) return;
+
+  const queryInput = document.getElementById('report-search-query');
+  const query = queryInput ? queryInput.value.toLowerCase() : '';
+
+  const filtered = reportTemplatesCatalog.filter(rpt => {
+    const matchCat = activeReportFilterCategory === 'all' || rpt.category === activeReportFilterCategory;
+    const matchQuery = !query || rpt.title.toLowerCase().includes(query) || rpt.desc.toLowerCase().includes(query);
+    return matchCat && matchQuery;
+  });
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<p style="color:var(--text-muted); grid-column:1/-1;">لا توجد تقارير تطابق البحث الحالي.</p>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(rpt => `
+    <div class="panel-card" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-color); display:flex; flex-direction:column; justify-content:space-between; cursor:pointer;" onclick="selectReportTemplateCard('${rpt.id}')">
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+          <h3 style="color:var(--accent-cyan); font-size:1.05rem;">${rpt.title}</h3>
+          <span style="font-size:1rem;">${rpt.fav ? '⭐' : ''}</span>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.8rem;">${rpt.desc}</p>
+      </div>
+      <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-color); padding-top:0.6rem;">
+        <span style="font-size:0.75rem; color:var(--accent-amber);">${rpt.time}</span>
+        <button class="btn btn-sm btn-primary">اختيار التقرير 🚀</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterReportCategory(cat, btn) {
+  activeReportFilterCategory = cat;
+  document.querySelectorAll('#report-category-chips .btn').forEach(b => {
+    b.classList.remove('btn-primary');
+    b.classList.add('btn-secondary');
+  });
+  if (btn) {
+    btn.classList.remove('btn-secondary');
+    btn.classList.add('btn-primary');
+  }
+  renderCategorizedReportCards();
+}
+
+function selectReportTemplateCard(templateId) {
+  openReportEditorStage(null, templateId);
+}
+
+function setWizardStep(stepNum) {
+  document.querySelectorAll('.wizard-step').forEach((el, idx) => {
+    if (idx + 1 === stepNum) el.classList.add('active');
+    else el.classList.remove('active');
+  });
+
+  const step1 = document.getElementById('wizard-step-1-container');
+  const editorStage = document.getElementById('report-editor-stage');
+
+  if (stepNum === 1 || stepNum === 2) {
+    if (step1) step1.style.display = 'block';
+    if (editorStage) editorStage.style.display = 'none';
+  } else {
+    if (step1) step1.style.display = 'block';
+    openReportEditorStage();
+  }
+}
+
+// DIRECT WHATSAPP VISIT REMINDER (تذكير بالزيارة القادمة)
+function sendWhatsAppVisitReminderDirect(patientId) {
+  const p = patients.find(item => item.patientId === patientId);
+  if (!p) return;
+
+  const patVisits = visits.filter(v => v.patientId === p.patientId);
+  const lastVisit = patVisits[0];
+  const nextVisitDate = (lastVisit && lastVisit.wound && lastVisit.wound.nextDate) ? lastVisit.wound.nextDate : 'غداً في تمام 10:00 صباحاً';
+  const serviceName = (p.requestedServices && p.requestedServices.length > 0) ? p.requestedServices.join(' - ') : 'خدمة وتمريض منزلي';
+  const cleanPhone = (p.whatsApp || p.phone || clinicSettings.whatsApp).replace(/\D/g, '');
+
+  const text = `السلام عليكم أ/ ${p.fullName} 🌸\n\nنذكركم بموعد الزيارة التمريضية المنزلية المقررة يوم: (${nextVisitDate})\n\nالخدمة المطلوبة:\n${serviceName}\n\nالعنوان:\n${p.area} - ${p.detailedAddress}\n\nالممرض المسؤول:\nإبراهيم ماهر (نبض للتمريض المنزلي - محافظة دمياط)\n\nللتواصل والاستفسار المباشر:\n${clinicSettings.phone}`;
+
+  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+  
+  addAuditLog(p.patientId, `إرسال تذكير مباشر بالزيارة القادمة عبر الواتساب (${nextVisitDate})`);
+  window.open(waUrl, '_blank');
+}
+
+// DAILY VISITS NOTIFICATIONS HUB (إخباري يومياً بمواعيد زيارات اليوم)
+function renderTodayVisitsHub() {
+  const containerCRM = document.getElementById('today-visits-hub-crm');
+  const containerDash = document.getElementById('today-visits-hub-dash');
+
+  const todayList = patients.filter((p, idx) => p.status === 'نشط' || idx < 4);
+
+  const hubHtml = `
+    <div style="background: linear-gradient(135deg, rgba(0,212,178,0.12) 0%, rgba(11,25,44,0.8) 100%); border: 1px solid var(--accent-cyan); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.5rem; box-shadow: 0 4px 15px rgba(0,212,178,0.15);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="color: var(--accent-cyan); font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
+          <span>🔔 زيارات اليوم المقررة (إبراهيم ماهر - محافظة دمياط)</span>
+          <span class="tag tag-success" style="font-size: 0.85rem;">${todayList.length} زيارات منزلية اليوم</span>
+        </h3>
+        <span style="font-size: 0.85rem; color: var(--text-muted);">📅 ${new Date().toLocaleDateString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 0.8rem;">
+        ${todayList.map(p => `
+          <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+              <strong style="color: #fff; font-size: 0.95rem;">👤 ${p.fullName}</strong>
+              <span style="color: var(--accent-cyan); font-size: 0.8rem;">MRN: ${p.mrn || p.patientId}</span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.3rem;">📍 ${p.area} - ${p.detailedAddress}</p>
+            <p style="font-size: 0.82rem; color: var(--accent-amber); margin-bottom: 0.6rem;">🩺 ${p.requestedServices && p.requestedServices.length > 0 ? p.requestedServices[0] : 'غيار جراحي ودعم تمريضي'}</p>
+            
+            <div style="display: flex; gap: 0.3rem; flex-wrap: wrap;">
+              <button class="btn btn-sm btn-primary" onclick="openNewVisitFromCRM('${p.patientId}')">🩺 بدء الزيارة</button>
+              <button class="btn btn-sm btn-success" onclick="sendWhatsAppVisitReminderDirect('${p.patientId}')">💬 تذكير الواتساب</button>
+              <a href="${p.mapsLink || clinicSettings.googleMapsUrl}" target="_blank" class="btn btn-sm" style="background:#1e3e62; color:#fff;">📍 الخريطة</a>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  if (containerCRM) containerCRM.innerHTML = hubHtml;
+  if (containerDash) containerDash.innerHTML = hubHtml;
+}
+
 function populateReportPatientSelect() {
   const select = document.getElementById('rpt-patient-id');
   if (!select) return;

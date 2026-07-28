@@ -269,6 +269,10 @@
 
     <!-- 2. PATIENTS CRM TAB -->
     <section id="patients-tab" class="tab-content">
+      
+      <!-- DAILY VISITS NOTIFICATIONS HUB -->
+      <div id="today-visits-hub-crm"></div>
+
       <div class="panel-card">
         <div class="panel-header">
           <div style="display: flex; align-items: center; gap: 0.8rem;">
@@ -566,7 +570,7 @@
     <section id="prescription-tab" class="tab-content">
       
       <!-- 1) 5-STEP WIZARD PROGRESS BAR HEADER -->
-      <div class="panel-card" style="padding: 1.2rem;">
+      <div class="panel-card" style="padding: 1.2rem; margin-bottom: 1.5rem;">
         <div class="wizard-progress-bar">
           <div class="wizard-step active" id="wiz-step-pill-1" onclick="setWizardStep(1)">
             <span class="step-num">①</span>
@@ -593,10 +597,122 @@
 
       <!-- STEP 1 CONTAINER: CATEGORIZED REPORTS SELECTION -->
       <div id="wizard-step-1-container">
-        <div id="categorized-reports-container">
-          <!-- Dynamically populated via app.js -->
+        <div class="panel-card">
+          <div class="panel-header">
+            <div style="display: flex; align-items: center; gap: 0.8rem;">
+              <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+              <h2>📑 اختيار نوع التقرير والمستند الطبي (15 نوع تقرير معتمد)</h2>
+            </div>
+          </div>
+
+          <!-- Category Chips & Search Bar -->
+          <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center;">
+            <input type="text" id="report-search-query" placeholder="🔎 ابحث عن نوع التقرير (مثال: روشتة، غيار جروح، تحاليل...)" style="flex: 1; min-width: 260px;" oninput="renderCategorizedReportCards()" inputmode="search">
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;" id="report-category-chips">
+              <button class="btn btn-sm btn-primary" onclick="filterReportCategory('all', this)">جميع التقارير</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('nursing', this)">🩺 التمريض والزيارات</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('wounds', this)">🩹 الجروح والقرح</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('official', this)">📄 الروشتات والشهادات</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('labs', this)">🧪 التحاليل والأشعة</button>
+            </div>
+          </div>
+
+          <div id="categorized-reports-container" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+            <!-- Dynamically populated via app.js -->
+          </div>
+        </div>
+
+        <!-- PATIENT SELECTOR & LAUNCH EDITOR -->
+        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(0, 212, 178, 0.03); border: 1px solid var(--accent-cyan);">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">② اختيار المريض وفتح محرر التقرير الذكي</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اختر المريض بالتقرير</label>
+              <select id="rpt-patient-id">
+                <option value="">-- اختر مريضاً --</option>
+              </select>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+              <button class="btn btn-primary btn-lg" style="width: 100%;" onclick="openReportEditorStage(event)">
+                🚀 فتح محرر التقرير والروشتة الموثقة (Report Studio)
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- REPORT STUDIO EDITOR STAGE -->
+      <div id="report-editor-stage" class="panel-card" style="display: none; margin-top: 1.5rem; border: 2px solid var(--accent-cyan);">
+        <div class="panel-header">
+          <h2 style="color: var(--accent-cyan);">🎨 محرر التقارير التفاعلي (Canva/Word-like Report Studio)</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-amber btn-sm" onclick="editorUndo()">↩️ تراجع</button>
+            <button class="btn btn-amber btn-sm" onclick="editorRedo()">↪️ إعادة</button>
+            <button class="btn btn-success btn-sm" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ مسودة</button>
+            <button class="btn btn-danger btn-sm" onclick="closeReportEditorStage()">❌ إغلاق المحرر</button>
+          </div>
+        </div>
+
+        <!-- 3-COLUMN STUDIO EDITOR LAYOUT -->
+        <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+          
+          <!-- Column 1: Patient Info & Variables -->
+          <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">1️⃣ بيانات المريض في التقرير</h4>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label style="font-size: 0.8rem;">اسم المريض بالتقرير</label>
+              <input type="text" id="draft-pat-name" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label style="font-size: 0.8rem;">السن</label>
+              <input type="text" id="draft-pat-age" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label style="font-size: 0.8rem;">رقم الهاتف</label>
+              <input type="text" id="draft-pat-phone" oninput="updateDraftReportView()">
+            </div>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label style="font-size: 0.8rem;">المنطقة والعنوان</label>
+              <input type="text" id="draft-pat-area" oninput="updateDraftReportView()">
+            </div>
+          </div>
+
+          <!-- Column 2: Medications & Content -->
+          <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+              <h4 style="color: var(--accent-cyan);">2️⃣ أدوية الروشتة والتوصيات</h4>
+              <button class="btn btn-sm btn-primary" onclick="openAddMedicationDraftModal()">+ إضافة دواء</button>
+            </div>
+            <div id="draft-medications-editor-list" style="margin-bottom: 1rem;"></div>
+
+            <div class="form-group">
+              <label style="font-size: 0.8rem;">توصيات وملاحظات إبراهيم ماهر الحرة</label>
+              <textarea id="draft-free-notes" rows="4" style="width: 100%; font-size: 0.85rem;" oninput="updateDraftReportView()"></textarea>
+            </div>
+            <button class="btn btn-amber btn-sm" onclick="aiEnhanceReportNotes()" style="width: 100%; margin-top: 0.4rem;">✨ تحسين التقرير بالذكاء الاصطناعي</button>
+          </div>
+
+          <!-- Column 3: Actions & Export -->
+          <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">3️⃣ التوثيق والتصدير والطباعة</h4>
+              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">التقرير موثق رقمياً بختم نبض وتوقيع إبراهيم ماهر المعتمد و كود QR الفوري للتحقق.</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <button class="btn btn-primary btn-lg" onclick="downloadReportPDF()">📄 طباعة وتصدير PDF</button>
+              <button class="btn btn-success btn-lg" onclick="shareReportWhatsApp()">💬 إرسال التقرير واتساب المريض</button>
+              <button class="btn btn-secondary" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ بالمسودات</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- LIVE PRINTABLE PREVIEW CONTAINER -->
+        <div style="margin-top: 1.5rem; background: #fff; color: #0b192c; padding: 2rem; border-radius: 12px; font-family: 'Segoe UI', Arial, sans-serif;" id="draft-live-preview-box" class="printable">
+          <!-- Live Preview Injected via JS -->
+        </div>
+      </div>
+
     </section>
 
     <!-- 5. SETTINGS & DATABASE TAB -->
