@@ -71,6 +71,27 @@ body {
   gap: 1rem;
 }
 
+.header-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.header-back-btn:hover {
+  background: var(--accent-cyan);
+  color: #0b192c;
+  transform: translateX(4px);
+}
+
 .brand-logo {
   width: 52px;
   height: 52px;

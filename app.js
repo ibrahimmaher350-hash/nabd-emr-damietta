@@ -209,8 +209,49 @@ try {
   console.log('Using initial seed state:', err);
 }
 
+// NAVIGATION HISTORY STACK (FOR BACK ARROWS)
+let navigationHistoryStack = ['add-patient-tab'];
+
+function navigateBackHistory() {
+  // 1. Check if any popup modal is open
+  const activeModal = document.querySelector('.modal-overlay.active');
+  if (activeModal) {
+    activeModal.classList.remove('active');
+    return;
+  }
+
+  // 2. Check if Report Editor Stage is open
+  const reportStage = document.getElementById('report-editor-stage');
+  if (reportStage && reportStage.style.display !== 'none') {
+    reportStage.style.display = 'none';
+    return;
+  }
+
+  // 3. Check if Inline Visit section in CRM tab is open
+  const inlineVisit = document.getElementById('inline-crm-visit-section');
+  if (inlineVisit && inlineVisit.style.display !== 'none') {
+    inlineVisit.style.display = 'none';
+    return;
+  }
+
+  // 4. Pop current tab and switch to previous tab in stack
+  if (navigationHistoryStack.length > 1) {
+    navigationHistoryStack.pop();
+    const previousTab = navigationHistoryStack[navigationHistoryStack.length - 1];
+    switchTab(previousTab, null, true);
+  } else {
+    switchTab('add-patient-tab', null, true);
+  }
+}
+
 // MAIN NAVIGATION TAB SWITCHER
-function switchTab(tabId, btnElement) {
+function switchTab(tabId, btnElement, skipPush = false) {
+  if (!skipPush) {
+    if (navigationHistoryStack[navigationHistoryStack.length - 1] !== tabId) {
+      navigationHistoryStack.push(tabId);
+    }
+  }
+
   document.querySelectorAll('main > .tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-tabs > .tab-btn').forEach(el => el.classList.remove('active'));
   

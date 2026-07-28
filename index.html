@@ -6,18 +6,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="theme-color" content="#0b192c">
   <title>إبراهيم ماهر | نبض للتمريض المنزلي - محافظة دمياط</title>
-  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=25">
-  <link rel="apple-touch-icon" href="assets/logo.jpg?v=25">
-  <link rel="stylesheet" href="styles.css?v=25">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpg?v=27">
+  <link rel="apple-touch-icon" href="assets/logo.jpg?v=27">
+  <link rel="stylesheet" href="styles.css?v=27">
   <!-- QRCode JS Library for PDF/Prescription verification -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
 
-  <!-- Top Header Navigation -->
+  <!-- Top Header Navigation with Universal Back Arrow -->
   <header class="top-navbar">
     <div class="brand-section">
-      <img src="assets/logo.jpg?v=25" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
+      <button class="btn btn-secondary header-back-btn" onclick="navigateBackHistory()" title="رجوع للصفحة السابقة">
+        <span style="font-size: 1.2rem;">➡️</span>
+        <span>رجوع</span>
+      </button>
+      <img src="assets/logo.jpg?v=27" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
       <div class="brand-title">
         <h1 id="ui-top-brand-name" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h1>
         <p id="ui-top-subtitle" style="font-size: 0.88rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | 📱 <span id="ui-top-phone">01001097896</span></p>
@@ -60,7 +64,10 @@
     <section id="add-patient-tab" class="tab-content active">
       <div class="panel-card">
         <div class="panel-header">
-          <h2>➕ إضافة مريض جديد - إبراهيم ماهر (نبض للتمريض المنزلي - دمياط)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>➕ إضافة مريض جديد - إبراهيم ماهر (نبض للتمريض المنزلي - دمياط)</h2>
+          </div>
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn btn-amber btn-sm" onclick="autoFillDemoPatientTabForm()">⚡ تعبئة مريض تجريبي (دمياط)</button>
           </div>
@@ -247,6 +254,7 @@
           </div>
 
           <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
             <button type="submit" class="btn btn-primary btn-lg">
               💾 حفظ ملف المريض وافتتاح السجل الطبي
             </button>
@@ -259,7 +267,10 @@
     <section id="patients-tab" class="tab-content">
       <div class="panel-card">
         <div class="panel-header">
-          <h2>🔎 البحث وتصفية سجلات المرضى (محافظة دمياط)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>🔎 البحث وتصفية سجلات المرضى (محافظة دمياط)</h2>
+          </div>
           <button class="btn btn-primary btn-lg" onclick="openNewVisitFromCRM()">🩺 تسجيل زيارة تمريضية جديدة (EMR)</button>
         </div>
         <div class="form-grid">
@@ -301,7 +312,10 @@
       <!-- INLINE VISIT EMR RECORDING FORM CONTAINER -->
       <div id="inline-crm-visit-section" class="panel-card" style="display: none; background: rgba(0, 212, 178, 0.03); border: 2px solid var(--accent-cyan); margin-bottom: 2rem;">
         <div class="panel-header">
-          <h2 style="color: var(--accent-cyan);">🩺 تسجيل زيارة تمريضية جديدة وتحديث EMR إبراهيم ماهر</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="closeInlineCRMVisitSection()">➡️ رجوع</button>
+            <h2 style="color: var(--accent-cyan);">🩺 تسجيل زيارة تمريضية جديدة وتحديث EMR إبراهيم ماهر</h2>
+          </div>
           <div style="display: flex; gap: 0.5rem;">
             <button class="btn btn-amber btn-sm" onclick="autoFillDemoVisit()">⚡ تعبئة نموذج تجريبي</button>
             <button class="btn btn-danger btn-sm" onclick="closeInlineCRMVisitSection()">❌ إغلاق تسجيل الزيارة</button>
@@ -536,6 +550,7 @@
           </div>
 
           <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="closeInlineCRMVisitSection()">➡️ رجوع</button>
             <button type="submit" class="btn btn-primary btn-lg">
               💾 حفظ الزيارة وتحديث السجل ومزامنة Google Sheets
             </button>
@@ -555,7 +570,10 @@
       <!-- SCHEDULE VISITS PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>📅 1. جدولة الزيارات القادمة وتخطيط الرحلات (محافظة دمياط)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>📅 1. جدولة الزيارات القادمة وتخطيط الرحلات (محافظة دمياط)</h2>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="alert('تم تفعيل التذكيرات التلقائية عبر الواتساب وتقويم Google')">🔔 إرسال تذكيرات الواتساب</button>
         </div>
         
@@ -601,7 +619,10 @@
       <!-- SMART NOTIFICATIONS & REMINDERS PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>🔔 2. مركز الإشعارات والتذكيرات الذكية (Smart Reminders Hub)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>🔔 2. مركز الإشعارات والتذكيرات الذكية (Smart Reminders Hub)</h2>
+          </div>
           <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
             💬 إشعارات الواتساب والنظام
           </span>
@@ -635,6 +656,7 @@
           </div>
 
           <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
             <button type="button" class="btn btn-success btn-lg" onclick="sendActiveReminderWhatsApp()">
               📲 إرسال التذكير فوراً عبر الواتساب
             </button>
@@ -675,7 +697,10 @@
       <!-- REPORT BUILDER SELECTION PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>📑 مركز إنشاء التقارير والروشتات (Report Builder & Editor Center)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>📑 مركز إنشاء التقارير والروشتات (Report Builder & Editor Center)</h2>
+          </div>
           <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
             ✏️ تحرير كامل ومسودات Report Drafts
           </span>
@@ -831,6 +856,7 @@
         <!-- Editor Top Toolbar -->
         <div class="editor-toolbar-top">
           <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center;">
+            <button class="btn btn-sm btn-secondary" onclick="closeReportEditorStage()">➡️ رجوع</button>
             <span style="font-weight: 800; color: var(--accent-cyan);">✏️ وضع التحرير المباشر:</span>
             <button class="btn btn-sm btn-primary" onclick="saveReportDraft()">💾 حفظ مسودة</button>
             <button class="btn btn-sm btn-secondary" onclick="editorUndo()">↶ تراجع</button>
@@ -948,7 +974,10 @@
       <!-- CLINIC & BRAND SETTINGS FORM PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>🏢 1. إعدادات مركز نبض والبراند (Clinic & Brand Settings)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>🏢 1. إعدادات مركز نبض والبراند (Clinic & Brand Settings)</h2>
+          </div>
           <span class="status-badge" style="background: rgba(255, 159, 67, 0.15); color: var(--accent-amber); border-color: rgba(255, 159, 67, 0.3);">
             ⚙️ الهوية والبيانات
           </span>
@@ -962,14 +991,14 @@
             </div>
             <div class="form-group">
               <label>2. الشعار الرسمي (مسار / URL)</label>
-              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=25">
+              <input type="text" id="cfg-logo-url" value="assets/logo.jpg?v=27">
             </div>
             <div class="form-group">
               <label>3. رقم الهاتف الرئيسي</label>
               <input type="tel" id="cfg-phone" value="01001097896">
             </div>
             <div class="form-group">
-              <label>4. رقم الواتساب (ل للمشاركة والتذكير)</label>
+              <label>4. رقم الواتساب (للمشاركة والتذكير)</label>
               <input type="tel" id="cfg-whatsapp" value="01001097896">
             </div>
             <div class="form-group">
@@ -999,6 +1028,7 @@
           </div>
 
           <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
             <button type="submit" class="btn btn-primary btn-lg">
               💾 حفظ تحديث إعدادات المركز والبراند
             </button>
@@ -1009,7 +1039,10 @@
       <!-- SYNC & CLOUD INTEGRATION SETTINGS PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>🔄 2. إعدادات المزامنة والربط السحابي (Sync & Cloud Integration)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>🔄 2. إعدادات المزامنة والربط السحابي (Sync & Cloud Integration)</h2>
+          </div>
         </div>
 
         <form id="sync-settings-form" onsubmit="handleSaveSyncSettings(event)">
@@ -1063,11 +1096,12 @@
             </div>
             <div class="form-group">
               <label>10. آخر مزامنة سحابية ناجحة</label>
-              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 17:56">
+              <input type="text" id="sync-last-time-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="2026-07-28 18:11">
             </div>
           </div>
 
           <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
             <button type="button" class="btn btn-amber" onclick="triggerManualSync()">🔄 مزامنة فورية الآن (Sync Now)</button>
             <button type="button" class="btn btn-success" onclick="triggerGoogleDriveBackup()">☁️ نسخ احتياطي إلى Google Drive</button>
             <button type="submit" class="btn btn-primary">💾 حفظ وتفعيل إعدادات المزامنة</button>
@@ -1078,7 +1112,10 @@
       <!-- SYSTEM & UI PREFERENCES PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>🛠️ 3. إعدادات النظام وتفضيلات العرض (System Settings)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>🛠️ 3. إعدادات النظام وتفضيلات العرض (System Settings)</h2>
+          </div>
           <span class="status-badge" style="background: rgba(0, 212, 178, 0.15); color: var(--accent-cyan);">
             🎨 المظهر والترقيم والعملة
           </span>
@@ -1145,6 +1182,7 @@
           </div>
 
           <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
             <button type="submit" class="btn btn-primary btn-lg">
               💾 حفظ وتطبيق إعدادات النظام
             </button>
@@ -1155,7 +1193,10 @@
       <!-- DATABASE MANAGEMENT & EXPORT/IMPORT PANEL -->
       <div class="panel-card">
         <div class="panel-header">
-          <h2>💾 4. إدارة قواعد البيانات والتصدير والنسخ الاحتياطي (Database Management)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2>💾 4. إدارة قواعد البيانات والتصدير والنسخ الاحتياطي (Database Management)</h2>
+          </div>
           <span class="status-badge" style="background: rgba(255, 82, 82, 0.15); color: var(--accent-red); border-color: rgba(255, 82, 82, 0.3);">
             ⚠️ تحكم وأدوات قاعدة البيانات
           </span>
@@ -1169,6 +1210,7 @@
         <input type="file" id="json-import-file-input" accept=".json" style="display: none;" onchange="executeJSONImport(event)">
 
         <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-start;">
+          <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
           <button type="button" class="btn btn-primary btn-lg" onclick="saveAllSystemSettingsMaster()">💾 حفظ الإعدادات</button>
           <button type="button" class="btn btn-secondary btn-lg" onclick="testCloudConnection()">☁️ اختبار الاتصال</button>
           <button type="button" class="btn btn-amber btn-lg" onclick="triggerManualSync()">🔄 مزامنة الآن</button>
@@ -1187,7 +1229,7 @@
     <!-- 6. DASHBOARD TAB -->
     <section id="dashboard-tab" class="tab-content">
       <div class="panel-card hero-banner">
-        <img src="assets/logo.jpg?v=25" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
+        <img src="assets/logo.jpg?v=27" id="ui-hero-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" class="hero-logo">
         <div>
           <h2 id="ui-hero-title" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h2>
           <p id="ui-hero-areas" style="font-size: 0.95rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | مناطق الخدمة: بندر دمياط, مركز دمياط, رأس البر, دمياط الجديدة | 📞 01001097896</p>
@@ -1227,7 +1269,10 @@
 
       <div class="panel-card">
         <div class="panel-header">
-          <h2 id="ui-recent-visits-header">📋 أحدث الزيارات التمريضية - إبراهيم ماهر (نبض للتمريض المنزلي)</h2>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2 id="ui-recent-visits-header">📋 أحدث الزيارات التمريضية - إبراهيم ماهر (نبض للتمريض المنزلي)</h2>
+          </div>
           <button class="btn btn-primary btn-sm" onclick="openNewVisitFromCRM()">
             + تسجيل زيارة جديدة
           </button>
@@ -1376,7 +1421,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeAddPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;" class="ui-modal-brand-title">إضافة مريض جديد - إبراهيم ماهر (دمياط)</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تسجيل بيانات المريض وتأكيد الرقم القومي وهاتف التواصل</p>
@@ -1449,7 +1494,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditPatientModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل بيانات المريض</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل التفاصيل والسجل الطبي لمريض مسجل بنبض</p>
@@ -1536,7 +1581,7 @@
     <div class="modal-card">
       <button class="modal-close" onclick="closeEditVisitModal()">✕</button>
       <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <img src="assets/logo.jpg?v=25" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
+        <img src="assets/logo.jpg?v=27" class="ui-modal-logo" alt="إبراهيم ماهر - نبض للتمريض المنزلي" style="width: 48px; height: 48px; border-radius: 10px; border: 2px solid var(--accent-cyan);">
         <div>
           <h2 style="color: var(--accent-cyan); font-size: 1.25rem;">✏️ تعديل الزيارة التمريضية</h2>
           <p style="font-size: 0.8rem; color: var(--text-muted);">تعديل تفاصيل الزيارة والعلامات الحيوية والرسوم</p>
@@ -1595,6 +1640,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=25"></script>
+  <script src="app.js?v=27"></script>
 </body>
 </html>
