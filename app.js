@@ -496,6 +496,7 @@ function openNewVisitFromCRM(patientId = null) {
 function closeInlineCRMVisitSection() {
   const section = document.getElementById('inline-crm-visit-section');
   if (section) section.style.display = 'none';
+  resetNextVisitScheduler();
 }
 
 // DEDICATED ADD PATIENT TAB HANDLERS
@@ -3097,4 +3098,275 @@ function confirmDeleteVisit(visitId) {
     showToast('🗑️ تم حذف الزيارة بنجاح.', 'success');
   });
 }
+
+/* ============================================================
+   NEXT VISIT APPOINTMENT SCHEDULER ENGINE
+   نظام جدولة وتذكير موعد الزيارة القادمة
+   ============================================================ */
+
+// Interval map: key -> milliseconds
+const VISIT_INTERVAL_MAP = {
+  '2h':   2 * 60 * 60 * 1000,
+  '6h':   6 * 60 * 60 * 1000,
+  '12h':  12 * 60 * 60 * 1000,
+  '1d':   1 * 24 * 60 * 60 * 1000,
+  '2d':   2 * 24 * 60 * 60 * 1000,
+  '3d':   3 * 24 * 60 * 60 * 1000,
+  '5d':   5 * 24 * 60 * 60 * 1000,
+  '7d':   7 * 24 * 60 * 60 * 1000,
+  '10d':  10 * 24 * 60 * 60 * 1000,
+  '14d':  14 * 24 * 60 * 60 * 1000,
+  '30d':  30 * 24 * 60 * 60 * 1000,
+  '90d':  90 * 24 * 60 * 60 * 1000,
+  '180d': 180 * 24 * 60 * 60 * 1000,
+  '365d': 365 * 24 * 60 * 60 * 1000,
+};
+
+const INTERVAL_LABELS = {
+  '2h': 'بعد ساعتين', '6h': 'بعد 6 ساعات', '12h': 'بعد 12 ساعة',
+  '1d': 'بعد يوم', '2d': 'بعد يومين', '3d': 'بعد 3 أيام',
+  '5d': 'بعد 5 أيام', '7d': 'بعد أسبوع', '10d': 'بعد 10 أيام',
+  '14d': 'بعد أسبوعين', '30d': 'بعد شهر', '90d': 'بعد 3 شهور',
+  '180d': 'بعد 6 شهور', '365d': 'بعد سنة', 'custom': 'موعد مخصص'
+};
+
+// Called when user changes the interval dropdown
+function onNextVisitIntervalChange() {
+  const interval = document.getElementById('next-visit-interval').value;
+  const customGroup = document.getElementById('next-visit-custom-group');
+
+  if (interval === 'custom') {
+    if (customGroup) customGroup.style.display = 'block';
+    setElementValue('next-visit-display', '');
+    setElementValue('next-visit-remaining', '');
+    setElementValue('next-visit-iso', '');
+  } else {
+    if (customGroup) customGroup.style.display = 'none';
+    calcNextVisitDate();
+  }
+  hideNextVisitError();
+}
+
+// Called when reference date dropdown changes
+function calcNextVisitDate() {
+  const interval = getElementValue('next-visit-interval', '');
+  if (!interval || interval === 'custom') return;
+
+  const refType = getElementValue('next-visit-ref', 'current');
+  const customRefGroup = document.getElementById('custom-ref-date-group');
+  if (customRefGroup) customRefGroup.style.display = (refType === 'custom_ref') ? 'block' : 'none';
+
+  const refDate = getRefDate(refType);
+  if (!refDate) {
+    showNextVisitError('⚠️ لا يوجد تاريخ مرجعي متاح. تأكد من إدخال تاريخ الزيارة الحالية أولاً.');
+    return;
+  }
+
+  const ms = VISIT_INTERVAL_MAP[interval];
+  if (!ms) return;
+
+  const nextDate = new Date(refDate.getTime() + ms);
+  const now = new Date();
+
+  if (nextDate <= now) {
+    showNextVisitError('⚠️ الموعد المحسوب في الماضي. يرجى اختيار فترة أطول أو تاريخ مرجعي أحدث.');
+    return;
+  }
+
+  hideNextVisitError();
+  applyNextVisitResult(nextDate);
+}
+
+// Called when user manually enters a custom next visit date
+function onCustomNextVisitDateChange() {
+  const val = getElementValue('next-visit-custom-date', '');
+  if (!val) return;
+
+  const nextDate = new Date(val);
+  const now = new Date();
+
+  if (isNaN(nextDate.getTime())) {
+    showNextVisitError('⚠️ تاريخ غير صالح. يرجى إدخال تاريخ ووقت صحيح.');
+    return;
+  }
+  if (nextDate <= now) {
+    showNextVisitError('⚠️ لا يمكن تحديد موعد في الماضي. يرجى اختيار تاريخ مستقبلي.');
+    return;
+  }
+
+  hideNextVisitError();
+  applyNextVisitResult(nextDate);
+}
+
+// Get reference date based on selected ref type
+function getRefDate(refType) {
+  if (refType === 'current') {
+    const dtVal = getElementValue('visit-date-time', '');
+    if (dtVal) return new Date(dtVal);
+    return new Date(); // fallback to now
+  }
+  if (refType === 'custom_ref') {
+    const customRefVal = getElementValue('next-visit-custom-ref', '');
+    if (customRefVal) return new Date(customRefVal);
+    return null;
+  }
+  const patId = getElementValue('visit-patient-id', '') || getElementValue('new-visit-patient-id', '');
+  const patVisits = visits.filter(v => v.patientId === patId).sort((a, b) => new Date(a.visitDate) - new Date(b.visitDate));
+  if (patVisits.length === 0) return new Date(); // fallback
+  if (refType === 'first') return new Date(patVisits[0].visitDate);
+  if (refType === 'last')  return new Date(patVisits[patVisits.length - 1].visitDate);
+  return new Date();
+}
+
+// Apply the computed next date to UI fields
+function applyNextVisitResult(nextDate) {
+  const formatted = nextDate.toLocaleDateString('ar-EG', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+
+  const remaining = getTimeRemainingText(nextDate);
+
+  setElementValue('next-visit-display', formatted);
+  setElementValue('next-visit-remaining', remaining);
+  setElementValue('next-visit-iso', nextDate.toISOString());
+}
+
+// Format time remaining
+function getTimeRemainingText(targetDate) {
+  const now = new Date();
+  const diffMs = targetDate.getTime() - now.getTime();
+  if (diffMs <= 0) return 'الموعد مضى';
+
+  const mins  = Math.floor(diffMs / 60000);
+  const hours = Math.floor(mins / 60);
+  const days  = Math.floor(hours / 24);
+  const months= Math.floor(days / 30);
+  const years = Math.floor(days / 365);
+
+  if (years >= 1)  return `${years} سنة و ${Math.floor((days % 365) / 30)} شهر`;
+  if (months >= 1) return `${months} شهر و ${days % 30} يوم`;
+  if (days >= 1)   return `${days} يوم و ${hours % 24} ساعة`;
+  if (hours >= 1)  return `${hours} ساعة و ${mins % 60} دقيقة`;
+  return `${mins} دقيقة`;
+}
+
+// Show/hide error messages
+function showNextVisitError(msg) {
+  const el = document.getElementById('next-visit-error');
+  if (el) { el.style.display = 'block'; el.textContent = msg; }
+  setElementValue('next-visit-display', '');
+  setElementValue('next-visit-remaining', '');
+  setElementValue('next-visit-iso', '');
+}
+function hideNextVisitError() {
+  const el = document.getElementById('next-visit-error');
+  if (el) el.style.display = 'none';
+}
+
+// Main button: Auto Schedule Next Visit
+function autoScheduleNextVisit() {
+  const isoVal = getElementValue('next-visit-iso', '');
+  const interval = getElementValue('next-visit-interval', '');
+  const alertBefore = parseInt(getElementValue('next-visit-alert-before', '60'), 10);
+
+  // Validate
+  if (!interval) {
+    showNextVisitError('⚠️ يرجى اختيار فترة المتابعة أولاً.');
+    return;
+  }
+
+  // Re-calculate if not already done
+  if (!isoVal) {
+    if (interval === 'custom') {
+      onCustomNextVisitDateChange();
+    } else {
+      calcNextVisitDate();
+    }
+  }
+
+  const finalIso = getElementValue('next-visit-iso', '');
+  if (!finalIso) {
+    showNextVisitError('⚠️ لم يتم تحديد موعد صالح. يرجى مراجعة البيانات المدخلة.');
+    return;
+  }
+
+  const nextDate = new Date(finalIso);
+  const patId = getElementValue('visit-patient-id', '') || getElementValue('new-visit-patient-id', '');
+  const p = patients.find(x => x.patientId === patId) || { fullName: 'المريض', phone: clinicSettings.phone };
+
+  const intervalLabel = INTERVAL_LABELS[interval] || 'موعد مخصص';
+  const alertDateMs = nextDate.getTime() - (alertBefore * 60 * 1000);
+  const alertDate = new Date(alertDateMs);
+
+  // Save to patient's next visit info
+  const patIdx = patients.findIndex(x => x.patientId === patId);
+  if (patIdx >= 0) {
+    patients[patIdx].nextVisit = {
+      isoDate: finalIso,
+      interval: interval,
+      intervalLabel: intervalLabel,
+      alertBefore: alertBefore,
+      alertIso: alertDate.toISOString(),
+      status: 'مجدول',
+      setAt: new Date().toISOString()
+    };
+    saveStateToLocalStorage();
+  }
+
+  // Add to notification logs
+  const msgId = `NV-${Date.now()}`;
+  notificationLogs.unshift({
+    msgId,
+    patientId: patId,
+    patientName: p.fullName,
+    patientPhone: p.phone || clinicSettings.phone,
+    type: 'next_visit',
+    typeName: `📅 زيارة قادمة (${intervalLabel})`,
+    appointmentTime: nextDate.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' }),
+    messageText: `تذكير: زيارة تمريضية منزلية مقررة للمريض ${p.fullName} بتاريخ ${nextDate.toLocaleDateString('ar-EG')} - إبراهيم ماهر (01001097896)`,
+    date: new Date().toLocaleDateString('ar-EG'),
+    lastAttempt: 'بانتظار وقت الإرسال',
+    status: 'Pending'
+  });
+  try { localStorage.setItem('nabd_notifications_v1', JSON.stringify(notificationLogs)); } catch(e) {}
+
+  // Show confirmation
+  const confirmBox = document.getElementById('next-visit-confirm-box');
+  const confirmText = document.getElementById('next-visit-confirm-text');
+  if (confirmBox) confirmBox.style.display = 'block';
+  if (confirmText) {
+    confirmText.innerHTML = `
+      📅 <strong>الموعد:</strong> ${nextDate.toLocaleDateString('ar-EG', { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit' })}<br>
+      ⏳ <strong>المتبقي:</strong> ${getTimeRemainingText(nextDate)}<br>
+      🔔 <strong>التذكير:</strong> يُرسل قبل الموعد بـ ${alertBefore < 60 ? alertBefore + ' دقيقة' : (alertBefore/60) < 24 ? (alertBefore/60) + ' ساعة' : 'يوم كامل'}<br>
+      📋 <strong>نوع التكرار:</strong> ${intervalLabel}<br>
+      📊 <strong>حالة التذكير:</strong> مجدول ✅
+    `;
+  }
+
+  hideNextVisitError();
+  showToast(`✅ تم جدولة الزيارة القادمة للمريض ${p.fullName} بنجاح!`, 'success');
+  renderNotificationLogs();
+  renderScheduleTable();
+}
+
+// Reset scheduler fields (called on form reset)
+function resetNextVisitScheduler() {
+  setElementValue('next-visit-interval', '');
+  setElementValue('next-visit-ref', 'current');
+  setElementValue('next-visit-display', '');
+  setElementValue('next-visit-remaining', '');
+  setElementValue('next-visit-iso', '');
+  setElementValue('next-visit-alert-before', '60');
+  const customGroup = document.getElementById('next-visit-custom-group');
+  const customRefGroup = document.getElementById('custom-ref-date-group');
+  const confirmBox = document.getElementById('next-visit-confirm-box');
+  const errorBox = document.getElementById('next-visit-error');
+  if (customGroup) customGroup.style.display = 'none';
+  if (customRefGroup) customRefGroup.style.display = 'none';
+  if (confirmBox) confirmBox.style.display = 'none';
+  if (errorBox) errorBox.style.display = 'none';
+}
+
 

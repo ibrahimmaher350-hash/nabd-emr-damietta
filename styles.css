@@ -1651,3 +1651,47 @@ tr:hover {
   }
 }
 
+/* ========================================
+   NEXT VISIT SCHEDULER CARD STYLES
+   ======================================== */
+.next-visit-scheduler-card {
+  border-radius: 14px;
+  margin-top: 1.5rem;
+}
+
+.next-visit-scheduler-card h3 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+#next-visit-display {
+  font-size: 0.88rem;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  cursor: default;
+}
+
+#next-visit-remaining {
+  font-size: 0.95rem;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  cursor: default;
+  background: rgba(255, 189, 89, 0.08);
+  border: 1px solid rgba(255, 189, 89, 0.3);
+}
+
+#next-visit-confirm-box {
+  animation: toastIn 0.3s ease;
+}
+
+#next-visit-error {
+  animation: toastIn 0.25s ease;
+}
+
+@media (max-width: 768px) {
+  .next-visit-scheduler-card .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+

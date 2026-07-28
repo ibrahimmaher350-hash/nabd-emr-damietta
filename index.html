@@ -448,6 +448,90 @@
             </div>
           </div>
 
+          <!-- Step 4: NEXT VISIT APPOINTMENT SCHEDULER -->
+          <div class="panel-card next-visit-scheduler-card" style="background: rgba(0,212,178,0.04); border: 1.5px solid var(--accent-cyan);">
+            <h3 style="color: var(--accent-cyan); margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;">4️⃣ 📅 جدولة الزيارة القادمة والتذكير التلقائي</h3>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>⏱️ فاصل المتابعة (الموعد القادم بعد)</label>
+                <select id="next-visit-interval" onchange="onNextVisitIntervalChange()">
+                  <option value="">-- اختر الفترة --</option>
+                  <option value="2h">بعد ساعتين</option>
+                  <option value="6h">بعد 6 ساعات</option>
+                  <option value="12h">بعد 12 ساعة</option>
+                  <option value="1d">بعد يوم واحد</option>
+                  <option value="2d">بعد يومين</option>
+                  <option value="3d">بعد 3 أيام</option>
+                  <option value="5d">بعد 5 أيام</option>
+                  <option value="7d">بعد أسبوع</option>
+                  <option value="10d">بعد 10 أيام</option>
+                  <option value="14d">بعد أسبوعين</option>
+                  <option value="30d">بعد شهر</option>
+                  <option value="90d">بعد 3 شهور</option>
+                  <option value="180d">بعد 6 شهور</option>
+                  <option value="365d">بعد سنة</option>
+                  <option value="custom">📝 موعد مخصص يدوياً</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>📆 احسب الموعد من تاريخ</label>
+                <select id="next-visit-ref" onchange="calcNextVisitDate()">
+                  <option value="current">تاريخ الزيارة الحالية</option>
+                  <option value="first">تاريخ الزيارة الأولى</option>
+                  <option value="last">آخر زيارة مسجلة</option>
+                  <option value="custom_ref">تاريخ مرجعي مخصص</option>
+                </select>
+              </div>
+
+              <div class="form-group" id="custom-ref-date-group" style="display:none;">
+                <label>📅 التاريخ المرجعي المخصص</label>
+                <input type="datetime-local" id="next-visit-custom-ref" onchange="calcNextVisitDate()">
+              </div>
+
+              <div class="form-group" id="next-visit-custom-group" style="display:none;">
+                <label>📅 تاريخ ووقت الزيارة القادمة (يدوي)</label>
+                <input type="datetime-local" id="next-visit-custom-date" onchange="onCustomNextVisitDateChange()">
+              </div>
+
+              <div class="form-group">
+                <label>🔔 أرسل التذكير قبل الموعد بـ</label>
+                <select id="next-visit-alert-before">
+                  <option value="15">15 دقيقة</option>
+                  <option value="30">30 دقيقة</option>
+                  <option value="60" selected>ساعة واحدة</option>
+                  <option value="180">3 ساعات</option>
+                  <option value="360">6 ساعات</option>
+                  <option value="1440">يوم كامل</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>✅ موعد الزيارة القادمة (محسوب تلقائياً)</label>
+                <input type="text" id="next-visit-display" readonly style="background:rgba(0,212,178,0.1); color:var(--accent-cyan); font-weight:bold;" placeholder="اختر الفاصل الزمني أعلاه">
+              </div>
+
+              <div class="form-group">
+                <label>⏳ الوقت المتبقي حتى الموعد</label>
+                <input type="text" id="next-visit-remaining" readonly style="color:var(--accent-amber); font-weight:bold;" placeholder="--">
+              </div>
+
+              <input type="hidden" id="next-visit-iso">
+            </div>
+
+            <div id="next-visit-error" style="display:none; color:var(--accent-red); font-size:0.9rem; font-weight:700; padding:0.6rem 0.8rem; background:rgba(255,82,82,0.1); border-radius:8px; margin-bottom:0.8rem;"></div>
+
+            <button type="button" class="btn btn-primary" style="width:100%; font-size:1rem; padding:0.9rem; margin-top:0.4rem;" onclick="autoScheduleNextVisit()">
+              📅 تحديد الموعد القادم تلقائياً وإضافته لقائمة الزيارات
+            </button>
+
+            <div id="next-visit-confirm-box" style="display:none; margin-top:0.8rem; background:rgba(0,212,178,0.08); border:1px solid var(--accent-cyan); border-radius:10px; padding:0.8rem;">
+              <p style="color:var(--accent-cyan); font-weight:700; margin-bottom:0.3rem;">✅ تم جدولة الزيارة القادمة بنجاح!</p>
+              <p id="next-visit-confirm-text" style="color:var(--text-main); font-size:0.9rem;"></p>
+            </div>
+          </div>
+
           <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
             <button type="button" class="btn btn-secondary btn-lg" onclick="closeInlineCRMVisitSection()">➡️ رجوع</button>
             <button type="submit" class="btn btn-primary btn-lg">
@@ -465,45 +549,6 @@
 
     <!-- 3. SCHEDULING & NOTIFICATIONS TAB -->
     <section id="schedule-tab" class="tab-content">
-      
-      <!-- MONITORING METRICS HEADER BAR -->
-      <div class="notif-monitoring-bar">
-        <div class="metric-card">
-          <span class="metric-icon">📨</span>
-          <div>
-            <div class="metric-title">رسائل اليوم</div>
-            <div class="metric-val" id="metric-today-count">0</div>
-          </div>
-        </div>
-        <div class="metric-card">
-          <span class="metric-icon">✅</span>
-          <div>
-            <div class="metric-title">تم الإرسال</div>
-            <div class="metric-val" style="color:var(--accent-green);" id="metric-delivered-count">0</div>
-          </div>
-        </div>
-        <div class="metric-card">
-          <span class="metric-icon">⏳</span>
-          <div>
-            <div class="metric-title">بانتظار الإرسال</div>
-            <div class="metric-val" style="color:var(--accent-amber);" id="metric-pending-count">0</div>
-          </div>
-        </div>
-        <div class="metric-card">
-          <span class="metric-icon">❌</span>
-          <div>
-            <div class="metric-title">فشل الإرسال</div>
-            <div class="metric-val" style="color:var(--accent-red);" id="metric-failed-count">0</div>
-          </div>
-        </div>
-        <div class="metric-card">
-          <span class="metric-icon">📊</span>
-          <div>
-            <div class="metric-title">نسبة النجاح</div>
-            <div class="metric-val" style="color:var(--accent-cyan);" id="metric-success-rate">100%</div>
-          </div>
-        </div>
-      </div>
 
       <!-- SCHEDULE VISITS PANEL -->
       <div class="panel-card">
