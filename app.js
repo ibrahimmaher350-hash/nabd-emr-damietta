@@ -254,6 +254,7 @@ function switchTab(tabId, btnElement, skipPush = false) {
 
   document.querySelectorAll('main > .tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-tabs > .tab-btn').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.mobile-bottom-nav > .mobile-nav-item').forEach(el => el.classList.remove('active'));
   
   const targetContent = document.getElementById(tabId);
   if (targetContent) targetContent.classList.add('active');
@@ -269,6 +270,14 @@ function switchTab(tabId, btnElement, skipPush = false) {
     else if (tabId === 'settings-tab' && btns[4]) btns[4].classList.add('active');
     else if (tabId === 'dashboard-tab' && btns[5]) btns[5].classList.add('active');
   }
+
+  // Sync Mobile Bottom Nav Items
+  const mobItems = document.querySelectorAll('.mobile-bottom-nav > .mobile-nav-item');
+  if (tabId === 'add-patient-tab' && mobItems[0]) mobItems[0].classList.add('active');
+  else if (tabId === 'patients-tab' && mobItems[1]) mobItems[1].classList.add('active');
+  else if (tabId === 'schedule-tab' && mobItems[2]) mobItems[2].classList.add('active');
+  else if (tabId === 'prescription-tab' && mobItems[3]) mobItems[3].classList.add('active');
+  else if (tabId === 'settings-tab' && mobItems[4]) mobItems[4].classList.add('active');
 
   if (tabId === 'add-patient-tab') {
     initTabAddPatientForm();
@@ -287,7 +296,7 @@ function switchTab(tabId, btnElement, skipPush = false) {
   }
 }
 
-// Initialize Application
+// Initialize Application & Service Worker PWA Registration
 document.addEventListener('DOMContentLoaded', () => {
   applyClinicSettingsToUI();
   applySyncSettingsToUI();
@@ -304,6 +313,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initQRCode();
   setCurrentDateTime();
   initTabAddPatientForm();
+
+  // Register PWA Service Worker for Offline & Native Mobile Support
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js?v=31')
+      .then(reg => console.log('📱 PWA Service Worker Registered Successfully:', reg.scope))
+      .catch(err => console.log('❌ Service Worker Registration Failed:', err));
+  }
 });
 
 function addAuditLog(patientId, actionText) {

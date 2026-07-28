@@ -1,0 +1,26 @@
+{
+  "name": "إبراهيم ماهر | نبض للتمريض المنزلي EMR",
+  "short_name": "نبض EMR",
+  "description": "نظام EMR & ERP إدارة التمريض المنزلي والزيارات - محافظة دمياط",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b192c",
+  "theme_color": "#0b192c",
+  "lang": "ar-EG",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "assets/logo.jpg?v=31",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/logo.jpg?v=31",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

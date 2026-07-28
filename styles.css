@@ -978,6 +978,178 @@ tr:hover {
   font-weight: bold;
 }
 
+/* MOBILE BOTTOM NAVIGATION BAR (Android Native App Experience) */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62px;
+  background: #0b192c;
+  border-top: 1px solid var(--border-color);
+  z-index: 1000;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+}
+
+.mobile-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0.3rem 0.5rem;
+  transition: all 0.15s ease;
+  flex: 1;
+}
+
+.mobile-nav-item .mobile-nav-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.1rem;
+}
+
+.mobile-nav-item.active {
+  color: var(--accent-cyan);
+}
+
+.mobile-nav-item.active .mobile-nav-icon {
+  transform: translateY(-2px);
+}
+
+/* MOBILE FLOATING ACTION BUTTON (FAB) */
+.mobile-fab-btn {
+  display: none;
+  position: fixed;
+  bottom: 74px;
+  left: 16px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan) 0%, #00a88f 100%);
+  color: #0b192c;
+  font-size: 1.5rem;
+  border: none;
+  box-shadow: 0 6px 20px rgba(0, 212, 178, 0.4);
+  z-index: 999;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-fab-btn:active {
+  transform: scale(0.92);
+}
+
+/* RESPONSIVE SMARTPHONE MEDIA QUERIES (320px to 768px) */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 70px;
+  }
+
+  .nav-tabs {
+    display: none !important;
+  }
+
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+
+  .mobile-fab-btn {
+    display: flex !important;
+  }
+
+  .top-navbar {
+    padding: 0.6rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .brand-title h1 {
+    font-size: 1.25rem !important;
+  }
+
+  .brand-title p {
+    font-size: 0.78rem !important;
+  }
+
+  .main-container {
+    padding: 0.8rem 0.6rem;
+  }
+
+  .panel-card {
+    padding: 1rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.8rem;
+  }
+
+  .btn {
+    min-height: 46px;
+    font-size: 0.92rem;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn-sm {
+    min-height: 38px;
+    width: auto;
+  }
+
+  /* Bottom sheet modal styling for phones */
+  .modal-overlay .modal-card {
+    border-radius: 20px 20px 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    width: 100%;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .patient-card {
+    padding: 0.8rem;
+  }
+
+  .notif-monitoring-bar {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+}
+
 @media print {
   body * {
     visibility: hidden;
