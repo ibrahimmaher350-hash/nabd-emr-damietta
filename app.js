@@ -2223,10 +2223,38 @@ function openAddPhotoURLModal() {
     url: url
   });
 
-  pushHistoryState();
-  renderDraftPhotosList();
-  updateDraftReportView();
-  showToast('📷 تم إضافة رابط الصورة بنجاح للتقرير!', 'success');
+function openReportPrintPreviewModal() {
+  const modal = document.getElementById('report-print-preview-modal');
+  const stage = document.getElementById('modal-printable-a4-stage');
+  const canvas = document.getElementById('printable-editor-report-canvas') || document.getElementById('draft-live-preview-box');
+
+  if (!modal || !stage) return;
+
+  if (canvas && canvas.innerHTML.trim() !== '') {
+    stage.innerHTML = canvas.innerHTML;
+  } else {
+    // Generate default patient print record if empty
+    const p = patients.find(item => item.patientId === currentActiveProfilePatientId) || patients[0];
+    if (p) printPatientRecord(p.patientId);
+    return;
+  }
+
+  modal.classList.add('active');
+}
+
+function closeReportPrintPreviewModal() {
+  const modal = document.getElementById('report-print-preview-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function executePrintFromPreview() {
+  closeReportPrintPreviewModal();
+  downloadReportPDF();
+}
+
+function sharePreviewReportWhatsApp() {
+  closeReportPrintPreviewModal();
+  shareReportWhatsApp();
 }
 
 function editPhotoLabel(idx) {

@@ -567,6 +567,7 @@
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">التقرير موثق رقمياً بختم نبض وتوقيع إبراهيم ماهر المعتمد و كود QR الفوري للتحقق.</p>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.6rem;">
+              <button class="btn btn-amber btn-lg" onclick="openReportPrintPreviewModal()">👁️ معاينة التقرير قبل الطباعة</button>
               <button class="btn btn-primary btn-lg" onclick="downloadReportPDF()">📄 طباعة وتصدير PDF</button>
               <button class="btn btn-success btn-lg" onclick="shareReportWhatsApp()">💬 إرسال التقرير واتساب المريض</button>
               <button class="btn btn-secondary" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ بالمسودات</button>
@@ -1268,6 +1269,29 @@
         <button class="btn btn-secondary" id="confirm-modal-cancel">إلغاء</button>
         <button class="btn btn-danger" id="confirm-modal-action">🗑️ تأكيد الحذف النهائي</button>
       </div>
+  <!-- FULL SCREEN PRINT & PDF PREVIEW MODAL -->
+  <div class="modal-overlay" id="report-print-preview-modal" style="z-index: 100000;">
+    <div class="modal-card" style="max-width: 900px; width: 95%; max-height: 94vh; overflow-y: auto; background: #0f172a; border: 2px solid var(--accent-cyan);">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <h3 style="color: var(--accent-cyan); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+          👁️ معاينة التقرير الطبي ومطابقته للطباعة (Print & PDF Live Preview)
+        </h3>
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-primary btn-sm" onclick="executePrintFromPreview()">🖨️ طباعة الآن / حفظ PDF</button>
+          <button type="button" class="btn btn-success btn-sm" onclick="sharePreviewReportWhatsApp()">💬 إرسال واتساب</button>
+          <button type="button" class="btn btn-secondary btn-sm" onclick="closeReportPrintPreviewModal()">❌ إغلاق المعاينة</button>
+        </div>
+      </div>
+      
+      <!-- A4 PAPER CANVAS WRAPPER IN MODAL -->
+      <div style="background: #cbd5e1; padding: 1.2rem; border-radius: 8px; overflow-x: auto; display: flex; justify-content: center;">
+        <div id="modal-printable-a4-stage" style="width: 100%; max-width: 794px; background: #ffffff; color: #000000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 4px; padding: 15px; direction: rtl; text-align: right;">
+          <!-- Content populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- GLOBAL PRINTABLE STAGE FOR OFFICIAL EMR REPORTS & PDF EXPORT -->
   <div id="global-printable-stage"></div>
 
