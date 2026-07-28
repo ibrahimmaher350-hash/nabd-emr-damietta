@@ -1249,21 +1249,67 @@ tr:hover {
   background: var(--bg-card);
   border-radius: 16px;
   border: 1px solid var(--border-color);
-  padding: 1.5rem;
-  width: 100%;
-  max-width: 1050px;
+  padding: 1.2rem;
+  width: 96vw;
+  max-width: 1150px;
+  height: 92vh;
   max-height: 92vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
   box-shadow: var(--shadow-lg);
   position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .profile-top-banner {
-  background: linear-gradient(135deg, rgba(0, 212, 178, 0.1) 0%, rgba(11, 25, 44, 0.9) 100%);
-  border: 1px solid var(--accent-cyan);
+  background: linear-gradient(135deg, rgba(0, 212, 178, 0.12) 0%, rgba(15, 23, 42, 0.95) 100%);
+  border: 1px solid rgba(0, 212, 178, 0.3);
   border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1rem;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.profile-header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.profile-summary-stats {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  width: 100%;
+}
+
+.stat-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.stat-pill-due {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.profile-action-btns {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .profile-nav-tabs {
@@ -1271,22 +1317,47 @@ tr:hover {
   overflow-x: auto;
   white-space: nowrap;
   gap: 0.4rem;
-  padding-bottom: 0.5rem;
-  margin-bottom: 1rem;
+  padding: 0.3rem 0.2rem 0.6rem 0.2rem;
+  margin-bottom: 0.6rem;
   border-bottom: 1px solid var(--border-color);
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  flex-shrink: 0;
+  touch-action: pan-x;
 }
 
 .profile-nav-tabs::-webkit-scrollbar {
-  display: none;
+  height: 4px;
+}
+.profile-nav-tabs::-webkit-scrollbar-thumb {
+  background: var(--accent-cyan);
+  border-radius: 4px;
 }
 
 .profile-nav-tabs .tab-btn {
   flex: 0 0 auto;
-  padding: 0.5rem 0.9rem;
-  font-size: 0.85rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
   border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.profile-nav-tabs .tab-btn.active {
+  background: var(--gradient-accent);
+  color: #fff;
+  border-color: transparent;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 212, 178, 0.3);
+}
+
+.profile-body-container {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0.5rem 0.2rem;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* RESPONSIVE SMARTPHONE MEDIA QUERIES (320px to 768px) */
@@ -1346,8 +1417,8 @@ tr:hover {
     align-items: flex-end !important;
   }
 
-  .modal-overlay .modal-card,
-  .modal-overlay .full-profile-modal-card {
+  /* Target standard modal cards on phone */
+  .modal-overlay .modal-card {
     border-radius: 20px 20px 0 0 !important;
     max-height: 92vh !important;
     height: auto !important;
@@ -1364,45 +1435,81 @@ tr:hover {
     box-sizing: border-box !important;
   }
 
-  /* Profile Top Banner Stack for Mobile */
-  .profile-top-banner {
-    padding: 0.8rem !important;
+  /* Dedicated Mobile Layout for Full Patient Profile Modal */
+  .modal-overlay .full-profile-modal-card {
+    border-radius: 20px 20px 0 0 !important;
+    height: 94vh !important;
+    max-height: 94vh !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0.8rem 0.6rem !important;
+    box-sizing: border-box !important;
   }
 
-  .profile-top-banner > div {
-    flex-direction: column !important;
-    align-items: flex-start !important;
+  .profile-top-banner {
+    padding: 0.6rem 0.8rem !important;
     gap: 0.5rem !important;
   }
 
-  .profile-top-banner div[style*="display:flex"] {
-    flex-wrap: wrap !important;
+  .profile-header-info {
+    gap: 0.6rem !important;
+  }
+
+  .profile-header-info h2 {
+    font-size: 1.1rem !important;
+  }
+
+  .profile-header-info p {
+    font-size: 0.75rem !important;
+  }
+
+  .profile-summary-stats {
     gap: 0.3rem !important;
-    width: 100% !important;
   }
 
-  .profile-top-banner .btn {
-    font-size: 0.78rem !important;
-    padding: 0.3rem 0.6rem !important;
-    min-height: 36px !important;
-    flex: 1 1 auto !important;
+  .stat-pill {
+    font-size: 0.72rem !important;
+    padding: 0.25rem 0.5rem !important;
   }
 
-  /* Profile Nav Tabs Scrollable Row */
+  .profile-action-btns {
+    gap: 0.4rem !important;
+  }
+
+  .profile-action-btns .btn {
+    flex: 1 1 45% !important;
+    font-size: 0.75rem !important;
+    padding: 0.35rem 0.5rem !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+
   .profile-nav-tabs {
-    display: flex !important;
-    overflow-x: auto !important;
-    white-space: nowrap !important;
-    -webkit-overflow-scrolling: touch !important;
+    padding: 0.2rem 0.1rem 0.5rem 0.1rem !important;
+    margin-bottom: 0.5rem !important;
     gap: 0.3rem !important;
-    padding-bottom: 0.6rem !important;
-    width: 100% !important;
   }
 
   .profile-nav-tabs .tab-btn {
-    flex: 0 0 auto !important;
-    font-size: 0.8rem !important;
-    padding: 0.4rem 0.7rem !important;
+    font-size: 0.76rem !important;
+    padding: 0.35rem 0.65rem !important;
+  }
+
+  .profile-body-container {
+    padding: 0.4rem 0.2rem !important;
+  }
+
+  .profile-body-container .form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.6rem !important;
   }
 
   /* Grid Layouts collapse to 1 column on phone */

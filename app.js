@@ -816,22 +816,26 @@ function openFullPatientProfileModal(patientId) {
   let totalDue = 0;
   patVisits.forEach(v => { totalDue += (v.billing?.remaining || 0); });
 
+  const ageText = p.dob ? `${calculateAge(p.dob)} سنة` : (p.age || 'غير محدد');
   const banner = document.getElementById('profile-top-banner-content');
   banner.innerHTML = `
-    <div style="display:flex; align-items:center; gap:1rem;">
-      <div class="patient-avatar" style="width:56px; height:56px; font-size:1.5rem;">${p.fullName.charAt(0)}</div>
-      <div>
-        <h2 style="font-size:1.4rem; color:var(--accent-cyan); font-weight:800;">${p.fullName} <span style="font-size:0.9rem; color:var(--text-muted);">(${p.mrn || p.patientId})</span></h2>
-        <p style="font-size:0.85rem; color:#cbd5e1;">السن: ${calculateAge(p.dob)} سنة | ${p.gender} | ${p.status || '🟢 نشط'} | 📱 ${p.phone}</p>
+    <div class="profile-header-info">
+      <div class="patient-avatar" style="width:46px; height:46px; font-size:1.3rem; flex-shrink:0;">${p.fullName.charAt(0)}</div>
+      <div style="flex:1; min-width:0;">
+        <h2 style="font-size:1.2rem; color:var(--accent-cyan); font-weight:800; margin:0 0 0.1rem 0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${p.fullName} <span style="font-size:0.75rem; color:var(--text-muted);">(${p.mrn || p.patientId})</span></h2>
+        <p style="font-size:0.78rem; color:#cbd5e1; margin:0; line-height:1.3;">السن: ${ageText} | ${p.gender} | ${p.status || '🟢 نشط'} | 📱 ${p.phone}</p>
       </div>
     </div>
 
     <div class="profile-summary-stats">
-      <div class="stat-pill">👥 الزيارات: <strong>${patVisits.length} زيارة</strong></div>
+      <div class="stat-pill">👥 الزيارات: <strong>${patVisits.length}</strong></div>
       <div class="stat-pill">🩹 الجرح: <strong>${lastVisit?.wound?.type || 'بدون جرح'}</strong></div>
       <div class="stat-pill">❤️ الضغط: <strong>${lastVisit?.vitals?.bpSys || 120}/${lastVisit?.vitals?.bpDia || 80}</strong></div>
       <div class="stat-pill">🧪 السكر: <strong>${lastVisit?.vitals?.sugar || 140} mg/dL</strong></div>
-      <div class="stat-pill" style="border-color:var(--accent-red); color:var(--accent-red);">💰 المستحق: <strong>${totalDue} ج.م</strong></div>
+      <div class="stat-pill stat-pill-due">💰 المستحق: <strong>${totalDue} ج.م</strong></div>
+    </div>
+
+    <div class="profile-action-btns">
       <button class="btn btn-amber btn-sm" onclick="openDocumentCenterForPatient('${p.patientId}')">📄 إنشاء مستند جديد</button>
       <button class="btn btn-primary btn-sm" onclick="openExportPatientModal('${p.patientId}')">🖨️ طباعة / تصدير</button>
     </div>
@@ -856,13 +860,15 @@ function switchProfileTab(tabId, btnElement) {
   const container = document.getElementById('profile-body-content');
 
   if (tabId === 'prof-basic') {
+    const ageText = p.dob ? `${calculateAge(p.dob)} سنة` : (p.age || 'غير محدد');
+    let natIdHtml = (p.nationalId && p.nationalId !== 'غير محدد') ? `<div><strong>الرقم القومي:</strong> ${p.nationalId}</div>` : '';
     container.innerHTML = `
       <div class="panel-card">
-        <h3 style="color:var(--accent-cyan); margin-bottom:1rem;">📋 البيانات الشخصية والعنوان (MRN: ${p.mrn || p.patientId})</h3>
+        <h3 style="color:var(--accent-cyan); margin-bottom:1rem; font-size:1.05rem;">📋 البيانات الشخصية والعنوان (MRN: ${p.mrn || p.patientId})</h3>
         <div class="form-grid">
           <div><strong>الاسم الكامل:</strong> ${p.fullName}</div>
-          <div><strong>الرقم القومي:</strong> ${p.nationalId}</div>
-          <div><strong>تاريخ الميلاد:</strong> ${p.dob} (${calculateAge(p.dob)} سنة)</div>
+          ${natIdHtml}
+          <div><strong>تاريخ الميلاد والسن:</strong> ${p.dob ? p.dob + ' (' + ageText + ')' : ageText}</div>
           <div><strong>النوع / الجنس:</strong> ${p.gender}</div>
           <div><strong>حالة المريض:</strong> ${p.status || '🟢 نشط'}</div>
           <div><strong>رقم الهاتف الرئيسي:</strong> ${p.phone}</div>
@@ -870,7 +876,7 @@ function switchProfileTab(tabId, btnElement) {
           <div><strong>طوارئ وهاتف الصلة:</strong> ${p.emergency}</div>
           <div><strong>المنطقة والمدينة:</strong> ${p.area}</div>
           <div class="full-width"><strong>العنوان التفصيلي وملاحظات الوصول:</strong> ${p.detailedAddress}</div>
-          <div class="full-width"><strong>📍 موقع Google Maps:</strong> <a href="${p.mapsLink || clinicSettings.googleMapsUrl}" target="_blank">${p.mapsLink || clinicSettings.googleMapsUrl}</a></div>
+          <div class="full-width"><strong>📍 موقع Google Maps:</strong> <a href="${p.mapsLink || clinicSettings.googleMapsUrl}" target="_blank" style="color:var(--accent-cyan); font-weight:bold; word-break:break-all;">${p.mapsLink || clinicSettings.googleMapsUrl}</a></div>
         </div>
       </div>
     `;
