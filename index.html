@@ -401,93 +401,81 @@
 
     </section>
 
-    <!-- 4. ENTERPRISE REPORT STUDIO & MEDICAL DOCUMENT CENTER -->
+    <!-- 4. UNIVERSAL SINGLE SMART EMR REPORT STUDIO TAB -->
     <section id="prescription-tab" class="tab-content">
       
-      <!-- 1) 5-STEP WIZARD PROGRESS BAR HEADER -->
-      <div class="panel-card" style="padding: 1.2rem; margin-bottom: 1.5rem;">
-        <div class="wizard-progress-bar">
-          <div class="wizard-step active" id="wiz-step-pill-1" onclick="setWizardStep(1)">
-            <span class="step-num">①</span>
-            <span class="step-title">نوع التقرير</span>
+      <!-- HERO HEADER FOR UNIVERSAL REPORT STUDIO -->
+      <div class="panel-card hero-banner" style="margin-bottom: 1.2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 0.8rem;">
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <div>
+              <h2 style="color: var(--accent-cyan); font-size: 1.5rem; font-weight: 800; margin: 0;">📑 قالب التقرير الطبي الموحد الذكي (Universal EMR Smart Report)</h2>
+              <p style="color: #cbd5e1; font-size: 0.88rem; margin: 0.2rem 0 0 0;">قالب موحد شامل يتيح تعديل كافة التفاصيل يدويًا وتوليد وإضافة البيانات بالذكاء الاصطناعي.</p>
+            </div>
           </div>
-          <div class="wizard-step" id="wiz-step-pill-2" onclick="setWizardStep(2)">
-            <span class="step-num">②</span>
-            <span class="step-title">المريض والبيانات</span>
-          </div>
-          <div class="wizard-step" id="wiz-step-pill-3" onclick="setWizardStep(3)">
-            <span class="step-num">③</span>
-            <span class="step-title">المحرر الذكي</span>
-          </div>
-          <div class="wizard-step" id="wiz-step-pill-4" onclick="setWizardStep(4)">
-            <span class="step-num">④</span>
-            <span class="step-title">المعاينة والتاريخ</span>
-          </div>
-          <div class="wizard-step" id="wiz-step-pill-5" onclick="setWizardStep(5)">
-            <span class="step-num">⑤</span>
-            <span class="step-title">PDF والتصدير</span>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-amber btn-sm" onclick="editorUndo()">↩️ تراجع</button>
+            <button class="btn btn-amber btn-sm" onclick="editorRedo()">↪️ إعادة</button>
+            <button class="btn btn-success btn-sm" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ المسودة</button>
           </div>
         </div>
       </div>
 
-      <!-- STEP 1 CONTAINER: CATEGORIZED REPORTS SELECTION -->
-      <div id="wizard-step-1-container">
-        <div class="panel-card">
-          <div class="panel-header">
-            <div style="display: flex; align-items: center; gap: 0.8rem;">
-              <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
-              <h2>📑 اختيار نوع التقرير والمستند الطبي (15 نوع تقرير معتمد)</h2>
-            </div>
-          </div>
-
-          <!-- Category Chips & Search Bar -->
-          <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.2rem; align-items: center;">
-            <input type="text" id="report-search-query" placeholder="🔎 ابحث عن نوع التقرير (مثال: روشتة، غيار جروح، تحاليل...)" style="flex: 1; min-width: 260px;" oninput="renderCategorizedReportCards()" inputmode="search">
-            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;" id="report-category-chips">
-              <button class="btn btn-sm btn-primary" onclick="filterReportCategory('all', this)">جميع التقارير</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('primary', this)">⭐ التقارير الشاملة</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('wounds', this)">🩹 تقارير الجروح</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('vitals', this)">📊 العلامات الحيوية</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('nursing', this)">🩺 التمريض والزيارات</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('official', this)">📄 الروشتات والشهادات</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('financial', this)">💰 المالية والإدارية</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('ai', this)">✨ الذكاء الاصطناعي</button>
-            </div>
-          </div>
-
-          <div id="categorized-reports-container" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
-            <!-- Dynamically populated via app.js -->
-          </div>
-        </div>
-
-        <!-- PATIENT SELECTOR & LAUNCH EDITOR -->
-        <div class="panel-card" style="margin-top: 1.5rem; background: rgba(0, 212, 178, 0.03); border: 1px solid var(--accent-cyan);">
-          <h3 style="color: var(--accent-cyan); margin-bottom: 1rem;">② اختيار المريض وفتح محرر التقرير الذكي</h3>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>اختر المريض بالتقرير</label>
-              <select id="rpt-patient-id">
+      <!-- MAIN REPORT EDITOR STAGE (ALWAYS ACTIVE & UNIFIED) -->
+      <div id="report-editor-stage" class="panel-card" style="display: block; border: 2px solid var(--accent-cyan);">
+        
+        <!-- TOP CONTROL BAR: PATIENT SELECTOR & AI DETAILS GENERATOR -->
+        <div style="background: rgba(0, 212, 178, 0.05); padding: 1rem; border-radius: 10px; border: 1px solid var(--accent-cyan); margin-bottom: 1.2rem;">
+          <div class="form-grid" style="grid-template-columns: 1fr 1fr 1.2fr; align-items: flex-end; gap: 1rem;">
+            
+            <div class="form-group" style="margin: 0;">
+              <label style="font-weight: bold; color: var(--accent-cyan);">① اختر المريض بالتقرير</label>
+              <select id="rpt-patient-id" onchange="onReportPatientSelected(this.value)" style="font-weight: bold; width: 100%;">
                 <option value="">-- اختر مريضاً --</option>
               </select>
             </div>
-            <div class="form-group" style="display: flex; align-items: flex-end;">
-              <button class="btn btn-primary btn-lg" style="width: 100%;" onclick="openReportEditorStage(event)">
-                🚀 فتح محرر التقرير والروشتة الموثقة (Report Studio)
+
+            <div class="form-group" style="margin: 0;">
+              <label style="font-weight: bold; color: var(--accent-cyan);">② نوع الخدمة / التقرير</label>
+              <select id="draft-service-selector" onchange="autoTransformReportForService(this.value)" style="font-weight: bold; width: 100%;">
+                <option value="comprehensive_medical">⭐ تقرير طبي شامل ومستند تحويل (Comprehensive EMR)</option>
+                <option value="prescription">📄 روشتة علاج وأدوية (Prescription)</option>
+                <option value="wound_dressing">🩹 غيار ورعاية الجروح والقرح (Wound Dressing Care)</option>
+                <option value="vital_signs">📊 متابعة وتخطيط العلامات الحيوية (Vital Signs Monitoring)</option>
+                <option value="medication_admin">💊 إعطاء وإدارة الأدوية (Medication Administration)</option>
+                <option value="injection">💉 إعطاء حقن عضل/وريد/تحت الجلد (Injections)</option>
+                <option value="iv_cannula">💉 تركيب كانيولا وريدية (IV Cannula Insertion)</option>
+                <option value="iv_fluids">💧 تركيب محاليل وريدية (IV Infusion & Fluids)</option>
+                <option value="catheter_care">🫁 تركيب/تغيير قسطرة بولية (Urinary Catheter)</option>
+                <option value="ryle_tube">🥛 تركيب أنبوب تغذية رايل (NG Tube / Ryle)</option>
+                <option value="diabetic_foot">🦶 عناية وغيارات القدم السكري (Diabetic Foot Care)</option>
+                <option value="post_op_care">🔪 رعاية بعد العمليات الجراحية (Post Operative Care)</option>
+                <option value="pressure_ulcer">🩹 رعاية قرح الفراش (Pressure Ulcer Care)</option>
+                <option value="home_visit">🏠 زيارة تمريضية منزلية (Home Nursing Visit)</option>
+                <option value="nursing_24h">⏱️ تمريض مقيم 24 ساعة (24-Hour Nursing Care)</option>
+                <option value="invoice">🧾 إيصال واستلام نقدية (Invoice & Cash Receipt)</option>
+                <option value="discharge">🚪 تعليمات ملخص الخروج (Discharge Summary)</option>
+                <option value="custom">✨ خدمة وتقارير مخصصة (Custom Report)</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 0.4rem;">
+              <button type="button" class="btn btn-primary btn-lg" style="width: 100%; font-weight: 800;" onclick="aiAutoGenerateFullReportDetails()">
+                🤖 توليد وإضافة التفاصيل بالذكاء الاصطناعي
               </button>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- REPORT STUDIO EDITOR STAGE -->
-      <div id="report-editor-stage" class="panel-card" style="display: none; margin-top: 1.5rem; border: 2px solid var(--accent-cyan);">
-        <div class="panel-header">
-          <h2 style="color: var(--accent-cyan);">🎨 محرر التقارير التفاعلي (Canva/Word-like Report Studio)</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-amber btn-sm" onclick="editorUndo()">↩️ تراجع</button>
-            <button class="btn btn-amber btn-sm" onclick="editorRedo()">↪️ إعادة</button>
-            <button class="btn btn-success btn-sm" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ مسودة</button>
-            <button class="btn btn-danger btn-sm" onclick="closeReportEditorStage()">❌ إغلاق المحرر</button>
+          </div>
+
+          <!-- AI ACTION TOOLBAR BUTTONS -->
+          <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.8rem; border-top: 1px dashed rgba(0,212,178,0.3); padding-top: 0.8rem;">
+            <button type="button" class="btn btn-sm btn-primary" onclick="aiActionStyleEnhance()" title="تحسين الصياغة بلغة تمريضية راقية">✨ تحسين الصياغة</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="aiActionSuggestAssessment()" title="اقتراح تقييم تمريضي ملائم">🩺 اقتراح تقييم</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="aiActionSuggestCarePlan()" title="اقتراح خطة رعاية وتوصيات">📋 اقتراح خطة رعاية</button>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="aiActionImproveTerms()" title="استبدال العامية بمصطلحات طبية قياسية">📚 المصطلحات الطبية</button>
+            <button type="button" class="btn btn-sm btn-amber" onclick="aiActionTranslateMedical()" title="ترجمة فورية بين العربية والإنجليزية">🌍 ترجمة عربي/إنجليزي</button>
+            <button type="button" class="btn btn-sm btn-success" onclick="aiAuditReportQuality()" title="مراجعة وتدقيق الذكاء الاصطناعي الشامل قبل الطباعة">✅ تدقيق AI قبل الطباعة</button>
           </div>
         </div>
 

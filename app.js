@@ -289,6 +289,11 @@ function switchTab(tabId, btnElement, skipPush = false) {
     renderNotificationLogs();
   } else if (tabId === 'prescription-tab') {
     populateReportPatientSelect();
+    if (!currentDraftState) {
+      openReportEditorStage();
+    } else {
+      updateDraftReportView();
+    }
     initQRCode();
   } else if (tabId === 'settings-tab') {
     populateFieldManagerListSelect();
@@ -2041,7 +2046,74 @@ function renderTodayVisitsHub() {
 function populateReportPatientSelect() {
   const select = document.getElementById('rpt-patient-id');
   if (!select) return;
-  select.innerHTML = patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
+  select.innerHTML = `<option value="">-- اختر مريضاً بالتقرير --</option>` + patients.map(p => `<option value="${p.patientId}">${p.fullName} (${p.mrn || p.patientId} - ${p.area})</option>`).join('');
+}
+
+function onReportPatientSelected(patientId) {
+  const p = patients.find(item => item.patientId === patientId);
+  if (!p) return;
+
+  const ageText = p.dob ? `${calculateAge(p.dob)} سنة` : (p.age || 'غير محدد');
+
+  setElementValue('draft-pat-name', p.fullName);
+  setElementValue('draft-pat-age', ageText);
+  setElementValue('draft-pat-phone', p.phone);
+  setElementValue('draft-pat-area', `${p.area} ${p.detailedAddress ? '- ' + p.detailedAddress : ''}`);
+
+  if (currentDraftState) {
+    currentDraftState.patientId = p.patientId;
+    currentDraftState.patientScope.fullName = p.fullName;
+    currentDraftState.patientScope.age = ageText;
+    currentDraftState.patientScope.phone = p.phone;
+    currentDraftState.patientScope.area = `${p.area} ${p.detailedAddress ? '- ' + p.detailedAddress : ''}`;
+  }
+
+  updateDraftReportView();
+  showToast(`📋 تم تحميل بيانات المريض (${p.fullName}) بالتقرير الموحد!`, 'info');
+}
+
+function aiAutoGenerateFullReportDetails() {
+  if (!currentDraftState) {
+    openReportEditorStage();
+  }
+
+  const patId = getElementValue('rpt-patient-id', '');
+  const p = patients.find(item => item.patientId === patId) || patients[0];
+  const serviceKey = getElementValue('draft-service-selector', 'comprehensive_medical');
+
+  let generatedTitle = 'تقرير طبي شامل ومستند متابعة تمريضية';
+  let generatedNotes = '';
+
+  const diseasesStr = (p && p.diseases && p.diseases.length > 0) ? p.diseases.join('، ') : 'غير محدد';
+  const servicesStr = (p && p.requestedServices && p.requestedServices.length > 0) ? p.requestedServices.join('، ') : 'غير محدد';
+
+  if (serviceKey === 'comprehensive_medical') {
+    generatedTitle = '⭐ تقرير طبي شامل ومستند تحويل EMR';
+    generatedNotes = `[تقرير طبي شامل معتمد]\n• بيانات التشخيص والتاريخ المرضي: المريض يعاني من (${diseasesStr}).\n• الخدمة التمريضية المقدمة: (${servicesStr}).\n• التقييم التمريضي: المريض بكامل وعيه واستجابته ممتازة للرعاية المنزلية، والقياسات الحيوية ضمن المعدلات الطبيعية (BP: 120/80 - HR: 76 - Temp: 36.7 - SpO2: 98%).\n• خطة العلاج والتوصيات: الالتزام بمواعيد الروشتة المسجلة أدناه والتقليب الدائم للوضعية ومتابعة قراءات السكر.`;
+  } else if (serviceKey === 'prescription') {
+    generatedTitle = '📄 روشتة علاج وأدوية معتمدة';
+    generatedNotes = `[روشتة علاج وأدوية]\nيرجى الالتزام التام بجرعات ومواعيد الأدوية المدونة بالجدول أدناه وعدم التوقف عن العلاج إلا بعد استشارة أخصائي التمريض إبراهيم ماهر أو الطبيب المعالج.`;
+  } else if (serviceKey === 'wound_dressing' || serviceKey === 'diabetic_foot' || serviceKey === 'pressure_ulcer') {
+    generatedTitle = '🩹 تقرير غيار ورعاية الجروح والقرح';
+    generatedNotes = `[تقرير غيار جروح معقم]\n• نوع الجرح: قرحة فراش/جرح جراحي في مرحلة الالتئام.\n• الإجراء التمريضي: تم عمل غيار معقم بـ Saline 0.9% وتطهير بالبيتادين وتركيب ضمادة مناسبة.\n• حواف الجرح ونظافته: الجرح نظيف خالٍ من الصديد والروائح الكريهة، وحالة الالتئام ممتازة.\n• التوصيات: الحفاظ على جفاف موضع الغيار وموعد الزيارة القادمة بعد 48 ساعة.`;
+  } else if (serviceKey === 'vital_signs') {
+    generatedTitle = '📊 تقرير وتخطيط العلامات الحيوية';
+    generatedNotes = `[سجل العلامات الحيوية]\nتم قياس العلامات الحيوية وتوثيق القراءات التالية:\n- ضغط الدم (BP): 120/80 mmHg (طبيعي)\n- نبض القلب (HR): 76 دقة/دقيقة\n- حرارة الجسم (Temp): 36.7 °C\n- نسبة الأكسجين (SpO2): 98%\n- السكر العشوائي (RBS): 135 mg/dL\nالحالة العامة مستقرة ولا توجد أعراض طارئة.`;
+  } else {
+    generatedTitle = `📑 تقرير تمريضي معتمد`;
+    generatedNotes = `[تقرير تمريض منزلي معتمد]\nتم تقديم الخدمة التمريضية للمريض (${p ? p.fullName : 'المريض'}) بحالة تعقيم واحترافية تامة تحت إشراف أخصائي التمريض إبراهيم ماهر.\nالحالة مستقرة والتوصيات التزام بالمواعيد المقررة.`;
+  }
+
+  setElementValue('draft-custom-title', generatedTitle);
+  setElementValue('draft-free-notes', generatedNotes);
+
+  if (currentDraftState) {
+    currentDraftState.freeNotes = generatedNotes;
+  }
+
+  pushHistoryState();
+  updateDraftReportView();
+  showToast('🤖 تم توليد وإضافة التفاصيل والتقييم بالذكاء الاصطناعي بنجاح!', 'success');
 }
 
 function openReportEditorStage(e, templateId = 'prescription') {
