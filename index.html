@@ -494,9 +494,13 @@
         <!-- 3-COLUMN STUDIO EDITOR LAYOUT -->
         <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
           
-          <!-- Column 1: Patient Info & Variables -->
+          <!-- Column 1: Patient Info & Custom Fields -->
           <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-            <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">1️⃣ بيانات المريض في التقرير</h4>
+            <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">1️⃣ بيانات التقرير والمريض والتعديل</h4>
+            <div class="form-group" style="margin-bottom: 0.6rem;">
+              <label style="font-size: 0.8rem;">عنوان التقرير المخصص</label>
+              <input type="text" id="draft-custom-title" placeholder="أدخل عنوان التقرير المخصص..." oninput="updateDraftReportView()">
+            </div>
             <div class="form-group" style="margin-bottom: 0.6rem;">
               <label style="font-size: 0.8rem;">اسم المريض بالتقرير</label>
               <input type="text" id="draft-pat-name" oninput="updateDraftReportView()">
@@ -513,28 +517,50 @@
               <label style="font-size: 0.8rem;">المنطقة والعنوان</label>
               <input type="text" id="draft-pat-area" oninput="updateDraftReportView()">
             </div>
+            <button class="btn btn-secondary btn-sm" onclick="addCustomSectionToDraft()" style="width: 100%; margin-top: 0.4rem;">➕ إضافة قسم / خانة حرة بالتقرير</button>
           </div>
 
-          <!-- Column 2: Medications & Content -->
+          <!-- Column 2: Medications, Photos & Notes (Add, Edit, Delete) -->
           <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-              <h4 style="color: var(--accent-cyan);">2️⃣ أدوية الروشتة والتوصيات</h4>
-              <button class="btn btn-sm btn-primary" onclick="openAddMedicationDraftModal()">+ إضافة دواء</button>
+              <h4 style="color: var(--accent-cyan);">2️⃣ أدوية الروشتة والصور والملاحظات</h4>
+              <div style="display: flex; gap: 0.3rem;">
+                <button class="btn btn-xs btn-primary" onclick="openAddMedicationDraftModal()">+ إضافة دواء</button>
+                <button class="btn btn-xs btn-danger" onclick="removeAllMedicationsFromDraft()" title="حذف جميع الأدوية">🗑️ مسح الأدوية</button>
+              </div>
             </div>
-            <div id="draft-medications-editor-list" style="margin-bottom: 1rem;"></div>
+            <div id="draft-medications-editor-list" style="margin-bottom: 0.8rem;"></div>
 
-            <div class="form-group">
-              <label style="font-size: 0.8rem;">توصيات وملاحظات إبراهيم ماهر الحرة</label>
-              <textarea id="draft-free-notes" rows="4" style="width: 100%; font-size: 0.85rem;" oninput="updateDraftReportView()"></textarea>
+            <!-- PHOTOS MANAGEMENT SECTION -->
+            <div style="border-top: 1px dashed var(--border-color); padding-top: 0.8rem; margin-top: 0.8rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <h5 style="color: var(--accent-cyan); margin: 0;">📷 معرض صور الجروح والمرفقات</h5>
+                <button class="btn btn-xs btn-success" onclick="openAddPhotoModal()">📷 + إضافة صورة</button>
+              </div>
+              <div id="draft-photos-editor-list" style="max-height: 140px; overflow-y: auto; margin-bottom: 0.8rem;">
+                <!-- Photos listed dynamically -->
+              </div>
             </div>
-            <button class="btn btn-amber btn-sm" onclick="aiEnhanceReportNotes()" style="width: 100%; margin-top: 0.4rem;">✨ تحسين التقرير بالذكاء الاصطناعي</button>
+
+            <!-- FREE NOTES SECTION -->
+            <div class="form-group">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.3rem;">
+                <label style="font-size: 0.8rem; margin: 0;">ملاحظات وتوصيات إبراهيم ماهر الحرة</label>
+                <button class="btn btn-xs btn-danger" onclick="clearDraftFreeNotes()">🗑️ مسح</button>
+              </div>
+              <textarea id="draft-free-notes" rows="3" style="width: 100%; font-size: 0.85rem;" oninput="updateDraftReportView()"></textarea>
+            </div>
+            <button class="btn btn-amber btn-sm" onclick="aiEnhanceReportNotes()" style="width: 100%; margin-top: 0.2rem;">✨ تحسين التقرير بالذكاء الاصطناعي</button>
           </div>
 
-          <!-- Column 3: Actions & Export -->
+          <!-- Column 3: Custom Sections & Export Actions -->
           <div style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between;">
             <div>
-              <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">3️⃣ التوثيق والتصدير والطباعة</h4>
-              <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1rem;">التقرير موثق رقمياً بختم نبض وتوقيع إبراهيم ماهر المعتمد و كود QR الفوري للتحقق.</p>
+              <h4 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">3️⃣ الخانات المخصصة والتوثيق والطباعة</h4>
+              <div id="draft-custom-sections-editor-list" style="margin-bottom: 1rem; max-height: 150px; overflow-y: auto;">
+                <!-- Custom sections listed dynamically with delete buttons -->
+              </div>
+              <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">التقرير موثق رقمياً بختم نبض وتوقيع إبراهيم ماهر المعتمد و كود QR الفوري للتحقق.</p>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.6rem;">
               <button class="btn btn-primary btn-lg" onclick="downloadReportPDF()">📄 طباعة وتصدير PDF</button>

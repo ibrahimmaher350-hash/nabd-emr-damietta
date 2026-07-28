@@ -2161,51 +2161,154 @@ function deleteDraftMedication(idx) {
 }
 
 function renderDraftWoundPhotosList() {
-  const container = document.getElementById('draft-wound-photos-list');
+  renderDraftPhotosList();
+}
+
+function renderDraftPhotosList() {
+  const container = document.getElementById('draft-photos-editor-list');
   if (!container || !currentDraftState) return;
 
+  if (!currentDraftState.woundPhotos || currentDraftState.woundPhotos.length === 0) {
+    container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted); margin:0;">لا توجد صور مرفقة بعد. انقر على "📷 + إضافة صورة".</p>`;
+    return;
+  }
+
   container.innerHTML = currentDraftState.woundPhotos.map((img, idx) => `
-    <div class="wound-card-comparison">
-      <img src="${img.url}" alt="${img.label}">
-      <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">${img.label}</p>
-      <div style="display:flex; gap:0.3rem; justify-content:center;">
-        <button type="button" class="btn btn-sm btn-amber" onclick="replaceWoundPhoto(${idx})">✏️ استبدال</button>
-        <button type="button" class="btn btn-sm btn-danger" onclick="deleteWoundPhoto(${idx})">🗑️ حذف</button>
+    <div style="display:flex; align-items:center; justify-content:space-between; background:rgba(255,255,255,0.03); padding:4px 8px; border-radius:6px; margin-bottom:4px; border:1px solid var(--border-color);">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <img src="${img.url}" style="width:36px; height:36px; border-radius:4px; object-fit:cover;">
+        <span style="font-size:0.78rem; color:var(--text-color);">${img.label || 'صورة مرفقة'}</span>
+      </div>
+      <div style="display:flex; gap:3px;">
+        <button type="button" class="btn btn-xs btn-amber" onclick="editPhotoLabel(${idx})">✏️</button>
+        <button type="button" class="btn btn-xs btn-danger" onclick="deleteWoundPhoto(${idx})">🗑️ حذف</button>
       </div>
     </div>
   `).join('');
 }
 
+function openAddPhotoModal() {
+  const label = prompt('أدخل وصف الصورة (مثال: صورة الجرح قبل الغيار / نتيجة الأشعة):') || 'صورة مرفقة جديدة';
+  const url = prompt('رابط الصورة أو مسارها (اتركه فارغاً لاختيار صورة نموذجية):') || 'assets/stamp.jpg?v=26';
+
+  if (!currentDraftState.woundPhotos) currentDraftState.woundPhotos = [];
+  currentDraftState.woundPhotos.push({
+    id: `img_${Date.now()}`,
+    label: label,
+    url: url
+  });
+
+  pushHistoryState();
+  renderDraftPhotosList();
+  updateDraftReportView();
+  showToast('📷 تم إضافة الصورة بنجاح للتقرير!', 'success');
+}
+
+function editPhotoLabel(idx) {
+  if (!currentDraftState || !currentDraftState.woundPhotos[idx]) return;
+  const oldLabel = currentDraftState.woundPhotos[idx].label || '';
+  const newLabel = prompt('تعديل وصف الصورة:', oldLabel);
+  if (newLabel !== null) {
+    currentDraftState.woundPhotos[idx].label = newLabel;
+    pushHistoryState();
+    renderDraftPhotosList();
+    updateDraftReportView();
+  }
+}
+
+function removeAllMedicationsFromDraft() {
+  if (!currentDraftState) return;
+  showConfirmDialog('هل أنت تأكد من مسح وحذف جميع الأدوية المضافة لهذا التقرير؟', () => {
+    currentDraftState.medications = [];
+    pushHistoryState();
+    renderDraftMedicationsList();
+    updateDraftReportView();
+    showToast('🗑️ تم مسح جدول الأدوية.', 'info');
+  });
+}
+
+function clearDraftFreeNotes() {
+  const input = document.getElementById('draft-free-notes');
+  if (input) input.value = '';
+  if (currentDraftState) currentDraftState.freeNotes = '';
+  updateDraftReportView();
+  showToast('🗑️ تم مسح الملاحظات الحرة.', 'info');
+}
+
+function addCustomSectionToDraft() {
+  const title = prompt('أدخل عنوان الخانة / القسم المخصص (مثال: توصيات النظام الغذائي):');
+  if (!title) return;
+  const value = prompt(`أدخل محتوى قسم [${title}]:`) || 'محتوى مخصص إضافي...';
+
+  if (!currentDraftState.extraElements) currentDraftState.extraElements = [];
+  currentDraftState.extraElements.push({ title: title, value: value });
+
+  pushHistoryState();
+  renderDraftCustomSectionsList();
+  updateDraftReportView();
+  showToast(`➕ تم إضافة القسم المخصص [${title}] بنجاح!`, 'success');
+}
+
+function editDraftCustomSection(idx) {
+  if (!currentDraftState || !currentDraftState.extraElements[idx]) return;
+  const el = currentDraftState.extraElements[idx];
+  const title = prompt('تعديل عنوان القسم:', el.title) || el.title;
+  const value = prompt('تعديل المحتوى:', el.value) || el.value;
+
+  currentDraftState.extraElements[idx] = { title, value };
+  pushHistoryState();
+  renderDraftCustomSectionsList();
+  updateDraftReportView();
+}
+
+function deleteDraftCustomSection(idx) {
+  if (!currentDraftState || !currentDraftState.extraElements) return;
+  currentDraftState.extraElements.splice(idx, 1);
+  pushHistoryState();
+  renderDraftCustomSectionsList();
+  updateDraftReportView();
+  showToast('🗑️ تم حذف القسم المخصص.', 'info');
+}
+
+function renderDraftCustomSectionsList() {
+  const container = document.getElementById('draft-custom-sections-editor-list');
+  if (!container || !currentDraftState) return;
+
+  if (!currentDraftState.extraElements || currentDraftState.extraElements.length === 0) {
+    container.innerHTML = `<p style="font-size:0.78rem; color:var(--text-muted); margin:0;">لا توجد خانات حرة مضافة. انقر على "➕ إضافة قسم/خانة حرة".</p>`;
+    return;
+  }
+
+  container.innerHTML = currentDraftState.extraElements.map((el, idx) => `
+    <div style="background:rgba(255,255,255,0.03); border:1px solid var(--border-color); padding:6px 10px; border-radius:6px; margin-bottom:6px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+        <strong style="font-size:0.8rem; color:var(--accent-cyan);">📌 ${el.title}</strong>
+        <div style="display:flex; gap:3px;">
+          <button type="button" class="btn btn-xs btn-amber" onclick="editDraftCustomSection(${idx})">✏️ تعديل</button>
+          <button type="button" class="btn btn-xs btn-danger" onclick="deleteDraftCustomSection(${idx})">🗑️ حذف</button>
+        </div>
+      </div>
+      <p style="font-size:0.75rem; color:var(--text-muted); margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${el.value}</p>
+    </div>
+  `).join('');
+}
+
 function triggerAddNewWoundPhoto() {
-  document.getElementById('wound-photo-file-input').click();
+  openAddPhotoModal();
 }
 
 function executeAddWoundPhoto(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    currentDraftState.woundPhotos.push({
-      id: `img_${Date.now()}`,
-      label: `صورة جرح جديدة (${new Date().toLocaleDateString('ar-EG')})`,
-      url: evt.target.result
-    });
-    pushHistoryState();
-    renderDraftWoundPhotosList();
-    updateDraftReportView();
-  };
-  reader.readAsDataURL(file);
+  openAddPhotoModal();
 }
 
 function replaceWoundPhoto(idx) {
-  triggerAddNewWoundPhoto();
+  editPhotoLabel(idx);
 }
 
 function deleteWoundPhoto(idx) {
   currentDraftState.woundPhotos.splice(idx, 1);
   pushHistoryState();
-  renderDraftWoundPhotosList();
+  renderDraftPhotosList();
   updateDraftReportView();
 }
 
