@@ -968,26 +968,17 @@
             <input type="text" id="tab-pat-mrn" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="MRN-1005">
           </div>
           <div class="form-group">
-            <label>2. حالة المريض</label>
-            <select id="tab-pat-status">
-              <option value="نشط" selected>🟢 نشط</option>
-              <option value="متوقف">⏸️ متوقف</option>
-              <option value="متوفى">⚰️ متوفى</option>
-              <option value="خرج من الخدمة">🚪 خرج من الخدمة</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>3. تاريخ التسجيل</label>
+            <label>2. تاريخ التسجيل</label>
             <input type="date" id="tab-pat-reg-date">
           </div>
 
           <!-- Basic Info -->
           <div class="form-group">
-            <label>4. الاسم الثلاثي / الرباعي للمريض</label>
+            <label>3. الاسم الثلاثي / الرباعي للمريض</label>
             <input type="text" id="tab-pat-name" placeholder="مثال: أحمد محمود إبراهيم" inputmode="text" required>
           </div>
           <div class="form-group">
-            <label>5. النوع / الجنس</label>
+            <label>4. النوع / الجنس</label>
             <select id="tab-pat-gender">
               <option value="غير محدد">غير محدد</option>
               <option value="ذكر" selected>ذكر</option>
@@ -995,12 +986,12 @@
             </select>
           </div>
           <div class="form-group">
-            <label>6. تاريخ الميلاد</label>
+            <label>5. تاريخ الميلاد (اختياري)</label>
             <input type="date" id="tab-pat-dob" onchange="autoCalcAgeInTabForm(this.value)">
           </div>
           <div class="form-group">
-            <label>7. العمر المحسوب تلقائياً</label>
-            <input type="text" id="tab-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="غير محدد">
+            <label>6. عمر المريض (محسوب تلقائياً أو أدخله يدوياً)</label>
+            <input type="text" id="tab-pat-age-display" placeholder="مثال: 54 سنة" style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="غير محدد">
           </div>
           <div class="form-group">
             <label>8. رقم الهاتف الرئيسي</label>

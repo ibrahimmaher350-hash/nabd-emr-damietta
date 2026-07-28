@@ -610,7 +610,7 @@ function handleSavePatientFromTab(e) {
   if (e) e.preventDefault();
 
   const mrn = document.getElementById('tab-pat-mrn').value || "MRN-1005";
-  const status = document.getElementById('tab-pat-status').value || "نشط";
+  const status = "نشط";
   const regDate = document.getElementById('tab-pat-reg-date').value || new Date().toISOString().split('T')[0];
 
   const name = document.getElementById('tab-pat-name').value.trim() || "مريض بدون اسم";
