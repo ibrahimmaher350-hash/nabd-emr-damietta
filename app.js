@@ -1732,8 +1732,54 @@ function viewVisitPrescription(visitId) {
 }
 
 function downloadReportPDF() {
-  const patId = document.getElementById('rpt-patient-id')?.value;
-  printPatientRecord(patId || currentActiveProfilePatientId);
+  openLiveReportPreviewModal();
+}
+
+// LIVE INTERACTIVE REPORT PRE-PRINT PREVIEW & WYSIWYG EDITING ENGINE
+function openLiveReportPreviewModal() {
+  const sourceBox = document.getElementById('draft-live-preview-box');
+  const targetCanvas = document.getElementById('live-preview-a4-canvas');
+  const modal = document.getElementById('live-report-preview-modal');
+
+  if (!sourceBox || !targetCanvas || !modal) return;
+
+  // Make a clone of the report preview HTML
+  targetCanvas.innerHTML = sourceBox.innerHTML;
+
+  // Enable direct WYSIWYG editing (contenteditable) on all text, headings, paragraphs, and table cells inside the preview canvas!
+  const editableTargets = targetCanvas.querySelectorAll('p, h1, h2, h3, h4, h5, h6, span, td, th, li, div');
+  editableTargets.forEach(el => {
+    // Avoid making buttons or images contenteditable
+    if (el.tagName !== 'BUTTON' && el.tagName !== 'IMG' && !el.classList.contains('no-print')) {
+      el.setAttribute('contenteditable', 'true');
+      el.style.outline = 'none';
+      el.style.borderRadius = '3px';
+      el.onfocus = () => { el.style.background = 'rgba(0, 212, 178, 0.1)'; };
+      el.onblur = () => { el.style.background = 'transparent'; };
+    }
+  });
+
+  modal.classList.add('active');
+}
+
+function closeLiveReportPreviewModal() {
+  const modal = document.getElementById('live-report-preview-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function printLivePreviewDocument() {
+  const targetCanvas = document.getElementById('live-preview-a4-canvas');
+  const globalStage = document.getElementById('global-printable-stage');
+
+  if (targetCanvas && globalStage) {
+    // Copy exact edited HTML (including live contenteditable edits) to global printable stage
+    globalStage.innerHTML = `<div style="font-family:'Segoe UI', Tahoma, sans-serif; color:#0b192c; padding:15px; background:#fff; direction:rtl; text-align:right;">${targetCanvas.innerHTML}</div>`;
+  }
+
+  closeLiveReportPreviewModal();
+  setTimeout(() => {
+    window.print();
+  }, 150);
 }
 
 function shareReportWhatsApp() {
@@ -2223,38 +2269,10 @@ function openAddPhotoURLModal() {
     url: url
   });
 
-function openReportPrintPreviewModal() {
-  const modal = document.getElementById('report-print-preview-modal');
-  const stage = document.getElementById('modal-printable-a4-stage');
-  const canvas = document.getElementById('printable-editor-report-canvas') || document.getElementById('draft-live-preview-box');
-
-  if (!modal || !stage) return;
-
-  if (canvas && canvas.innerHTML.trim() !== '') {
-    stage.innerHTML = canvas.innerHTML;
-  } else {
-    // Generate default patient print record if empty
-    const p = patients.find(item => item.patientId === currentActiveProfilePatientId) || patients[0];
-    if (p) printPatientRecord(p.patientId);
-    return;
-  }
-
-  modal.classList.add('active');
-}
-
-function closeReportPrintPreviewModal() {
-  const modal = document.getElementById('report-print-preview-modal');
-  if (modal) modal.classList.remove('active');
-}
-
-function executePrintFromPreview() {
-  closeReportPrintPreviewModal();
-  downloadReportPDF();
-}
-
-function sharePreviewReportWhatsApp() {
-  closeReportPrintPreviewModal();
-  shareReportWhatsApp();
+  pushHistoryState();
+  renderDraftPhotosList();
+  updateDraftReportView();
+  showToast('📷 تم إضافة رابط الصورة بنجاح للتقرير!', 'success');
 }
 
 function editPhotoLabel(idx) {

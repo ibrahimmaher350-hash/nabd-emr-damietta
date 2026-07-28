@@ -567,7 +567,7 @@
               <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">التقرير موثق رقمياً بختم نبض وتوقيع إبراهيم ماهر المعتمد و كود QR الفوري للتحقق.</p>
             </div>
             <div style="display: flex; flex-direction: column; gap: 0.6rem;">
-              <button class="btn btn-amber btn-lg" onclick="openReportPrintPreviewModal()">👁️ معاينة التقرير قبل الطباعة</button>
+              <button class="btn btn-amber btn-lg" onclick="openLiveReportPreviewModal()" title="انقر لمعاينة ورقة التقرير كاملة والتعديل المباشر على أي كلمة أو حرف قبل الطباعة">🔍 معاينة وتعديل التقرير بالكامل قبل الطباعة</button>
               <button class="btn btn-primary btn-lg" onclick="downloadReportPDF()">📄 طباعة وتصدير PDF</button>
               <button class="btn btn-success btn-lg" onclick="shareReportWhatsApp()">💬 إرسال التقرير واتساب المريض</button>
               <button class="btn btn-secondary" onclick="saveCurrentDraftToLocalStorage()">💾 حفظ بالمسودات</button>
@@ -1269,26 +1269,38 @@
         <button class="btn btn-secondary" id="confirm-modal-cancel">إلغاء</button>
         <button class="btn btn-danger" id="confirm-modal-action">🗑️ تأكيد الحذف النهائي</button>
       </div>
-  <!-- FULL SCREEN PRINT & PDF PREVIEW MODAL -->
-  <div class="modal-overlay" id="report-print-preview-modal" style="z-index: 100000;">
-    <div class="modal-card" style="max-width: 900px; width: 95%; max-height: 94vh; overflow-y: auto; background: #0f172a; border: 2px solid var(--accent-cyan);">
-      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <h3 style="color: var(--accent-cyan); margin: 0; display: flex; align-items: center; gap: 0.5rem;">
-          👁️ معاينة التقرير الطبي ومطابقته للطباعة (Print & PDF Live Preview)
-        </h3>
-        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-          <button type="button" class="btn btn-primary btn-sm" onclick="executePrintFromPreview()">🖨️ طباعة الآن / حفظ PDF</button>
-          <button type="button" class="btn btn-success btn-sm" onclick="sharePreviewReportWhatsApp()">💬 إرسال واتساب</button>
-          <button type="button" class="btn btn-secondary btn-sm" onclick="closeReportPrintPreviewModal()">❌ إغلاق المعاينة</button>
-        </div>
-      </div>
+  <!-- LIVE REPORT PRE-PRINT INTERACTIVE PREVIEW & WYSIWYG EDITABLE MODAL -->
+  <div class="modal-overlay" id="live-report-preview-modal" style="z-index: 10000; align-items: flex-start; padding: 1rem; overflow-y: auto;">
+    <div class="modal-card" style="max-width: 900px; width: 100%; background: #0b192c; border: 2px solid var(--accent-cyan); border-radius: 12px; margin: 1rem auto;">
       
-      <!-- A4 PAPER CANVAS WRAPPER IN MODAL -->
-      <div style="background: #cbd5e1; padding: 1.2rem; border-radius: 8px; overflow-x: auto; display: flex; justify-content: center;">
-        <div id="modal-printable-a4-stage" style="width: 100%; max-width: 794px; background: #ffffff; color: #000000; box-shadow: 0 10px 25px rgba(0,0,0,0.3); border-radius: 4px; padding: 15px; direction: rtl; text-align: right;">
-          <!-- Content populated dynamically -->
+      <!-- TOOLBAR HEADER -->
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 0.8rem; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h2 style="color: var(--accent-cyan); font-size: 1.3rem; margin: 0;">🔍 معاينة التقرير والتعديل المباشر قبل الطباعة</h2>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">انقر على أي كلمة أو حرف للتعديل عليه فورياً، أو إضافة/حذف الصور والأجزاء قبل استخراج الـ PDF.</p>
+        </div>
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+          <button class="btn btn-sm btn-success" onclick="triggerReportPhotoUpload()">📷 + إضافة صورة</button>
+          <button class="btn btn-sm btn-secondary" onclick="addCustomSectionToDraft()">✏️ + إضافة قسم/خانة</button>
+          <button class="btn btn-sm btn-primary" onclick="printLivePreviewDocument()">🖨️ طباعة المستند الآن (A4 / PDF)</button>
+          <button class="btn btn-sm btn-danger" onclick="closeLiveReportPreviewModal()">❌ إغلاق المعاينة</button>
         </div>
       </div>
+
+      <!-- EDITABLE A4 LIVE PAPER CANVAS -->
+      <div id="live-preview-a4-canvas" class="printable" style="background: #ffffff; color: #0b192c; padding: 2rem; border-radius: 8px; font-family: 'Segoe UI', Arial, sans-serif; direction: rtl; text-align: right; box-shadow: 0 10px 30px rgba(0,0,0,0.5); min-height: 750px;">
+        <!-- Injected via JS with contenteditable enabled on text blocks -->
+      </div>
+
+      <!-- FOOTER ACTIONS -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; flex-wrap: wrap; gap: 0.6rem;">
+        <span style="font-size: 0.82rem; color: var(--accent-cyan);">💡 ملحوظة: جميع التعديلات المكتوبة في شاشة المعاينة تظهر مباشرة في النسخة المطبوعة وتُحفظ تلقائياً.</span>
+        <div style="display: flex; gap: 0.5rem;">
+          <button class="btn btn-secondary" onclick="closeLiveReportPreviewModal()">إغلاق المعاينة</button>
+          <button class="btn btn-primary btn-lg" onclick="printLivePreviewDocument()">🖨️ تأكيد الطباعة / حفظ PDF</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
