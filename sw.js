@@ -1,13 +1,13 @@
-const CACHE_NAME = 'nabd-emr-pwa-v31';
+const CACHE_NAME = 'nabd-emr-pwa-v35';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
-  './styles.css?v=31',
-  './app.js?v=31',
+  './styles.css?v=35',
+  './app.js?v=35',
   './manifest.json',
-  './assets/logo.jpg?v=29',
-  './assets/stamp.jpg?v=26',
-  './assets/signature.png?v=26',
+  './assets/logo.jpg?v=35',
+  './assets/stamp.jpg?v=35',
+  './assets/signature.png?v=35',
   'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'
 ];
 
