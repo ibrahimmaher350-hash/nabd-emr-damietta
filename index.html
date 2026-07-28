@@ -28,23 +28,13 @@
       <img src="assets/logo.jpg?v=31" id="ui-top-logo" alt="شعار إبراهيم ماهر - نبض للتمريض المنزلي" class="brand-logo">
       <div class="brand-title">
         <h1 id="ui-top-brand-name" style="font-size: 1.6rem; font-weight: 800; color: var(--accent-cyan);">إبراهيم ماهر</h1>
-        <p id="ui-top-subtitle" style="font-size: 0.88rem; color: #cbd5e1; font-weight: 600;">نبض للتمريض المنزلي (محافظة دمياط) | 📱 <span id="ui-top-phone">01001097896</span></p>
       </div>
-    </div>
-
-    <div class="top-actions">
-      <button class="btn btn-primary" onclick="switchTab('add-patient-tab', document.querySelectorAll('.tab-btn')[0])">
-        <span>➕ إضافة مريض جديد</span>
-      </button>
     </div>
   </header>
 
   <!-- Navigation Tabs (Desktop Header Nav) -->
   <nav class="nav-tabs">
-    <button class="tab-btn active" onclick="switchTab('add-patient-tab', this)">
-      ➕ إضافة مريض جديد
-    </button>
-    <button class="tab-btn" onclick="switchTab('patients-tab', this)">
+    <button class="tab-btn active" onclick="switchTab('patients-tab', this)">
       👥 سجل المرضى (CRM)
     </button>
     <button class="tab-btn" onclick="switchTab('schedule-tab', this)">
@@ -64,222 +54,22 @@
   <!-- Main Content Container -->
   <main class="main-container">
 
-    <!-- 1. ADD NEW PATIENT DEDICATED TAB -->
-    <section id="add-patient-tab" class="tab-content active">
-      <div class="panel-card">
-        <div class="panel-header">
-          <div style="display: flex; align-items: center; gap: 0.8rem;">
-            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
-            <h2>➕ إضافة مريض جديد - إبراهيم ماهر (نبض للتمريض المنزلي - دمياط)</h2>
-          </div>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-amber btn-sm" onclick="autoFillDemoPatientTabForm()">⚡ تعبئة مريض تجريبي (دمياط)</button>
-          </div>
-        </div>
-
-        <form id="tab-add-patient-form" onsubmit="handleSavePatientFromTab(event)">
-          <div class="form-grid">
-            
-            <!-- Auto-generated MRN & Status & Reg Date -->
-            <div class="form-group">
-              <label>1. رقم الملف (MRN - محصوب تلقائياً)</label>
-              <input type="text" id="tab-pat-mrn" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="MRN-1005">
-            </div>
-            <div class="form-group">
-              <label>2. حالة المريض</label>
-              <select id="tab-pat-status">
-                <option value="نشط" selected>🟢 نشط</option>
-                <option value="متوقف">⏸️ متوقف</option>
-                <option value="متوفى">⚰️ متوفى</option>
-                <option value="خرج من الخدمة">🚪 خرج من الخدمة</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>3. تاريخ التسجيل</label>
-              <input type="date" id="tab-pat-reg-date">
-            </div>
-
-            <!-- Basic Info -->
-            <div class="form-group">
-              <label>4. الاسم الثلاثي / الرباعي للمريض</label>
-              <input type="text" id="tab-pat-name" placeholder="مثال: أحمد محمود إبراهيم" inputmode="text">
-            </div>
-            <div class="form-group">
-              <label>5. الرقم القومي (14 رقم)</label>
-              <input type="text" id="tab-pat-national-id" placeholder="29010151234567" inputmode="numeric">
-            </div>
-            <div class="form-group">
-              <label>6. النوع / الجنس</label>
-              <select id="tab-pat-gender">
-                <option value="غير محدد">غير محدد</option>
-                <option value="ذكر" selected>ذكر</option>
-                <option value="أنثى">أنثى</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>7. تاريخ الميلاد</label>
-              <input type="date" id="tab-pat-dob" onchange="autoCalcAgeInTabForm(this.value)">
-            </div>
-            <div class="form-group">
-              <label>8. العمر المحسوب تلقائياً</label>
-              <input type="text" id="tab-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="غير محدد">
-            </div>
-            <div class="form-group">
-              <label>9. رقم الهاتف الرئيسي</label>
-              <input type="tel" id="tab-pat-phone" placeholder="01001097896" inputmode="tel">
-            </div>
-            <div class="form-group">
-              <label>10. رقم الواتساب</label>
-              <input type="tel" id="tab-pat-whatsapp" placeholder="01001097896" inputmode="tel">
-            </div>
-            <div class="form-group">
-              <label>11. اسم الطوارئ والصلة ورقم الهاتف</label>
-              <input type="text" id="tab-pat-emergency" placeholder="محمود (ابن المريض) - 01114455667">
-            </div>
-            <div class="form-group">
-              <label>12. المنطقة / المدينة (نطاق دمياط)</label>
-              <select id="tab-pat-area">
-                <option value="بندر دمياط" selected>بندر دمياط</option>
-                <option value="مركز دمياط">مركز دمياط</option>
-                <option value="رأس البر">رأس البر</option>
-                <option value="دمياط الجديدة">دمياط الجديدة</option>
-              </select>
-            </div>
-            <div class="form-group full-width">
-              <label>13. العنوان التفصيلي وملاحظات الوصول للمنزل</label>
-              <input type="text" id="tab-pat-address-detail" placeholder="مثال: دمياط الجديدة - الحي المتميز - عمارة 15 شقة 4">
-            </div>
-
-            <!-- GPS Location & Maps Link -->
-            <div class="form-group full-width" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
-              <label style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 0.5rem; display: block;">📍 تحديد الموقع الجغرافي على الخريطة (GPS & Google Maps Link)</label>
-              <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
-                <input type="url" id="tab-pat-maps-link" placeholder="رابط Google Maps (https://maps.google.com/?q=...)" style="flex: 1;">
-                <button type="button" class="btn btn-amber" onclick="getCurrentGPSLocationForTab()">📍 التقاط موقع GPS الحقيقي الآن</button>
-              </div>
-              <small style="color: var(--text-muted); font-size: 0.8rem; margin-top: 0.3rem; display: block;">سيتم حفظ إحداثيات الموقع التلقائي ورابط الخريطة في ملف المريض</small>
-            </div>
-
-            <!-- Blood Type & Allergies -->
-            <div class="form-group">
-              <label>فصيلة الدم</label>
-              <select id="tab-pat-blood">
-                <option value="غير محدد">غير محدد</option>
-                <option value="A+" selected>A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>الحساسية الدوائية (Allergies)</label>
-              <input type="text" id="tab-pat-allergies" placeholder="حساسية بنسلين">
-            </div>
-
-          </div>
-
-          <!-- Chronic Diseases Multi-Select Checkboxes -->
-          <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
-            <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">🩺 ثامناً: الأمراض المزمنة (اختر من القائمة)</h3>
-            <div class="checkbox-grid">
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="سكر"> ☑️ سكر (Diabetes)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="ضغط"> ☑️ ضغط (Hypertension)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="قلب"> ☑️ قلب (Heart Disease)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="كبد"> ☑️ كبد (Liver Disease)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="كلى"> ☑️ كلى (Kidney Disease)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="سرطان"> ☑️ سرطان (Cancer)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="COPD"> ☑️ COPD (انسداد رئوي)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="Asthma"> ☑️ Asthma (ربو شعبى)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="Stroke"> ☑️ Stroke (جلطة دماغية)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="Dementia"> ☑️ Dementia (خرف / ألزهايمر)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="Parkinson"> ☑️ Parkinson (باركنسون)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_disease" value="Bedridden"> ☑️ Bedridden (طريح الفراش)</label>
-            </div>
-            <div class="form-group" style="margin-top: 1rem;">
-              <label>أمراض مزمنة أخرى (اكتبها هنا)</label>
-              <input type="text" id="tab-pat-other-diseases" placeholder="أخرى (مثال: ديسك، ضعف نظر...)">
-            </div>
-          </div>
-
-          <!-- Required Services -->
-          <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
-            <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">💉 الخدمات والتدخلات المطلوبة للمريض</h3>
-            <div class="checkbox-grid">
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="غيار جراحي على الجروح"> غيار جراحي على الجروح</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="متابعة ضغط وسكر يومية"> متابعة ضغط وسكر يومية</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="تركيب / تغيير قسطرة بولية"> تركيب / تغيير قسطرة بولية</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="تركيب / تغيير أنبوب تغذية (رايل)"> تركيب / تغيير أنبوب تغذية (رايل)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="إعطاء المحاليل والحقن الوريدية"> إعطاء المحاليل والحقن الوريدية</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="سحب عينات التحاليل الطبية"> سحب عينات التحاليل الطبية</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="رعاية تمريضية مقيمة (24 ساعة)"> رعاية تمريضية مقيمة (24 ساعة)</label>
-              <label class="checkbox-item"><input type="checkbox" name="tab_service" value="علاج طبيعي وتأهيل"> علاج طبيعي وتأهيل</label>
-            </div>
-          </div>
-
-          <!-- Initial Attachments Module -->
-          <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
-            <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">📷 المرفقات والوثائق الأولية للمريض (Attachments)</h3>
-            <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
-              <div class="form-group">
-                <label>📷 صورة البطاقة الشخصية</label>
-                <input type="file" id="attach-id-card" accept="image/*,.pdf" onchange="previewAttachment('attach-id-card', 'prev-id-card')">
-                <div id="prev-id-card" class="file-preview-box"></div>
-              </div>
-              <div class="form-group">
-                <label>📷 صورة بطاقة التأمين الطبي</label>
-                <input type="file" id="attach-insurance" accept="image/*,.pdf" onchange="previewAttachment('attach-insurance', 'prev-insurance')">
-                <div id="prev-insurance" class="file-preview-box"></div>
-              </div>
-              <div class="form-group">
-                <label>📷 صورة الروشتة الطبية</label>
-                <input type="file" id="attach-rx" accept="image/*,.pdf" onchange="previewAttachment('attach-rx', 'prev-rx')">
-                <div id="prev-rx" class="file-preview-box"></div>
-              </div>
-              <div class="form-group">
-                <label>📷 صورة نتائج التحاليل</label>
-                <input type="file" id="attach-labs" accept="image/*,.pdf" onchange="previewAttachment('attach-labs', 'prev-labs')">
-                <div id="prev-labs" class="file-preview-box"></div>
-              </div>
-              <div class="form-group">
-                <label>📷 صورة التقارير والأشعة</label>
-                <input type="file" id="attach-rad" accept="image/*,.pdf" onchange="previewAttachment('attach-rad', 'prev-rad')">
-                <div id="prev-rad" class="file-preview-box"></div>
-              </div>
-              <div class="form-group">
-                <label>📎 ملفات ووثائق أخرى</label>
-                <input type="file" id="attach-other" accept="image/*,.pdf,.doc,.docx" onchange="previewAttachment('attach-other', 'prev-other')">
-                <div id="prev-other" class="file-preview-box"></div>
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
-            <button type="button" class="btn btn-secondary btn-lg" onclick="navigateBackHistory()">➡️ رجوع</button>
-            <button type="submit" class="btn btn-primary btn-lg">
-              💾 حفظ ملف المريض وافتتاح السجل الطبي
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-
-    <!-- 2. PATIENTS CRM TAB -->
-    <section id="patients-tab" class="tab-content">
+    <!-- 1. PATIENTS CRM TAB (Default Main View) -->
+    <section id="patients-tab" class="tab-content active">
       
       <!-- DAILY VISITS NOTIFICATIONS HUB -->
       <div id="today-visits-hub-crm"></div>
 
       <div class="panel-card">
-        <div class="panel-header">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 0.8rem;">
           <div style="display: flex; align-items: center; gap: 0.8rem;">
             <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
             <h2>🔎 البحث وتصفية سجلات المرضى (محافظة دمياط)</h2>
           </div>
-          <button class="btn btn-primary btn-lg" onclick="openNewVisitFromCRM()">🩺 تسجيل زيارة تمريضية جديدة (EMR)</button>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button class="btn btn-primary btn-lg" onclick="openAddPatientModal()">➕ إضافة مريض جديد</button>
+            <button class="btn btn-success btn-lg" onclick="openNewVisitFromCRM()">🩺 تسجيل زيارة تمريضية جديدة (EMR)</button>
+          </div>
         </div>
         <div class="form-grid">
           <div class="form-group">
@@ -1158,6 +948,245 @@
       <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));" id="actions-modal-buttons-grid">
         <!-- Injected via JS -->
       </div>
+    </div>
+  </div>
+
+  <!-- ADD NEW PATIENT MODAL -->
+  <div class="modal-overlay" id="add-patient-modal">
+    <div class="modal-card" style="max-width: 850px; max-height: 92vh; overflow-y: auto;">
+      <button class="modal-close" onclick="closeAddPatientModal()">✕</button>
+      <div class="panel-header" style="margin-bottom: 1rem;">
+        <h2 style="color: var(--accent-cyan);">➕ إضافة مريض جديد في النظام</h2>
+        <button class="btn btn-amber btn-sm" onclick="autoFillDemoPatientTabForm()">⚡ تعبئة مريض تجريبي (دمياط)</button>
+      </div>
+
+      <form id="tab-add-patient-form" onsubmit="handleSavePatientFromTab(event)">
+        <div class="form-grid">
+          
+          <div class="form-group">
+            <label>1. رقم الملف (MRN - محصوب تلقائياً)</label>
+            <input type="text" id="tab-pat-mrn" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="MRN-1005">
+          </div>
+          <div class="form-group">
+            <label>2. حالة المريض</label>
+            <select id="tab-pat-status">
+              <option value="نشط" selected>🟢 نشط</option>
+              <option value="متوقف">⏸️ متوقف</option>
+              <option value="متوفى">⚰️ متوفى</option>
+              <option value="خرج من الخدمة">🚪 خرج من الخدمة</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>3. تاريخ التسجيل</label>
+            <input type="date" id="tab-pat-reg-date">
+          </div>
+
+          <!-- Basic Info -->
+          <div class="form-group">
+            <label>4. الاسم الثلاثي / الرباعي للمريض</label>
+            <input type="text" id="tab-pat-name" placeholder="مثال: أحمد محمود إبراهيم" inputmode="text" required>
+          </div>
+          <div class="form-group">
+            <label>5. النوع / الجنس</label>
+            <select id="tab-pat-gender">
+              <option value="غير محدد">غير محدد</option>
+              <option value="ذكر" selected>ذكر</option>
+              <option value="أنثى">أنثى</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>6. تاريخ الميلاد</label>
+            <input type="date" id="tab-pat-dob" onchange="autoCalcAgeInTabForm(this.value)">
+          </div>
+          <div class="form-group">
+            <label>7. العمر المحسوب تلقائياً</label>
+            <input type="text" id="tab-pat-age-display" readonly style="background: rgba(0,212,178,0.1); color: var(--accent-cyan); font-weight: bold;" value="غير محدد">
+          </div>
+          <div class="form-group">
+            <label>8. رقم الهاتف الرئيسي</label>
+            <input type="tel" id="tab-pat-phone" placeholder="01001097896" inputmode="tel">
+          </div>
+          <div class="form-group">
+            <label>9. رقم الواتساب</label>
+            <input type="tel" id="tab-pat-whatsapp" placeholder="01001097896" inputmode="tel">
+          </div>
+          <div class="form-group">
+            <label>10. اسم الطوارئ والصلة ورقم الهاتف</label>
+            <input type="text" id="tab-pat-emergency" placeholder="محمود (ابن المريض) - 01114455667">
+          </div>
+          <div class="form-group">
+            <label>11. المنطقة / المدينة (نطاق دمياط)</label>
+            <select id="tab-pat-area">
+              <option value="بندر دمياط" selected>بندر دمياط</option>
+              <option value="مركز دمياط">مركز دمياط</option>
+              <option value="رأس البر">رأس البر</option>
+              <option value="دمياط الجديدة">دمياط الجديدة</option>
+            </select>
+          </div>
+          <div class="form-group full-width">
+            <label>12. العنوان التفصيلي وملاحظات الوصول للمنزل</label>
+            <input type="text" id="tab-pat-address-detail" placeholder="مثال: دمياط الجديدة - الحي المتميز - عمارة 15 شقة 4">
+          </div>
+
+          <!-- GPS Location & Maps Link -->
+          <div class="form-group full-width" style="background: rgba(255,255,255,0.02); padding: 1rem; border-radius: 8px; border: 1px solid var(--border-color);">
+            <label style="color: var(--accent-cyan); font-weight: bold; margin-bottom: 0.5rem; display: block;">📍 تحديد الموقع الجغرافي على الخريطة (GPS & Google Maps Link)</label>
+            <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+              <input type="url" id="tab-pat-maps-link" placeholder="رابط Google Maps (https://maps.google.com/?q=...)" style="flex: 1;">
+              <button type="button" class="btn btn-amber" onclick="getCurrentGPSLocationForTab()">📍 التقاط موقع GPS الحقيقي الآن</button>
+            </div>
+          </div>
+
+          <!-- Blood Type & Allergies -->
+          <div class="form-group">
+            <label>فصيلة الدم</label>
+            <select id="tab-pat-blood">
+              <option value="غير محدد">غير محدد</option>
+              <option value="A+" selected>A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>الحساسية الدوائية (Allergies)</label>
+            <input type="text" id="tab-pat-allergies" placeholder="حساسية بنسلين">
+          </div>
+
+        </div>
+
+        <!-- Dynamic Chronic Diseases Selector -->
+        <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">🩺 الأمراض المزمنة (اختر أو اتركه غير محدد)</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اختر المرض المزمن الرئيسي</label>
+              <select id="tab-pat-disease-select"></select>
+            </div>
+            <div class="form-group">
+              <label>أمراض مزمنة إضافية (أدخل أي تفاصيل أو اتركه فارغاً)</label>
+              <input type="text" id="tab-pat-other-diseases" placeholder="مثال: ديسك، ضعف نظر، حساسية...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Dynamic Required Services Selector -->
+        <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">💉 الخدمات والتدخلات المطلوبة للمريض</h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اختر الخدمة التمريضية الرئيسية</label>
+              <select id="tab-pat-service-select"></select>
+            </div>
+            <div class="form-group">
+              <label>خدمات تمريضية وتدخلات أخرى (أدخل أي تفاصيل أو اتركه فارغاً)</label>
+              <input type="text" id="tab-pat-other-services" placeholder="مثال: تركيب رايل، غيار جروح معقم...">
+            </div>
+          </div>
+        </div>
+
+        <!-- Next Visit Appointment Scheduler in Add Patient -->
+        <div class="panel-card" style="background: rgba(0,212,178,0.04); border: 1.5px solid var(--accent-cyan); margin-top: 1.5rem;">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 1rem; display:flex; align-items:center; gap:0.5rem;">
+            📅 تحديد موعد الزيارة القادمة والتذكير التلقائي
+          </h3>
+          <div class="form-grid">
+            <div class="form-group">
+              <label>⏱️ فاصل المتابعة (الموعد القادم بعد)</label>
+              <select id="tab-next-visit-interval" onchange="onTabNextVisitIntervalChange()">
+                <option value="">-- غير محدد --</option>
+                <option value="2h">بعد ساعتين</option>
+                <option value="6h">بعد 6 ساعات</option>
+                <option value="12h">بعد 12 ساعة</option>
+                <option value="1d">بعد يوم واحد</option>
+                <option value="2d">بعد يومين</option>
+                <option value="3d">بعد 3 أيام</option>
+                <option value="5d">بعد 5 أيام</option>
+                <option value="7d">بعد أسبوع</option>
+                <option value="10d">بعد 10 أيام</option>
+                <option value="14d">بعد أسبوعين</option>
+                <option value="30d">بعد شهر</option>
+                <option value="90d">بعد 3 شهور</option>
+                <option value="180d">بعد 6 شهور</option>
+                <option value="365d">بعد سنة</option>
+                <option value="custom">📝 موعد مخصص يدوياً</option>
+              </select>
+            </div>
+            <div class="form-group" id="tab-next-visit-custom-group" style="display:none;">
+              <label>📅 تاريخ ووقت الزيارة القادمة (يدوي)</label>
+              <input type="datetime-local" id="tab-next-visit-custom-date" onchange="onTabCustomNextVisitDateChange()">
+            </div>
+            <div class="form-group">
+              <label>🔔 أرسل التذكير قبل الموعد بـ</label>
+              <select id="tab-next-visit-alert-before">
+                <option value="15">15 دقيقة</option>
+                <option value="30">30 دقيقة</option>
+                <option value="60" selected>ساعة واحدة</option>
+                <option value="180">3 ساعات</option>
+                <option value="360">6 ساعات</option>
+                <option value="1440">يوم كامل</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>✅ موعد الزيارة القادمة (محسوب تلقائياً)</label>
+              <input type="text" id="tab-next-visit-display" readonly style="background:rgba(0,212,178,0.1); color:var(--accent-cyan); font-weight:bold;" placeholder="اختر الفاصل الزمني أعلاه">
+            </div>
+            <div class="form-group">
+              <label>⏳ الوقت المتبقي حتى الموعد</label>
+              <input type="text" id="tab-next-visit-remaining" readonly style="color:var(--accent-amber); font-weight:bold;" placeholder="--">
+            </div>
+            <input type="hidden" id="tab-next-visit-iso">
+          </div>
+        </div>
+
+        <!-- Initial Attachments Module -->
+        <div class="panel-card" style="background: rgba(255,255,255,0.02); margin-top: 1.5rem;">
+          <h3 style="color: var(--accent-cyan); margin-bottom: 0.8rem;">📷 المرفقات والوثائق الأولية للمريض (Attachments)</h3>
+          <div class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="form-group">
+              <label>📷 صورة البطاقة الشخصية</label>
+              <input type="file" id="attach-id-card" accept="image/*,.pdf" onchange="previewAttachment('attach-id-card', 'prev-id-card')">
+              <div id="prev-id-card" class="file-preview-box"></div>
+            </div>
+            <div class="form-group">
+              <label>📷 صورة بطاقة التأمين الطبي</label>
+              <input type="file" id="attach-insurance" accept="image/*,.pdf" onchange="previewAttachment('attach-insurance', 'prev-insurance')">
+              <div id="prev-insurance" class="file-preview-box"></div>
+            </div>
+            <div class="form-group">
+              <label>📷 صورة الروشتة الطبية</label>
+              <input type="file" id="attach-rx" accept="image/*,.pdf" onchange="previewAttachment('attach-rx', 'prev-rx')">
+              <div id="prev-rx" class="file-preview-box"></div>
+            </div>
+            <div class="form-group">
+              <label>📷 صورة نتائج التحاليل</label>
+              <input type="file" id="attach-labs" accept="image/*,.pdf" onchange="previewAttachment('attach-labs', 'prev-labs')">
+              <div id="prev-labs" class="file-preview-box"></div>
+            </div>
+            <div class="form-group">
+              <label>📷 صورة التقارير والأشعة</label>
+              <input type="file" id="attach-rad" accept="image/*,.pdf" onchange="previewAttachment('attach-rad', 'prev-rad')">
+              <div id="prev-rad" class="file-preview-box"></div>
+            </div>
+            <div class="form-group">
+              <label>📎 ملفات ووثائق أخرى</label>
+              <input type="file" id="attach-other" accept="image/*,.pdf,.doc,.docx" onchange="previewAttachment('attach-other', 'prev-other')">
+              <div id="prev-other" class="file-preview-box"></div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem;">
+          <button type="button" class="btn btn-secondary btn-lg" onclick="closeAddPatientModal()">إلغاء</button>
+          <button type="submit" class="btn btn-primary btn-lg">
+            💾 حفظ ملف المريض وافتتاح السجل الطبي
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 

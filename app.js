@@ -543,15 +543,80 @@ function autoFillDemoPatientTabForm() {
   document.getElementById('tab-pat-blood').value = 'A+';
 }
 
+function openAddPatientModal() {
+  const modal = document.getElementById('add-patient-modal');
+  if (modal) {
+    initTabAddPatientForm();
+    refreshAllConfigurableSelects();
+    modal.classList.add('active');
+  }
+}
+
+function closeAddPatientModal() {
+  const modal = document.getElementById('add-patient-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function onTabNextVisitIntervalChange() {
+  const interval = getElementValue('tab-next-visit-interval', '');
+  const customGroup = document.getElementById('tab-next-visit-custom-group');
+  if (interval === 'custom') {
+    if (customGroup) customGroup.style.display = 'block';
+    setElementValue('tab-next-visit-display', '');
+    setElementValue('tab-next-visit-remaining', '');
+    setElementValue('tab-next-visit-iso', '');
+  } else {
+    if (customGroup) customGroup.style.display = 'none';
+    calcTabNextVisitDate();
+  }
+}
+
+function calcTabNextVisitDate() {
+  const interval = getElementValue('tab-next-visit-interval', '');
+  if (!interval || interval === 'custom') return;
+
+  const ms = VISIT_INTERVAL_MAP ? VISIT_INTERVAL_MAP[interval] : null;
+  if (!ms) return;
+
+  const regDateStr = getElementValue('tab-pat-reg-date', '');
+  const refDate = regDateStr ? new Date(regDateStr) : new Date();
+
+  const nextDate = new Date(refDate.getTime() + ms);
+  const formatted = nextDate.toLocaleDateString('ar-EG', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  const remaining = getTimeRemainingText ? getTimeRemainingText(nextDate) : '';
+
+  setElementValue('tab-next-visit-display', formatted);
+  setElementValue('tab-next-visit-remaining', remaining);
+  setElementValue('tab-next-visit-iso', nextDate.toISOString());
+}
+
+function onTabCustomNextVisitDateChange() {
+  const val = getElementValue('tab-next-visit-custom-date', '');
+  if (!val) return;
+  const nextDate = new Date(val);
+  if (isNaN(nextDate.getTime())) return;
+  const formatted = nextDate.toLocaleDateString('ar-EG', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
+  const remaining = getTimeRemainingText ? getTimeRemainingText(nextDate) : '';
+
+  setElementValue('tab-next-visit-display', formatted);
+  setElementValue('tab-next-visit-remaining', remaining);
+  setElementValue('tab-next-visit-iso', nextDate.toISOString());
+}
+
 function handleSavePatientFromTab(e) {
   if (e) e.preventDefault();
-  
-  const mrn = document.getElementById('tab-pat-mrn').value || `MRN-${Date.now()}`;
+
+  const mrn = document.getElementById('tab-pat-mrn').value || "MRN-1005";
   const status = document.getElementById('tab-pat-status').value || "نشط";
   const regDate = document.getElementById('tab-pat-reg-date').value || new Date().toISOString().split('T')[0];
 
   const name = document.getElementById('tab-pat-name').value.trim() || "مريض بدون اسم";
-  const natId = document.getElementById('tab-pat-national-id').value.trim() || "غير محدد";
   const gender = document.getElementById('tab-pat-gender').value || "غير محدد";
   const dob = document.getElementById('tab-pat-dob').value || "1980-01-01";
   const phone = document.getElementById('tab-pat-phone').value.trim() || clinicSettings.phone;
@@ -561,11 +626,17 @@ function handleSavePatientFromTab(e) {
   const addressDetail = document.getElementById('tab-pat-address-detail').value.trim() || "غير محدد";
   const mapsLink = document.getElementById('tab-pat-maps-link').value.trim() || clinicSettings.googleMapsUrl;
 
-  const selectedDiseases = Array.from(document.querySelectorAll('input[name="tab_disease"]:checked')).map(cb => cb.value);
-  const otherDiseases = document.getElementById('tab-pat-other-diseases').value.trim();
-  if (otherDiseases) selectedDiseases.push(otherDiseases);
+  const primaryDisease = getElementValue('tab-pat-disease-select', '');
+  const otherDiseases = getElementValue('tab-pat-other-diseases', '');
+  const diseasesList = [];
+  if (primaryDisease && primaryDisease !== 'غير محدد') diseasesList.push(primaryDisease);
+  if (otherDiseases && otherDiseases !== 'غير محدد') diseasesList.push(otherDiseases);
 
-  const selectedServices = Array.from(document.querySelectorAll('input[name="tab_service"]:checked')).map(cb => cb.value);
+  const primaryService = getElementValue('tab-pat-service-select', '');
+  const otherServices = getElementValue('tab-pat-other-services', '');
+  const servicesList = [];
+  if (primaryService && primaryService !== 'غير محدد') servicesList.push(primaryService);
+  if (otherServices && otherServices !== 'غير محدد') servicesList.push(otherServices);
 
   const allergiesStr = document.getElementById('tab-pat-allergies').value.trim();
   const blood = document.getElementById('tab-pat-blood').value || "غير محدد";
@@ -578,7 +649,7 @@ function handleSavePatientFromTab(e) {
     status: status,
     registrationDate: regDate,
     fullName: name,
-    nationalId: natId,
+    nationalId: "",
     gender: gender,
     dob: dob,
     phone: phone,
@@ -589,8 +660,8 @@ function handleSavePatientFromTab(e) {
     latitude: 31.4165,
     longitude: 31.8133,
     mapsLink: mapsLink,
-    diseases: selectedDiseases,
-    requestedServices: selectedServices,
+    diseases: diseasesList,
+    requestedServices: servicesList,
     allergies: allergiesStr ? allergiesStr.split(',').map(s => s.trim()) : [],
     bloodType: blood,
     attachments: { ...currentTabPatientAttachments },
@@ -3864,6 +3935,10 @@ function refreshAllConfigurableSelects() {
   populateSelectFromFieldList('tab-pat-area', 'service_areas', getElementValue('tab-pat-area', 'بندر دمياط'));
   populateSelectFromFieldList('tab-pat-status', 'patient_status', getElementValue('tab-pat-status', 'نشط'));
   populateSelectFromFieldList('tab-pat-blood', 'blood_group', getElementValue('tab-pat-blood', 'غير محدد'));
+  populateSelectFromFieldList('tab-pat-disease-select', 'diagnosis', getElementValue('tab-pat-disease-select', ''));
+  populateSelectFromFieldList('tab-pat-service-select', 'services', getElementValue('tab-pat-service-select', ''));
+  populateSelectFromFieldList('tab-next-visit-interval', 'visit_intervals', getElementValue('tab-next-visit-interval', ''));
+  populateSelectFromFieldList('tab-next-visit-alert-before', 'alert_pretimes', getElementValue('tab-next-visit-alert-before', '60'));
 
   populateSelectFromFieldList('edit-pat-gender', 'gender', getElementValue('edit-pat-gender', ''));
   populateSelectFromFieldList('edit-pat-area', 'service_areas', getElementValue('edit-pat-area', ''));
