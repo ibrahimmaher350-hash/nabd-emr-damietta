@@ -1827,23 +1827,36 @@ function renderOfficialReportFooter(providerName = "إبراهيم ماهر") {
   `;
 }
 
-// REPORT BUILDER CENTER ENGINE (15 REPORT TYPES)
+// REPORT BUILDER CENTER ENGINE (COMPREHENSIVE EMR, WOUND, VITALS, FINANCIAL & AI TEMPLATES)
 const reportTemplatesCatalog = [
+  // 1. Primary Comprehensive & EMR
+  { id: "comprehensive_medical", title: "⭐ 1) التقرير الطبي الشامل ⭐⭐⭐⭐⭐", category: "primary", desc: "أهم تقرير في النظام: بيانات المريض، التشخيص، التاريخ المرضي، العلامات الحيوية، التقييم، الأدوية، التحاليل والأشعة، صور الجروح، خطة العلاج، والمواعيد القادمة", icon: "⭐", time: "⏱️ 5 دقائق", fav: true },
+  { id: "full_emr_record", title: "📜 2) الملف الطبي الكامل (Full EMR)", category: "primary", desc: "أرشيف كامل يشمل جميع بيانات المريض، الزيارات، القياسات، الجروح، الصور، والمستندات لتحويل المريض أو طلب ملفه بالكامل", icon: "📜", time: "⏱️ 5 دقائق", fav: true },
+
+  // 2. Wound Reports
+  { id: "wound_assessment", title: "🩺 7) تقرير تقييم الجرح الشامل", category: "wounds", desc: "نوع الجرح، المكان، السبب، القياسات (الطول/العمق)، اللون، الإفرازات، الرائحة، الألم، العدوى وصور قبل وبعد", icon: "🩺", time: "⏱️ 3 دقائق", fav: true },
+  { id: "wound_dressing", title: "🩹 8) تقرير غيار الجروح والضمادات", category: "wounds", desc: "تاريخ الغيار، نوع الضمادة، الأدوات والمحاليل المستخدمة، حالة الجرح والصور والخطة القادمة", icon: "🩹", time: "⏱️ 3 دقائق", fav: true },
+  { id: "wound_progress", title: "📈 9) تقرير تطور ونسبة تحسن الجرح", category: "wounds", desc: "يعرض صور متتابعة، القياسات، نسبة التحسن % ورسم بياني لسرعة التئام الأنسجة", icon: "📈", time: "⏱️ 4 دقائق", fav: true },
+  { id: "wound_photos_only", title: "📷 49) تقرير صور الجروح فقط (Before / After)", category: "wounds", desc: "مستند مصور يركز على صور الجرح قبل وبعد الغيار وتطور الالتئام", icon: "📷", time: "⏱️ 2 دقيقة", fav: false },
+
+  // 3. Vitals & Biometrics Reports
+  { id: "vitals_log", title: "📊 10) تقرير وتخطيط العلامات الحيوية", category: "vitals", desc: "سجل قراءات الضغط، النبض، الحرارة، التنفس، الأكسجين SpO2، السكر، الوزن، و BMI مع تحليل التغيرات", icon: "📊", time: "⏱️ 2 دقيقة", fav: true },
+
+  // 4. Financial & Admin Documents
+  { id: "cash_receipt", title: "🧾 18) إيصال استلام نقدية وسند قبض", category: "financial", desc: "إيصال مالي رسمي باسم المريض، المبلغ، طريقة الدفع، رقم الإيصال، وتفاصيل المستندات", icon: "🧾", time: "⏱️ 1 دقيقة", fav: true },
+  { id: "patient_consent", title: "✍️ 36) إقرار موافقة المريض على العلاج", category: "financial", desc: "موافقة مستنيرة موثقة من المريض أو ولي الأمر على تقديم الرعاية المنزلية والتدخلات التمريضية", icon: "✍️", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "liability_disclaimer", title: "🛡️ 37) إقرار إخلاء مسؤولية طبية", category: "financial", desc: "نموذج إخلاء مسؤولية وتوثيق التعليمات الطبية الصادرة من الطبيب المعالج", icon: "🛡️", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "home_care_plan", title: "🏠 38) خطة الرعاية المنزلية والتمريضية", category: "nursing", desc: "خطة تفصيلية لجدول الرعاية، التغذية، النظافة الشخصية، المواعيد، وتقليب المريض", icon: "🏠", time: "⏱️ 4 دقائق", fav: true },
+  { id: "discharge_instructions", title: "🚪 39) تعليمات الخروج واستكمال الرعاية", category: "nursing", desc: "تعليمات وإرشادات التمريض عند خروج المريض واستكمال الرعاية الذاتية بالمنزل", icon: "🚪", time: "⏱️ 3 دقائق", fav: false },
+  { id: "wound_home_instructions", title: "🩹 40) تعليمات العناية بالجرح بالمنزل", category: "wounds", desc: "إرشادات حماية الجرح، مواعيد الغيار، وأعراض الخطر التي تستدعي الاتصال الفوري", icon: "🩹", time: "⏱️ 2 دقيقة", fav: false },
+
+  // 5. Smart AI & Standard
+  { id: "ai_smart_summary", title: "✨ 50) التقرير الذكي (AI Clinical Summary ⭐)", category: "ai", desc: "يجمع تلقائياً بذكاء: ملخص الحالة الحالية، نسبة التحسن، أهم المشكلات الطبية، والخطة القادمة", icon: "✨", time: "⏱️ 1 دقيقة", fav: true },
   { id: "prescription", title: "📄 روشتة طبية معتمدة", category: "official", desc: "روشتة علاج أدوية معتمدة بختم نبض وتوقيع إبراهيم ماهر المعتمد", icon: "📄", time: "⏱️ 2 دقيقة", fav: true },
-  { id: "wound_dressing", title: "🩹 تقرير غيار جروح وقرح", category: "wounds", desc: "تقرير طبي بتفاصيل أبعاد الجرح، الإفرازات، الصور وصلاحية الغيار", icon: "🩹", time: "⏱️ 3 دقائق", fav: true },
-  { id: "vitals_log", title: "🩺 تقرير متابعة العلامات الحيوية", category: "nursing", desc: "سجل قراءات الضغط، السكر، النبض، الحرارة، ونسبة الأكسجين", icon: "🩺", time: "⏱️ 1 دقيقة", fav: true },
   { id: "lab_collection", title: "🧪 تقرير سحب عينات تحاليل", category: "labs", desc: "نموذج استلام عينات التحاليل الطبية وتوثيق شروط الصيام والجمع", icon: "🧪", time: "⏱️ 2 دقيقة", fav: false },
-  { id: "catheter_care", title: "🫁 تقرير تركيب / تغيير قسطرة بولية", category: "nursing", desc: "توثيق نوع القسطرة، المقاس بالفرينش (Fr)، والتطهير وتاريخ التغيير القادم", icon: "🫁", time: "⏱️ 3 دقائق", fav: false },
-  { id: "iv_infusion", title: "💉 تقرير تركيب كانيولا ومحاليل", category: "nursing", desc: "توثيق نوع المحاليل الوريدية، السرعة، وملاحظات الأوردة", icon: "💉", time: "⏱️ 2 دقيقة", fav: false },
-  { id: "resident_nursing", title: "🏠 تقرير رعاية تمريضية مقيمة (24س)", category: "nursing", desc: "تقرير شامل لمتابعة الحالات الحرجة والمقيمة بالمنزل على مدار اليوم", icon: "🏠", time: "⏱️ 5 دقائق", fav: true },
-  { id: "clearance_cert", title: "📜 شهادة خلو من الأمراض وملاءمة تمريضية", category: "official", desc: "شهادة طبية رسمية معتمدة بالحالة الصحية العامة ونطاق الخدمة", icon: "📜", time: "⏱️ 2 دقيقة", fav: false },
-  { id: "diabetic_foot", title: "🦶 تقرير عناية بالقدم السكري", category: "wounds", desc: "فحص وتوثيق الدورة الدموية، النبض الطرفي، وغيارات القدم السكري", icon: "🦶", time: "⏱️ 4 دقائق", fav: true },
-  { id: "post_op_care", title: "🔪 تقرير عناية بعد العمليات الجراحية", category: "wounds", desc: "متابعة الخياطة الجراحية والغرز وإزالة الدرنقة وتطهير الجرح", icon: "🔪", time: "⏱️ 3 دقائق", fav: false },
-  { id: "physiotherapy", title: "🤸 تقرير جلسة علاج طبيعي وتأهيل", category: "nursing", desc: "توثيق التمارين الحركية، التأهيل بعد الجلطات، ومدى الحركة", icon: "🤸", time: "⏱️ 3 دقائق", fav: false },
-  { id: "xray_rad", title: "🩻 تقرير فحوصات وأشعة منزلية", category: "labs", desc: "أرشفة وتوثيق نتائج تقارير الأشعة والسنار المنزلي", icon: "🩻", time: "⏱️ 2 دقيقة", fav: false },
-  { id: "ryle_feeding", title: "🥛 تقرير أنبوب تغذية (رايل Ryle)", category: "nursing", desc: "توثيق إدخال واختبار مكان الرايل وجدول التغذية الأنبوبية", icon: "🥛", time: "⏱️ 3 دقائق", fav: false },
-  { id: "medical_invoice", title: "🧾 فاتورة مستحقات تمريضية معتمدة", category: "official", desc: "كشف حسـاب وفاتورة رسمية بالخدمات والمستلزمات والمبالغ المدفوعة", icon: "🧾", time: "⏱️ 1 دقيقة", fav: true },
-  { id: "discharge_summary", title: "🚪 ملخص تقرير خروج وانتهاء رعاية", category: "official", desc: "تقرير ختامي بتحسن الحالة وانتهاء فترة تقديم الخدمة التمريضية المنزلية", icon: "🚪", time: "⏱️ 3 دقائق", fav: false }
+  { id: "catheter_care", title: "🫁 تقرير قسطرة بولية", category: "nursing", desc: "توثيق نوع القسطرة، المقاس بالفرينش (Fr)، والتطهير وتاريخ التغيير القادم", icon: "🫁", time: "⏱️ 3 دقائق", fav: false },
+  { id: "iv_infusion", title: "💉 تقرير كانيولا ومحاليل وريدية", category: "nursing", desc: "توثيق نوع المحاليل الوريدية، السرعة، وملاحظات الأوردة", icon: "💉", time: "⏱️ 2 دقيقة", fav: false },
+  { id: "medical_invoice", title: "🧾 فاتورة مستحقات تمريضية معتمدة", category: "financial", desc: "كشف حساب وفاتورة رسمية بالخدمات والمستلزمات والمبالغ المدفوعة", icon: "🧾", time: "⏱️ 1 دقيقة", fav: true }
 ];
 
 let activeReportFilterCategory = 'all';
@@ -2282,8 +2295,131 @@ function updateDraftReportView() {
   currentDraftState.patientScope.area = getElementValue('draft-pat-area', 'غير محدد');
   currentDraftState.freeNotes = getElementValue('draft-free-notes', '');
 
-  const canvas = document.getElementById('printable-editor-report-canvas') || document.getElementById('draft-live-preview-box');
-  if (!canvas) return;
+  const tId = currentDraftState.templateId || 'prescription';
+  const selectedTpl = reportTemplatesCatalog.find(t => t.id === tId) || reportTemplatesCatalog[0];
+
+  let dynamicTemplateBody = '';
+
+  if (tId === 'comprehensive_medical' || tId === 'full_emr_record') {
+    dynamicTemplateBody = `
+      <div style="background:#f8fafc; border:1px solid #00d4b2; border-radius:8px; padding:12px; margin-bottom:15px;">
+        <h4 style="color:#0b192c; margin:0 0 8px 0; font-size:1.1rem; border-bottom:1px solid #cbd5e1; padding-bottom:4px;">
+          ${selectedTpl.title}
+        </h4>
+        <p style="font-size:0.85rem; color:#475569; margin:0 0 8px 0;">المستند الطبي الشامل والموثق المخصص لتحويل الحالة أو تقديم الملف الطبي الكامل للجهة المختصة.</p>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:0.85rem;">
+          <div><strong>التشخيص الطبي الحالي:</strong> حالة متابعة تمريضية منزلية مستقرة</div>
+          <div><strong>التاريخ المرضي:</strong> ضغط / سكر / رعاية جروح</div>
+          <div><strong>حالة العلامات الحيوية:</strong> مستقرة ضمن النطاق الطبيعي</div>
+          <div><strong>التقييم التمريضي:</strong> ممتاز وحالة الالتئام جيدة</div>
+        </div>
+      </div>
+    `;
+  } else if (tId === 'wound_assessment' || tId === 'wound_dressing' || tId === 'wound_progress' || tId === 'wound_photos_only') {
+    dynamicTemplateBody = `
+      <div style="background:#fff7ed; border:1px solid #fdba74; border-radius:8px; padding:12px; margin-bottom:15px;">
+        <h4 style="color:#c2410c; margin:0 0 8px 0; font-size:1.05rem; border-bottom:1px solid #fed7aa; padding-bottom:4px;">
+          🩹 ${selectedTpl.title}
+        </h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:0.85rem;">
+          <div><strong>نوع الجرح ومكانه:</strong> قرحة فراش درجة 2 (المنطقة العجزية)</div>
+          <div><strong>القياسات:</strong> 4 سم × 3 سم (العمق: 0.5 سم)</div>
+          <div><strong>اللون والإفرازات:</strong> نسيج حبيبي حميد (وردي) / إفرازات مصلية خفيفة</div>
+          <div><strong>الرائحة والألم:</strong> لا توجد رائحة كريهة / الألم: 2 من 10</div>
+          <div><strong>علامات العدوى:</strong> لا توجد علامات التهاب أو صديد</div>
+          <div><strong>المحاليل والضمادات:</strong> سالين معقم + ضمادة هيدروجيل متطورة</div>
+        </div>
+      </div>
+    `;
+  } else if (tId === 'vitals_log') {
+    dynamicTemplateBody = `
+      <div style="background:#f0fdf4; border:1px solid #86efac; border-radius:8px; padding:12px; margin-bottom:15px;">
+        <h4 style="color:#15803d; margin:0 0 8px 0; font-size:1.05rem; border-bottom:1px solid #bbf7d0; padding-bottom:4px;">
+          📊 ${selectedTpl.title}
+        </h4>
+        <table class="prescription-table" style="font-size:0.85rem; margin-top:8px;">
+          <thead>
+            <tr>
+              <th>الضغط (BP)</th>
+              <th>النبض (HR)</th>
+              <th>الحرارة (Temp)</th>
+              <th>التنفس (RR)</th>
+              <th>الأكسجين (SpO2)</th>
+              <th>السكر (RBS)</th>
+              <th>الوزن / BMI</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>120 / 80</strong> mmHg</td>
+              <td>76 / دقيقة</td>
+              <td>36.7 °C</td>
+              <td>18 / دقيقة</td>
+              <td><strong>98%</strong></td>
+              <td>135 mg/dL</td>
+              <td>75 كجم (24.2)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
+  } else if (tId === 'cash_receipt') {
+    dynamicTemplateBody = `
+      <div style="background:#fffbe6; border:2px dashed #ffe58f; border-radius:10px; padding:16px; margin-bottom:15px; text-align:center;">
+        <h3 style="color:#b7eb8f; margin:0 0 10px 0; color:#d48806; font-size:1.3rem;">🧾 إيصال استلام نقدية وسند قبض معتمد</h3>
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem; font-weight:bold; color:#595959;">
+          <span>رقم الإيصال: REC-${Date.now().toString().slice(-6)}</span>
+          <span>تاريخ الاستلام: ${new Date().toLocaleDateString('ar-EG')}</span>
+        </div>
+        <div style="background:#fff; border:1px solid #ffe58f; padding:12px; border-radius:6px; font-size:1.1rem; color:#1f1f1f; margin-bottom:10px;">
+          استلمنا من السيد/السيدة: <strong>${currentDraftState.patientScope.fullName}</strong><br>
+          مبـلغ وقدره: <strong style="color:#52c41a; font-size:1.3rem;">0.00 جنيه مصري</strong> (فقط لا غير)
+        </div>
+        <p style="font-size:0.85rem; color:#8c8c8c; margin:0;">وذلك قيمة تقديم خدمات تمريضية منزلية برعاية أخصائي التمريض إبراهيم ماهر (01001097896).</p>
+      </div>
+    `;
+  } else if (tId === 'patient_consent' || tId === 'liability_disclaimer') {
+    dynamicTemplateBody = `
+      <div style="background:#fafafa; border:1px solid #d9d9d9; border-radius:8px; padding:14px; margin-bottom:15px; font-size:0.88rem; line-height:1.6;">
+        <h4 style="color:#262626; margin:0 0 8px 0; font-size:1.1rem; border-bottom:1px solid #f0f0f0; padding-bottom:4px;">
+          ✍️ ${selectedTpl.title}
+        </h4>
+        <p>أقر أنا الموقع أدناه بأني قد وافقت بكامل إرادتي على تلقي الرعاية التمريضية المنزلية المقررة من قبل أخصائي التمريض <strong>إبراهيم ماهر</strong> بناءً على تعليمات الطبيب المعالج، وتوثيق كافة التوصيات والإرشادات الطبية المرفقة بهذا المستند.</p>
+        <div style="display:flex; justify-content:space-between; margin-top:20px; font-weight:bold;">
+          <span>توقيع المريض / ولي الأمر: ............................</span>
+          <span>التاريخ: ${new Date().toLocaleDateString('ar-EG')}</span>
+        </div>
+      </div>
+    `;
+  } else if (tId === 'home_care_plan' || tId === 'discharge_instructions' || tId === 'wound_home_instructions') {
+    dynamicTemplateBody = `
+      <div style="background:#f6ffed; border:1px solid #b7eb8f; border-radius:8px; padding:12px; margin-bottom:15px;">
+        <h4 style="color:#389e0d; margin:0 0 8px 0; font-size:1.05rem; border-bottom:1px solid #d9f7be; padding-bottom:4px;">
+          🏠 ${selectedTpl.title}
+        </h4>
+        <ul style="margin:0; padding-right:20px; font-size:0.88rem; color:#273812; line-height:1.6;">
+          <li>الالتزام التام بمواعيد أخذ الأدوية والغيارات التمريضية المسجلة.</li>
+          <li>المحافظة على نظافة وجفاف موضع الجرح والابتعاد عن التلوث.</li>
+          <li>التقليب الدائم للحالة كل ساعتين في حالات طريحي الفراش لمنع قرح الفراش.</li>
+          <li>الاتصال الفوري بأخصائي التمريض إبراهيم ماهر (01001097896) عند ظهور أي أعراض خطر مثل ارتفاع الحرارة أو الصديد.</li>
+        </ul>
+      </div>
+    `;
+  } else if (tId === 'ai_smart_summary') {
+    dynamicTemplateBody = `
+      <div style="background:linear-gradient(135deg, #f0f5ff 0%, #e6f7ff 100%); border:1px solid #91caff; border-radius:8px; padding:14px; margin-bottom:15px;">
+        <h4 style="color:#0958d9; margin:0 0 8px 0; font-size:1.1rem; border-bottom:1px solid #bae0ff; padding-bottom:4px;">
+          ✨ 50) التقرير الذكي وموجز الحالة بالذكاء الاصطناعي (AI Summary)
+        </h4>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; font-size:0.85rem; color:#1d39c4;">
+          <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #adc6ff;"><strong>📌 ملخص الحالة:</strong> حالة تمريضية منزلية منتظمة الاستجابة للعلاج.</div>
+          <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #adc6ff;"><strong>📈 نسبة التحسن والتعافي:</strong> <span style="color:#389e0d; font-weight:bold;">85% (ممتازة)</span></div>
+          <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #adc6ff;"><strong>⚠️ أهم المشكلات والتحذيرات:</strong> يجب ضبط قراءات السكر وتجنب الانخفاض.</div>
+          <div style="background:#fff; padding:8px; border-radius:6px; border:1px solid #adc6ff;"><strong>🎯 الخطة القادمة:</strong> الاستمرار في جدول الغيارات والاستشارة المعتمدة.</div>
+        </div>
+      </div>
+    `;
+  }
 
   let html = `
     <div class="prescription-watermark">
@@ -2309,7 +2445,9 @@ function updateDraftReportView() {
       <div><strong>المنطقة:</strong> ${currentDraftState.patientScope.area}</div>
     </div>
 
-    <h3 style="color: #0b192c; border-bottom: 2px solid #0b192c; padding-bottom: 0.3rem; margin-bottom: 1rem;">التقرير والروشتة الطبية المعتمدة (Draft #${currentDraftState.draftId})</h3>
+    <h3 style="color: #0b192c; border-bottom: 2px solid #0b192c; padding-bottom: 0.3rem; margin-bottom: 1rem;">${selectedTpl.title} (Draft #${currentDraftState.draftId})</h3>
+
+    ${dynamicTemplateBody}
 
     ${currentDraftState.medications.length > 0 ? `
     <h4 style="color:#0b192c; margin-bottom:0.5rem;">💊 جدول العلاج والأدوية المسجلة:</h4>

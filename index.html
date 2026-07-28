@@ -445,10 +445,13 @@
             <input type="text" id="report-search-query" placeholder="🔎 ابحث عن نوع التقرير (مثال: روشتة، غيار جروح، تحاليل...)" style="flex: 1; min-width: 260px;" oninput="renderCategorizedReportCards()" inputmode="search">
             <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;" id="report-category-chips">
               <button class="btn btn-sm btn-primary" onclick="filterReportCategory('all', this)">جميع التقارير</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('primary', this)">⭐ التقارير الشاملة</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('wounds', this)">🩹 تقارير الجروح</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('vitals', this)">📊 العلامات الحيوية</button>
               <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('nursing', this)">🩺 التمريض والزيارات</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('wounds', this)">🩹 الجروح والقرح</button>
               <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('official', this)">📄 الروشتات والشهادات</button>
-              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('labs', this)">🧪 التحاليل والأشعة</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('financial', this)">💰 المالية والإدارية</button>
+              <button class="btn btn-sm btn-secondary" onclick="filterReportCategory('ai', this)">✨ الذكاء الاصطناعي</button>
             </div>
           </div>
 
