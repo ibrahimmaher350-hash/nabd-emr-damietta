@@ -349,6 +349,11 @@ function initTabAddPatientForm() {
   }
 }
 
+function setElementValue(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
 function applyClinicSettingsToUI() {
   const topLogo = document.getElementById('ui-top-logo');
   if (topLogo) topLogo.src = clinicSettings.logoUrl;
@@ -371,29 +376,29 @@ function applyClinicSettingsToUI() {
   const recentVisitsHeader = document.getElementById('ui-recent-visits-header');
   if (recentVisitsHeader) recentVisitsHeader.innerText = `📋 أحدث الزيارات التمريضية - إبراهيم ماهر (نبض للتمريض المنزلي)`;
 
-  document.getElementById('cfg-brand-name').value = "إبراهيم ماهر";
-  document.getElementById('cfg-logo-url').value = clinicSettings.logoUrl;
-  document.getElementById('cfg-phone').value = clinicSettings.phone;
-  document.getElementById('cfg-whatsapp').value = clinicSettings.whatsApp;
-  document.getElementById('cfg-email').value = clinicSettings.email;
-  document.getElementById('cfg-website').value = clinicSettings.website;
-  document.getElementById('cfg-governorate').value = clinicSettings.governorate;
-  document.getElementById('cfg-address').value = clinicSettings.address;
-  document.getElementById('cfg-service-areas').value = clinicSettings.serviceAreas;
-  document.getElementById('cfg-google-maps').value = clinicSettings.googleMapsUrl;
+  setElementValue('cfg-brand-name', "إبراهيم ماهر");
+  setElementValue('cfg-logo-url', clinicSettings.logoUrl);
+  setElementValue('cfg-phone', clinicSettings.phone);
+  setElementValue('cfg-whatsapp', clinicSettings.whatsApp);
+  setElementValue('cfg-email', clinicSettings.email);
+  setElementValue('cfg-website', clinicSettings.website);
+  setElementValue('cfg-governorate', clinicSettings.governorate);
+  setElementValue('cfg-address', clinicSettings.address);
+  setElementValue('cfg-service-areas', clinicSettings.serviceAreas);
+  setElementValue('cfg-google-maps', clinicSettings.googleMapsUrl);
 }
 
 function applySyncSettingsToUI() {
-  document.getElementById('sync-sheets-url').value = syncSettings.sheetsWebhookUrl;
-  document.getElementById('sync-drive-folder-id').value = syncSettings.driveFolderId;
-  document.getElementById('sync-firebase-project-id').value = syncSettings.firebaseProjectId;
-  document.getElementById('sync-firebase-api-key').value = syncSettings.firebaseApiKey;
-  document.getElementById('sync-firestore-db').value = syncSettings.firestoreDb;
-  document.getElementById('sync-custom-webhook').value = syncSettings.customWebhookUrl;
-  document.getElementById('sync-auto-sync-enabled').value = syncSettings.autoSyncEnabled;
-  document.getElementById('sync-auto-backup-enabled').value = syncSettings.autoBackupEnabled;
-  document.getElementById('sync-backup-interval').value = syncSettings.backupIntervalHours;
-  document.getElementById('sync-last-time-display').value = syncSettings.lastSyncTime || new Date().toLocaleString('ar-EG');
+  setElementValue('sync-sheets-url', syncSettings.sheetsWebhookUrl);
+  setElementValue('sync-drive-folder-id', syncSettings.driveFolderId);
+  setElementValue('sync-firebase-project-id', syncSettings.firebaseProjectId);
+  setElementValue('sync-firebase-api-key', syncSettings.firebaseApiKey);
+  setElementValue('sync-firestore-db', syncSettings.firestoreDb);
+  setElementValue('sync-custom-webhook', syncSettings.customWebhookUrl);
+  setElementValue('sync-auto-sync-enabled', syncSettings.autoSyncEnabled);
+  setElementValue('sync-auto-backup-enabled', syncSettings.autoBackupEnabled);
+  setElementValue('sync-backup-interval', syncSettings.backupIntervalHours);
+  setElementValue('sync-last-time-display', syncSettings.lastSyncTime || new Date().toLocaleString('ar-EG'));
 }
 
 function applySystemSettingsToUI() {
@@ -404,18 +409,18 @@ function applySystemSettingsToUI() {
   }
 
   document.querySelectorAll('.ui-currency-symbol').forEach(el => {
-    el.innerText = systemSettings.currency;
+    el.innerText = systemSettings.currency || 'ج.م';
   });
 
-  document.getElementById('sys-theme').value = systemSettings.theme;
-  document.getElementById('sys-language').value = systemSettings.language;
-  document.getElementById('sys-currency').value = systemSettings.currency;
-  document.getElementById('sys-date-format').value = systemSettings.dateFormat;
-  document.getElementById('sys-time-format').value = systemSettings.timeFormat;
-  document.getElementById('sys-timezone').value = systemSettings.timezone;
-  document.getElementById('sys-next-patient-id').value = systemSettings.nextPatientId;
-  document.getElementById('sys-next-visit-id').value = systemSettings.nextVisitId;
-  document.getElementById('sys-next-invoice-id').value = systemSettings.nextInvoiceId;
+  setElementValue('sys-theme', systemSettings.theme);
+  setElementValue('sys-language', systemSettings.language);
+  setElementValue('sys-currency', systemSettings.currency);
+  setElementValue('sys-date-format', systemSettings.dateFormat);
+  setElementValue('sys-time-format', systemSettings.timeFormat);
+  setElementValue('sys-timezone', systemSettings.timezone);
+  setElementValue('sys-next-patient-id', systemSettings.nextPatientId);
+  setElementValue('sys-next-visit-id', systemSettings.nextVisitId);
+  setElementValue('sys-next-invoice-id', systemSettings.nextInvoiceId);
 
   renderDashboardStats();
 }
