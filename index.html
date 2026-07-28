@@ -531,13 +531,17 @@
             </div>
             <div id="draft-medications-editor-list" style="margin-bottom: 0.8rem;"></div>
 
-            <!-- PHOTOS MANAGEMENT SECTION -->
+            <!-- PHOTOS MANAGEMENT SECTION WITH DIRECT FILE & CAMERA PICKER -->
+            <input type="file" id="report-photo-file-picker" accept="image/*" style="display:none;" onchange="handleReportPhotoFileSelected(event)">
             <div style="border-top: 1px dashed var(--border-color); padding-top: 0.8rem; margin-top: 0.8rem;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.4rem;">
                 <h5 style="color: var(--accent-cyan); margin: 0;">📷 معرض صور الجروح والمرفقات</h5>
-                <button class="btn btn-xs btn-success" onclick="openAddPhotoModal()">📷 + إضافة صورة</button>
+                <div style="display: flex; gap: 0.3rem;">
+                  <button type="button" class="btn btn-xs btn-success" onclick="triggerReportPhotoUpload()">📷 رفع صورة / كاميرا</button>
+                  <button type="button" class="btn btn-xs btn-secondary" onclick="openAddPhotoURLModal()">🌐 رابط صورة</button>
+                </div>
               </div>
-              <div id="draft-photos-editor-list" style="max-height: 140px; overflow-y: auto; margin-bottom: 0.8rem;">
+              <div id="draft-photos-editor-list" style="max-height: 160px; overflow-y: auto; margin-bottom: 0.8rem;">
                 <!-- Photos listed dynamically -->
               </div>
             </div>

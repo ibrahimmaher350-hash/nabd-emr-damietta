@@ -2187,7 +2187,32 @@ function renderDraftPhotosList() {
   `).join('');
 }
 
-function openAddPhotoModal() {
+function triggerReportPhotoUpload() {
+  const picker = document.getElementById('report-photo-file-picker');
+  if (picker) picker.click();
+}
+
+function handleReportPhotoFileSelected(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(evt) {
+    if (!currentDraftState.woundPhotos) currentDraftState.woundPhotos = [];
+    currentDraftState.woundPhotos.push({
+      id: `img_${Date.now()}`,
+      label: `صورة جرح/مرفق جديدة (${new Date().toLocaleDateString('ar-EG')})`,
+      url: evt.target.result
+    });
+    pushHistoryState();
+    renderDraftPhotosList();
+    updateDraftReportView();
+    showToast('📷 تم رفع وإضافة الصورة بنجاح للتقرير!', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function openAddPhotoURLModal() {
   const label = prompt('أدخل وصف الصورة (مثال: صورة الجرح قبل الغيار / نتيجة الأشعة):') || 'صورة مرفقة جديدة';
   const url = prompt('رابط الصورة أو مسارها (اتركه فارغاً لاختيار صورة نموذجية):') || 'assets/stamp.jpg?v=26';
 
@@ -2201,7 +2226,7 @@ function openAddPhotoModal() {
   pushHistoryState();
   renderDraftPhotosList();
   updateDraftReportView();
-  showToast('📷 تم إضافة الصورة بنجاح للتقرير!', 'success');
+  showToast('📷 تم إضافة رابط الصورة بنجاح للتقرير!', 'success');
 }
 
 function editPhotoLabel(idx) {
@@ -2578,12 +2603,16 @@ function updateDraftReportView() {
     </table>` : ''}
 
     ${currentDraftState.woundPhotos.length > 0 ? `
-    <h4 style="color:#0b192c; margin-bottom:0.5rem;">🩹 معرض صور ومتابعة الجروح (قبل / بعد):</h4>
+    <h4 style="color:#0b192c; margin-bottom:0.5rem;">🩹 معرض صور ومتابعة الجروح والمرفقات:</h4>
     <div class="wound-comparison-grid">
-      ${currentDraftState.woundPhotos.map(img => `
-        <div class="wound-card-comparison">
+      ${currentDraftState.woundPhotos.map((img, idx) => `
+        <div class="wound-card-comparison" style="position:relative;">
           <img src="${img.url}" alt="${img.label}">
-          <p style="font-size:0.8rem; color:#475569;">${img.label}</p>
+          <p style="font-size:0.8rem; color:#475569; margin:4px 0;">${img.label}</p>
+          <div class="no-print" style="display:flex; gap:4px; justify-content:center; margin-top:4px;">
+            <button type="button" class="btn btn-xs btn-amber" onclick="editPhotoLabel(${idx})">✏️ تعديل الوصف</button>
+            <button type="button" class="btn btn-xs btn-danger" onclick="deleteWoundPhoto(${idx})">🗑️ حذف الصورة</button>
+          </div>
         </div>
       `).join('')}
     </div>` : ''}
