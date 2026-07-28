@@ -798,6 +798,55 @@
           </div>
         </form>
       </div>
+
+      <!-- 2. FIELD MANAGER - DYNAMIC SYSTEM LISTS & CUSTOM FIELDS -->
+      <div class="panel-card" style="margin-top: 1.5rem; border: 1.5px solid var(--accent-cyan);">
+        <div class="panel-header" style="flex-wrap: wrap; gap: 0.8rem;">
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateBackHistory()">➡️ رجوع</button>
+            <h2 style="color: var(--accent-cyan);">⚙️ 2. مدير الحقول والقوائم التفاعلي (Field Manager)</h2>
+          </div>
+          <button class="btn btn-amber btn-sm" onclick="resetFieldListsToDefault()">🔄 استعادة القوائم الافتراضية</button>
+        </div>
+
+        <p style="color: var(--text-muted); font-size: 0.88rem; margin-bottom: 1.2rem;">
+          تخصيص كامل لجميع قوائم النظام والخيارات بدون تعديل الكود. إضافة، تعديل، إخفاء، ترتيب، وتمييز المفضلة بسهولة من الهاتف.
+        </p>
+
+        <!-- Category selector chips -->
+        <div style="display: flex; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 1rem;" id="field-manager-category-chips">
+          <button class="btn btn-sm btn-primary" onclick="setFieldManagerCategory('Medical', this)">🩺 طبي (Medical)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Administrative', this)">📋 إداري (Administrative)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Financial', this)">💵 مالي وتأمين (Financial)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Notifications', this)">🔔 إشعارات (Notifications)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Reports', this)">📄 تقارير (Reports)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Appointments', this)">📅 مواعيد (Appointments)</button>
+          <button class="btn btn-sm btn-secondary" onclick="setFieldManagerCategory('Custom Lists', this)">⚙️ قوائم مخصصة (Custom Lists)</button>
+        </div>
+
+        <!-- Field list selection & search -->
+        <div class="form-grid" style="margin-bottom: 1.2rem;">
+          <div class="form-group">
+            <label>اختر القائمة المراد إدارتها</label>
+            <select id="field-manager-list-select" onchange="renderFieldManagerOptions()"></select>
+          </div>
+          <div class="form-group">
+            <label>بحث داخل الخيارات</label>
+            <input type="text" id="field-manager-search" placeholder="ابحث عن خيار..." oninput="renderFieldManagerOptions()" inputmode="search">
+          </div>
+        </div>
+
+        <!-- Actions Bar for adding new option -->
+        <div style="display: flex; gap: 0.8rem; flex-wrap: wrap; align-items: center; justify-content: space-between; margin-bottom: 1rem; background: rgba(0,212,178,0.04); padding: 0.8rem; border-radius: 10px; border: 1px solid var(--border-color);">
+          <span style="font-weight: 700; color: var(--accent-cyan);" id="field-manager-current-title">قائمة الخيارات</span>
+          <button class="btn btn-success btn-sm" onclick="promptAddNewOptionToCurrentList()">➕ إضافة خيار جديد للقائمة</button>
+        </div>
+
+        <!-- Options Container -->
+        <div id="field-manager-options-container" style="display: flex; flex-direction: column; gap: 0.6rem;">
+          <!-- Dynamically populated via JS -->
+        </div>
+      </div>
     </section>
 
     <!-- 6. DASHBOARD TAB -->

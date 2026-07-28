@@ -293,6 +293,8 @@ function switchTab(tabId, btnElement, skipPush = false) {
   } else if (tabId === 'prescription-tab') {
     populateReportPatientSelect();
     initQRCode();
+  } else if (tabId === 'settings-tab') {
+    populateFieldManagerListSelect();
   }
 }
 
@@ -301,6 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
   try { applyClinicSettingsToUI(); } catch (e) { console.error('Error in applyClinicSettingsToUI:', e); }
   try { applySyncSettingsToUI(); } catch (e) { console.error('Error in applySyncSettingsToUI:', e); }
   try { applySystemSettingsToUI(); } catch (e) { console.error('Error in applySystemSettingsToUI:', e); }
+  try { refreshAllConfigurableSelects(); } catch (e) { console.error('Error in refreshAllConfigurableSelects:', e); }
+  try { populateFieldManagerListSelect(); } catch (e) { console.error('Error in populateFieldManagerListSelect:', e); }
   try { saveStateToLocalStorage(); } catch (e) { console.error('Error in saveStateToLocalStorage:', e); }
   try { renderDashboardStats(); } catch (e) { console.error('Error in renderDashboardStats:', e); }
   try { renderRecentVisits(); } catch (e) { console.error('Error in renderRecentVisits:', e); }
@@ -1346,9 +1350,14 @@ function removeMedication(idx) {
   renderMedicationsList();
 }
 
-function getElementValue(id, fallbackVal = "") {
+function getElementValue(id, fallbackVal = "غير محدد") {
   const el = document.getElementById(id);
-  return el ? el.value : fallbackVal;
+  if (!el) return fallbackVal;
+  const val = (el.value || "").trim();
+  if (val === "" || val === "__ADD_CUSTOM__") {
+    return fallbackVal || "غير محدد";
+  }
+  return val;
 }
 
 // Visit Form Submission
@@ -3368,5 +3377,505 @@ function resetNextVisitScheduler() {
   if (confirmBox) confirmBox.style.display = 'none';
   if (errorBox) errorBox.style.display = 'none';
 }
+
+/* ============================================================
+   FULLY CONFIGURABLE FIELD MANAGER ENGINE (مدير الحقول والقوائم التفاعلي)
+   ============================================================ */
+
+const defaultFieldLists = {
+  // Medical
+  diagnosis: [
+    { id: "diag_1", label: "مرض السكري (Diabetes Mellitus)", value: "مرض السكري", category: "Medical", disabled: false, favorite: true },
+    { id: "diag_2", label: "ارتفاع ضغط الدم (Hypertension)", value: "ارتفاع ضغط الدم", category: "Medical", disabled: false, favorite: true },
+    { id: "diag_3", label: "قرحة الفراش / الجروح المعقدة (Bedsores)", value: "قرحة الفراش", category: "Medical", disabled: false, favorite: true },
+    { id: "diag_4", label: "قدم سكري (Diabetic Foot)", value: "قدم سكري", category: "Medical", disabled: false, favorite: true },
+    { id: "diag_5", label: "أمراض القلب والشرايين (Cardiovascular)", value: "أمراض القلب", category: "Medical", disabled: false, favorite: false },
+    { id: "diag_6", label: "الفشل الكلوي (Renal Failure)", value: "فشل كلوي", category: "Medical", disabled: false, favorite: false },
+    { id: "diag_7", label: "الجلطة الدماغية والشلل (Stroke/Paralysis)", value: "جلطة دماغية", category: "Medical", disabled: false, favorite: false }
+  ],
+  complaints: [
+    { id: "cmp_1", label: "غيار على جرح سكري في القدم", value: "غيار جرح سكري", category: "Medical", disabled: false, favorite: true },
+    { id: "cmp_2", label: "متابعة قياس الضغط والسكر اليومي", value: "متابعة ضغط وسكر", category: "Medical", disabled: false, favorite: true },
+    { id: "cmp_3", label: "تركيب / تغيير قسطرة بولية (Foley Catheter)", value: "تركيب قسطرة بولية", category: "Medical", disabled: false, favorite: true },
+    { id: "cmp_4", label: "تركيب / إطعام رايل (NG Tube)", value: "تركيب رايل", category: "Medical", disabled: false, favorite: true },
+    { id: "cmp_5", label: "اعطاء محاليل وحقن ووريد", value: "محلول ووريد", category: "Medical", disabled: false, favorite: true },
+    { id: "cmp_6", label: "عناية تمريضية مقيمة 24 ساعة", value: "تمريض مقيم", category: "Medical", disabled: false, favorite: false }
+  ],
+  vitals_sugar_type: [
+    { id: "st_1", label: "عشوائي (Random)", value: "عشوائي (Random)", category: "Medical", disabled: false, favorite: true },
+    { id: "st_2", label: "صائم (Fasting)", value: "صائم (Fasting)", category: "Medical", disabled: false, favorite: true },
+    { id: "st_3", label: "بعد الأكل (Postprandial)", value: "بعد الأكل (Postprandial)", category: "Medical", disabled: false, favorite: true }
+  ],
+  wound_type: [
+    { id: "wt_1", label: "قرحة فراش (Pressure Ulcer)", value: "قرحة فراش", category: "Medical", disabled: false, favorite: true },
+    { id: "wt_2", label: "قدم سكري (Diabetic Foot Ulcer)", value: "قدم سكري", category: "Medical", disabled: false, favorite: true },
+    { id: "wt_3", label: "جرح جراحي بعد عملية (Post-Op Surgical)", value: "جرح جراحي", category: "Medical", disabled: false, favorite: true },
+    { id: "wt_4", label: "حروق (Burn Wound)", value: "حروق", category: "Medical", disabled: false, favorite: false },
+    { id: "wt_5", label: "قرحة وريدية / شريانية (Vascular Ulcer)", value: "قرحة وريدية", category: "Medical", disabled: false, favorite: false }
+  ],
+  wound_stage: [
+    { id: "ws_1", label: "المرحلة الأولى (Stage I - احمرار فقط)", value: "المرحلة الأولى", category: "Medical", disabled: false, favorite: true },
+    { id: "ws_2", label: "المرحلة الثانية (Stage II - فقدان جزئي للجلد)", value: "المرحلة الثانية", category: "Medical", disabled: false, favorite: true },
+    { id: "ws_3", label: "المرحلة الثالثة (Stage III - عميق للأنسجة)", value: "المرحلة الثالثة", category: "Medical", disabled: false, favorite: true },
+    { id: "ws_4", label: "المرحلة الرابعة (Stage IV - وصول للعظام)", value: "المرحلة الرابعة", category: "Medical", disabled: false, favorite: true }
+  ],
+  dressing_type: [
+    { id: "dt_1", label: "غيار معقم عادي شاش وبغادين", value: "غيار عادي", category: "Medical", disabled: false, favorite: true },
+    { id: "dt_2", label: "غيار فضة وفوم ذكي (Silver & Foam Dressing)", value: "غيار فضة وفوم", category: "Medical", disabled: false, favorite: true },
+    { id: "dt_3", label: "غيار هيدروجيل ورطوبة (Hydrogel)", value: "غيار هيدروجيل", category: "Medical", disabled: false, favorite: false },
+    { id: "dt_4", label: "غيار ألجينات الصوديوم (Alginate Dressing)", value: "غيار ألجينات", category: "Medical", disabled: false, favorite: false }
+  ],
+
+  // Administrative
+  gender: [
+    { id: "g_1", label: "ذكر", value: "ذكر", category: "Administrative", disabled: false, favorite: true },
+    { id: "g_2", label: "أنثى", value: "أنثى", category: "Administrative", disabled: false, favorite: true }
+  ],
+  marital_status: [
+    { id: "ms_1", label: "متزوج / متزوجة", value: "متزوج", category: "Administrative", disabled: false, favorite: true },
+    { id: "ms_2", label: "أعزب / عزباء", value: "أعزب", category: "Administrative", disabled: false, favorite: true },
+    { id: "ms_3", label: "أرمل / أرملة", value: "أرمل", category: "Administrative", disabled: false, favorite: false },
+    { id: "ms_4", label: "مطلق / مطلقة", value: "مطلق", category: "Administrative", disabled: false, favorite: false }
+  ],
+  blood_group: [
+    { id: "bg_1", label: "O+", value: "O+", category: "Administrative", disabled: false, favorite: true },
+    { id: "bg_2", label: "A+", value: "A+", category: "Administrative", disabled: false, favorite: true },
+    { id: "bg_3", label: "B+", value: "B+", category: "Administrative", disabled: false, favorite: true },
+    { id: "bg_4", label: "AB+", value: "AB+", category: "Administrative", disabled: false, favorite: true },
+    { id: "bg_5", label: "O-", value: "O-", category: "Administrative", disabled: false, favorite: false },
+    { id: "bg_6", label: "A-", value: "A-", category: "Administrative", disabled: false, favorite: false },
+    { id: "bg_7", label: "B-", value: "B-", category: "Administrative", disabled: false, favorite: false },
+    { id: "bg_8", label: "AB-", value: "AB-", category: "Administrative", disabled: false, favorite: false }
+  ],
+  service_areas: [
+    { id: "sa_1", label: "بندر دمياط", value: "بندر دمياط", category: "Administrative", disabled: false, favorite: true },
+    { id: "sa_2", label: "مركز دمياط", value: "مركز دمياط", category: "Administrative", disabled: false, favorite: true },
+    { id: "sa_3", label: "رأس البر", value: "رأس البر", category: "Administrative", disabled: false, favorite: true },
+    { id: "sa_4", label: "دمياط الجديدة", value: "دمياط الجديدة", category: "Administrative", disabled: false, favorite: true },
+    { id: "sa_5", label: "كفر البطيخ", value: "كفر البطيخ", category: "Administrative", disabled: false, favorite: false },
+    { id: "sa_6", label: "فارسكور", value: "فارسكور", category: "Administrative", disabled: false, favorite: false },
+    { id: "sa_7", label: "الزرقا", value: "الزرقا", category: "Administrative", disabled: false, favorite: false }
+  ],
+  patient_status: [
+    { id: "ps_1", label: "نشط (Active)", value: "نشط", category: "Administrative", disabled: false, favorite: true },
+    { id: "ps_2", label: "مكتمل الخدمة (Completed)", value: "مكتمل الخدمة", category: "Administrative", disabled: false, favorite: true },
+    { id: "ps_3", label: "مؤجل (On Hold)", value: "مؤجل", category: "Administrative", disabled: false, favorite: false },
+    { id: "ps_4", label: "متوفى (Deceased)", value: "متوفى", category: "Administrative", disabled: false, favorite: false }
+  ],
+  relationship: [
+    { id: "rel_1", label: "المريض نفسه", value: "المريض نفسه", category: "Administrative", disabled: false, favorite: true },
+    { id: "rel_2", label: "الابن / الابنة", value: "الابن/الابنة", category: "Administrative", disabled: false, favorite: true },
+    { id: "rel_3", label: "الزوج / الزوجة", value: "الزوج/الزوجة", category: "Administrative", disabled: false, favorite: true },
+    { id: "rel_4", label: "الأب / الأم", value: "الأب/الأم", category: "Administrative", disabled: false, favorite: false },
+    { id: "rel_5", label: "الأخ / الأخت", value: "الأخ/الأخت", category: "Administrative", disabled: false, favorite: false }
+  ],
+
+  // Financial
+  payment_methods: [
+    { id: "pm_1", label: "كاش نقدياً (Cash)", value: "كاش نقدياً", category: "Financial", disabled: false, favorite: true },
+    { id: "pm_2", label: "فودافون كاش / تحويل رقمي", value: "فودافون كاش", category: "Financial", disabled: false, favorite: true },
+    { id: "pm_3", label: "تأمين طبي / شركة", value: "تأمين طبي", category: "Financial", disabled: false, favorite: true },
+    { id: "pm_4", label: "آجل / متبقي", value: "آجل", category: "Financial", disabled: false, favorite: false }
+  ],
+  insurance_companies: [
+    { id: "ins_1", label: "خاص نائياً (بدون تأمين)", value: "خاص", category: "Financial", disabled: false, favorite: true },
+    { id: "ins_2", label: "التأمين الصحي الحكومي", value: "التأمين الصحي الحكومي", category: "Financial", disabled: false, favorite: true },
+    { id: "ins_3", label: "مصر للتأمين الطبي", value: "مصر للتأمين", category: "Financial", disabled: false, favorite: false },
+    { id: "ins_4", label: "أليانز (Allianz)", value: "Allianz", category: "Financial", disabled: false, favorite: false }
+  ],
+
+  // Notifications & Appointments
+  reminder_type: [
+    { id: "rt_1", label: "تذكير زيارة منزلية قادمة", value: "تذكير زيارة منزلية", category: "Notifications", disabled: false, favorite: true },
+    { id: "rt_2", label: "تذكير بموعد دواء / علاج", value: "تذكير موعد دواء", category: "Notifications", disabled: false, favorite: true },
+    { id: "rt_3", label: "تذكير غيار جروح معقم", value: "تذكير غيار جروح", category: "Notifications", disabled: false, favorite: true },
+    { id: "rt_4", label: "تذكير تحاليل وفحوصات دورية", value: "تذكير تحاليل", category: "Notifications", disabled: false, favorite: false }
+  ],
+  visit_intervals: [
+    { id: "vi_1", label: "بعد ساعتين", value: "2h", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_2", label: "بعد 6 ساعات", value: "6h", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_3", label: "بعد 12 ساعة", value: "12h", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_4", label: "بعد يوم واحد", value: "1d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_5", label: "بعد يومين", value: "2d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_6", label: "بعد 3 أيام", value: "3d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_7", label: "بعد 5 أيام", value: "5d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_8", label: "بعد أسبوع", value: "7d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_9", label: "بعد 10 أيام", value: "10d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_10", label: "بعد أسبوعين", value: "14d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_11", label: "بعد شهر", value: "30d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_12", label: "بعد 3 شهور", value: "90d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_13", label: "بعد 6 شهور", value: "180d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_14", label: "بعد سنة", value: "365d", category: "Appointments", disabled: false, favorite: true },
+    { id: "vi_15", label: "موعد مخصص يدوياً", value: "custom", category: "Appointments", disabled: false, favorite: true }
+  ],
+  alert_pretimes: [
+    { id: "ap_1", label: "15 دقيقة", value: "15", category: "Appointments", disabled: false, favorite: true },
+    { id: "ap_2", label: "30 دقيقة", value: "30", category: "Appointments", disabled: false, favorite: true },
+    { id: "ap_3", label: "ساعة واحدة", value: "60", category: "Appointments", disabled: false, favorite: true },
+    { id: "ap_4", label: "3 ساعات", value: "180", category: "Appointments", disabled: false, favorite: true },
+    { id: "ap_5", label: "6 ساعات", value: "360", category: "Appointments", disabled: false, favorite: true },
+    { id: "ap_6", label: "يوم كامل", value: "1440", category: "Appointments", disabled: false, favorite: true }
+  ],
+
+  // Custom Lists
+  services: [
+    { id: "srv_1", label: "غيار جروح وقرح معقم", value: "غيار جروح وقرح معقم", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "srv_2", label: "قياس ومتابعة العلامات الحيوية", value: "قياس العلامات الحيوية", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "srv_3", label: "تركيب / تغيير قسطرة بولية", value: "تركيب قسطرة بولية", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "srv_4", label: "تركيب / إطعام رايل معدي", value: "تركيب رايل معدي", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "srv_5", label: "اعطاء محاليل ووريد وحقن", value: "اعطاء محاليل وحقن", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "srv_6", label: "سحب عينات تحاليل منزلية", value: "سحب عينات تحاليل", category: "Custom Lists", disabled: false, favorite: false }
+  ],
+  medications: [
+    { id: "med_1", label: "Clexane 40mg Injection", value: "Clexane 40mg Injection", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "med_2", label: "Ceftriaxone 1g IV Vial", value: "Ceftriaxone 1g IV Vial", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "med_3", label: "Augmentin 1g Tablets", value: "Augmentin 1g Tablets", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "med_4", label: "Insulin Mixtard 30/70", value: "Insulin Mixtard", category: "Custom Lists", disabled: false, favorite: true },
+    { id: "med_5", label: "Concor 5mg Tablets", value: "Concor 5mg", category: "Custom Lists", disabled: false, favorite: false }
+  ]
+};
+
+const FIELD_LIST_REGISTRY = {
+  // Medical
+  diagnosis:          { name: "التشخيصات والأمراض المزمنة", category: "Medical", selectIds: ["filter-disease"] },
+  complaints:         { name: "الشكاوى الرئيسية", category: "Medical", selectIds: [] },
+  vitals_sugar_type:  { name: "نوع قياس السكر", category: "Medical", selectIds: ["vital-sugar-type"] },
+  wound_type:         { name: "أنواع الجروح والقرح", category: "Medical", selectIds: ["wound-type"] },
+  wound_stage:        { name: "درجات الجروح والقرح", category: "Medical", selectIds: ["wound-stage"] },
+  dressing_type:      { name: "أنواع الغيارات والمستلزمات", category: "Medical", selectIds: ["wound-dressing-type"] },
+  medical_history:    { name: "التاريخ الطبي والجراحي", category: "Medical", selectIds: [] },
+  home_equipment:     { name: "المستلزمات والأجهزة المنزلية", category: "Medical", selectIds: [] },
+  medical_devices:    { name: "الأجهزة الطبية والمعدات", category: "Medical", selectIds: [] },
+
+  // Administrative
+  gender:             { name: "النوع / الجنس", category: "Administrative", selectIds: ["tab-pat-gender", "edit-pat-gender"] },
+  marital_status:     { name: "الحالة الاجتماعية", category: "Administrative", selectIds: ["tab-pat-marital", "edit-pat-marital"] },
+  blood_group:        { name: "فصيلة الدم", category: "Administrative", selectIds: ["tab-pat-blood", "edit-pat-blood"] },
+  service_areas:      { name: "مناطق الخدمة بدمياط", category: "Administrative", selectIds: ["tab-pat-area", "edit-pat-area", "filter-area"] },
+  patient_status:     { name: "حالة المريض", category: "Administrative", selectIds: ["tab-pat-status", "edit-pat-status"] },
+  relationship:       { name: "صلة القرابة للمرافق", category: "Administrative", selectIds: ["tab-pat-rel", "edit-pat-rel"] },
+
+  // Financial
+  payment_methods:    { name: "طرق الدفع والتحصيل", category: "Financial", selectIds: ["bill-payment-method"] },
+  insurance_companies:{ name: "شركات التأمين والمؤسسات", category: "Financial", selectIds: ["tab-pat-insurance"] },
+
+  // Notifications
+  reminder_type:      { name: "أنواع التذكيرات", category: "Notifications", selectIds: [] },
+
+  // Appointments
+  visit_intervals:    { name: "فواصل المتابعة القادمة", category: "Appointments", selectIds: ["next-visit-interval"] },
+  alert_pretimes:     { name: "أوقات التنبيه المسبق", category: "Appointments", selectIds: ["next-visit-alert-before"] },
+
+  // Custom Lists
+  services:           { name: "الخدمات التمريضية والإجراءات", category: "Custom Lists", selectIds: [] },
+  medications:        { name: "الأدوية والعقاقير", category: "Custom Lists", selectIds: [] }
+};
+
+let systemFieldLists = defaultFieldLists;
+try {
+  const savedLists = localStorage.getItem('nabd_system_field_lists_v1');
+  if (savedLists) {
+    const parsed = JSON.parse(savedLists);
+    systemFieldLists = { ...defaultFieldLists, ...parsed };
+  }
+} catch (e) {
+  console.log('Using default field lists:', e);
+}
+
+function saveFieldListsToLocalStorage() {
+  try {
+    localStorage.setItem('nabd_system_field_lists_v1', JSON.stringify(systemFieldLists));
+  } catch (e) {
+    console.error('Error saving field lists:', e);
+  }
+}
+
+let currentFieldManagerCategory = 'Medical';
+
+function setFieldManagerCategory(category, btnElement) {
+  currentFieldManagerCategory = category;
+  if (btnElement) {
+    document.querySelectorAll('#field-manager-category-chips button').forEach(b => {
+      b.classList.remove('btn-primary');
+      b.classList.add('btn-secondary');
+    });
+    btnElement.classList.remove('btn-secondary');
+    btnElement.classList.add('btn-primary');
+  }
+  populateFieldManagerListSelect();
+}
+
+function populateFieldManagerListSelect() {
+  const select = document.getElementById('field-manager-list-select');
+  if (!select) return;
+
+  const categoryKeys = Object.keys(FIELD_LIST_REGISTRY).filter(k => FIELD_LIST_REGISTRY[k].category === currentFieldManagerCategory);
+
+  select.innerHTML = categoryKeys.map(k => `<option value="${k}">${FIELD_LIST_REGISTRY[k].name}</option>`).join('');
+
+  if (categoryKeys.length > 0) {
+    select.value = categoryKeys[0];
+  }
+  renderFieldManagerOptions();
+}
+
+function renderFieldManagerOptions() {
+  const listSelect = document.getElementById('field-manager-list-select');
+  const container = document.getElementById('field-manager-options-container');
+  const titleEl = document.getElementById('field-manager-current-title');
+  const searchInput = document.getElementById('field-manager-search');
+
+  if (!listSelect || !container) return;
+
+  const listKey = listSelect.value;
+  if (!listKey || !FIELD_LIST_REGISTRY[listKey]) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1rem;">اختر قائمة لعرض الخيارات المتاحة.</div>`;
+    return;
+  }
+
+  const listInfo = FIELD_LIST_REGISTRY[listKey];
+  if (titleEl) titleEl.innerText = `📋 قائمة: ${listInfo.name}`;
+
+  const query = (searchInput ? searchInput.value : '').trim().toLowerCase();
+  const list = systemFieldLists[listKey] || [];
+
+  if (list.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1.5rem; background:rgba(255,255,255,0.02); border-radius:8px;">لا توجد خيارات مسجلة لهذه القائمة حتى الآن. اضغط "+ إضافة خيار جديد" لإضافة أول خيار.</div>`;
+    return;
+  }
+
+  const filtered = list.filter(opt => opt.label.toLowerCase().includes(query) || opt.value.toLowerCase().includes(query));
+
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:1rem;">لا توجد نتائج تطابق "${query}".</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map((opt, idx) => {
+    const isFav = opt.favorite;
+    const isDis = opt.disabled;
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; background: ${isDis ? 'rgba(255,82,82,0.05)' : 'rgba(255,255,255,0.03)'}; border: 1px solid ${isDis ? 'rgba(255,82,82,0.3)' : 'var(--border-color)'}; padding: 0.75rem 1rem; border-radius: 10px; gap: 0.5rem; flex-wrap: wrap;">
+        <div style="display:flex; align-items:center; gap:0.6rem;">
+          <button class="btn btn-sm" style="background:none; border:none; padding:0; font-size:1.2rem; cursor:pointer;" onclick="toggleFavoriteOptionInFieldList('${listKey}', '${opt.id}')" title="تمييز كـ مفضل">
+            ${isFav ? '⭐' : '☆'}
+          </button>
+          <div>
+            <strong style="color:${isDis ? 'var(--text-muted)' : '#fff'}; font-size:0.95rem; text-decoration:${isDis ? 'line-through' : 'none'};">
+              ${opt.label}
+            </strong>
+            <span style="font-size:0.75rem; color:var(--text-muted); margin-right:0.4rem;">
+              (${isDis ? '🔴 معطل' : '🟢 مفعل'})
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:0.3rem; flex-wrap:wrap; align-items:center;">
+          <button class="btn btn-sm btn-secondary" onclick="reorderOptionInFieldList('${listKey}', '${opt.id}', 'up')" ${idx === 0 ? 'disabled' : ''} title="تحريك لأعلى">⬆️</button>
+          <button class="btn btn-sm btn-secondary" onclick="reorderOptionInFieldList('${listKey}', '${opt.id}', 'down')" ${idx === filtered.length - 1 ? 'disabled' : ''} title="تحريك لأسفل">⬇️</button>
+          <button class="btn btn-sm btn-amber" onclick="editOptionInFieldList('${listKey}', '${opt.id}')">✏️ تعديل</button>
+          <button class="btn btn-sm ${isDis ? 'btn-success' : 'btn-secondary'}" onclick="toggleDisableOptionInFieldList('${listKey}', '${opt.id}')">
+            ${isDis ? '🔄 تفعيل' : '🚫 تعطيل'}
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="deleteOptionFromFieldList('${listKey}', '${opt.id}')">🗑️ حذف</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function promptAddNewOptionToCurrentList(listKey = null, targetSelectId = null) {
+  if (!listKey) {
+    const listSelect = document.getElementById('field-manager-list-select');
+    if (listSelect) listKey = listSelect.value;
+  }
+  if (!listKey || !FIELD_LIST_REGISTRY[listKey]) return;
+
+  const displayName = FIELD_LIST_REGISTRY[listKey].name;
+  const newLabel = prompt(`➕ إضافة خيار جديد لقائمة [${displayName}]:`);
+  if (!newLabel || !newLabel.trim()) {
+    if (targetSelectId) {
+      const el = document.getElementById(targetSelectId);
+      if (el) el.value = "";
+    }
+    return;
+  }
+
+  const cleanLabel = newLabel.trim();
+  const list = systemFieldLists[listKey] || [];
+  const existing = list.find(opt => opt.label.toLowerCase() === cleanLabel.toLowerCase() || opt.value.toLowerCase() === cleanLabel.toLowerCase());
+
+  if (existing) {
+    existing.disabled = false;
+    saveFieldListsToLocalStorage();
+    showToast(`✨ الخيار "${cleanLabel}" موجود بالفعل وتم تفعيله!`, 'info');
+  } else {
+    const newOpt = {
+      id: `${listKey}_${Date.now()}`,
+      label: cleanLabel,
+      value: cleanLabel,
+      category: FIELD_LIST_REGISTRY[listKey].category,
+      disabled: false,
+      favorite: false
+    };
+    list.push(newOpt);
+    systemFieldLists[listKey] = list;
+    saveFieldListsToLocalStorage();
+    showToast(`✨ تم إضافة "${cleanLabel}" بنجاح وإتاحته للجميع!`, 'success');
+  }
+
+  refreshAllConfigurableSelects();
+  renderFieldManagerOptions();
+
+  if (targetSelectId) {
+    const select = document.getElementById(targetSelectId);
+    if (select) {
+      populateSelectFromFieldList(targetSelectId, listKey, cleanLabel, true);
+      select.value = cleanLabel;
+    }
+  }
+}
+
+function editOptionInFieldList(listKey, optionId) {
+  const list = systemFieldLists[listKey] || [];
+  const opt = list.find(item => item.id === optionId);
+  if (!opt) return;
+
+  const newLabel = prompt(`✏️ تعديل الخيار [${opt.label}]:`, opt.label);
+  if (!newLabel || !newLabel.trim()) return;
+
+  opt.label = newLabel.trim();
+  opt.value = newLabel.trim();
+  saveFieldListsToLocalStorage();
+  refreshAllConfigurableSelects();
+  renderFieldManagerOptions();
+  showToast('✅ تم تعديل الخيار بنجاح!', 'success');
+}
+
+function toggleDisableOptionInFieldList(listKey, optionId) {
+  const list = systemFieldLists[listKey] || [];
+  const opt = list.find(item => item.id === optionId);
+  if (!opt) return;
+
+  opt.disabled = !opt.disabled;
+  saveFieldListsToLocalStorage();
+  refreshAllConfigurableSelects();
+  renderFieldManagerOptions();
+  showToast(opt.disabled ? '🔴 تم تعطيل الخيار بنجاح.' : '🟢 تم إعادة تفعيل الخيار بنجاح.', 'info');
+}
+
+function toggleFavoriteOptionInFieldList(listKey, optionId) {
+  const list = systemFieldLists[listKey] || [];
+  const opt = list.find(item => item.id === optionId);
+  if (!opt) return;
+
+  opt.favorite = !opt.favorite;
+  saveFieldListsToLocalStorage();
+  refreshAllConfigurableSelects();
+  renderFieldManagerOptions();
+  showToast(opt.favorite ? '⭐ تم إضافة الخيار للمفضلة!' : '☆ تم إزالة الخيار من المفضلة.', 'info');
+}
+
+function reorderOptionInFieldList(listKey, optionId, direction) {
+  const list = systemFieldLists[listKey] || [];
+  const idx = list.findIndex(item => item.id === optionId);
+  if (idx < 0) return;
+
+  if (direction === 'up' && idx > 0) {
+    const temp = list[idx];
+    list[idx] = list[idx - 1];
+    list[idx - 1] = temp;
+  } else if (direction === 'down' && idx < list.length - 1) {
+    const temp = list[idx];
+    list[idx] = list[idx + 1];
+    list[idx + 1] = temp;
+  }
+
+  systemFieldLists[listKey] = list;
+  saveFieldListsToLocalStorage();
+  refreshAllConfigurableSelects();
+  renderFieldManagerOptions();
+}
+
+function deleteOptionFromFieldList(listKey, optionId) {
+  const list = systemFieldLists[listKey] || [];
+  const opt = list.find(item => item.id === optionId);
+  if (!opt) return;
+
+  showConfirmDialog(`هل أنت تأكد من حذف الخيار "${opt.label}" من القائمة؟`, () => {
+    systemFieldLists[listKey] = list.filter(item => item.id !== optionId);
+    saveFieldListsToLocalStorage();
+    refreshAllConfigurableSelects();
+    renderFieldManagerOptions();
+    showToast('🗑️ تم حذف الخيار من القائمة.', 'success');
+  });
+}
+
+function resetFieldListsToDefault() {
+  showConfirmDialog('هل تريد إعادة جميع القوائم التفاعلية لحالتها الافتراضية؟ (لن تفقد بيانات المرضى المسجلين)', () => {
+    systemFieldLists = JSON.parse(JSON.stringify(defaultFieldLists));
+    saveFieldListsToLocalStorage();
+    refreshAllConfigurableSelects();
+    renderFieldManagerOptions();
+    showToast('🔄 تم استعادة جميع القوائم الافتراضية بنجاح!', 'success');
+  });
+}
+
+function populateSelectFromFieldList(selectId, listKey, selectedVal = "", allowAddCustom = true) {
+  const select = document.getElementById(selectId);
+  if (!select) return;
+
+  const list = systemFieldLists[listKey] || [];
+  const sortedList = [...list].sort((a, b) => {
+    if (a.favorite && !b.favorite) return -1;
+    if (!a.favorite && b.favorite) return 1;
+    if (a.disabled && !b.disabled) return 1;
+    if (!a.disabled && b.disabled) return -1;
+    return 0;
+  });
+
+  let optionsHtml = `<option value="">غير محدد</option>`;
+
+  sortedList.forEach(opt => {
+    if (opt.disabled && opt.value !== selectedVal) return;
+    const isSelected = (opt.value === selectedVal || opt.label === selectedVal) ? 'selected' : '';
+    const star = opt.favorite ? '⭐ ' : '';
+    optionsHtml += `<option value="${opt.value}" ${isSelected}>${star}${opt.label}</option>`;
+  });
+
+  if (allowAddCustom) {
+    optionsHtml += `<option value="__ADD_CUSTOM__" style="color:var(--accent-cyan); font-weight:bold;">➕ إضافة خيار جديد للقائمة...</option>`;
+  }
+
+  select.innerHTML = optionsHtml;
+
+  if (allowAddCustom && !select.dataset.customAdderAttached) {
+    select.dataset.customAdderAttached = "true";
+    select.addEventListener('change', function() {
+      if (this.value === '__ADD_CUSTOM__') {
+        promptAddNewOptionToCurrentList(listKey, selectId);
+      }
+    });
+  }
+}
+
+function refreshAllConfigurableSelects() {
+  populateSelectFromFieldList('tab-pat-gender', 'gender', getElementValue('tab-pat-gender', 'ذكر'));
+  populateSelectFromFieldList('tab-pat-area', 'service_areas', getElementValue('tab-pat-area', 'بندر دمياط'));
+  populateSelectFromFieldList('tab-pat-status', 'patient_status', getElementValue('tab-pat-status', 'نشط'));
+  populateSelectFromFieldList('tab-pat-blood', 'blood_group', getElementValue('tab-pat-blood', 'غير محدد'));
+
+  populateSelectFromFieldList('edit-pat-gender', 'gender', getElementValue('edit-pat-gender', ''));
+  populateSelectFromFieldList('edit-pat-area', 'service_areas', getElementValue('edit-pat-area', ''));
+  populateSelectFromFieldList('edit-pat-status', 'patient_status', getElementValue('edit-pat-status', ''));
+
+  populateSelectFromFieldList('filter-area', 'service_areas', getElementValue('filter-area', ''), false);
+  populateSelectFromFieldList('filter-disease', 'diagnosis', getElementValue('filter-disease', ''), false);
+
+  populateSelectFromFieldList('vital-sugar-type', 'vitals_sugar_type', getElementValue('vital-sugar-type', 'عشوائي (Random)'));
+  populateSelectFromFieldList('next-visit-interval', 'visit_intervals', getElementValue('next-visit-interval', ''));
+  populateSelectFromFieldList('next-visit-alert-before', 'alert_pretimes', getElementValue('next-visit-alert-before', '60'));
+}
+
 
 
